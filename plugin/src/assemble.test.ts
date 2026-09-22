@@ -1,17 +1,53 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { assembleComposition, attachImages } from "./assemble";
 import type { ScannedItem, ScanSuccess, SupportedItemNode } from "./figma-export";
 
-function fakeNode(width: number, height: number, bytes: Uint8Array = new Uint8Array([1, 2, 3])): SupportedItemNode {
+const PNG_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const JPEG_BYTES = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+
+/**
+ * formatForNode reads figma.mixed and figma.getImageByHash directly (there's
+ * no dependency injection for it), so this stubs just enough of the global
+ * for tests to control what each image-fill hash "contains" without needing
+ * a real Figma environment.
+ */
+function stubFigma(imagesByHash: Record<string, Uint8Array> = {}) {
+  (globalThis as unknown as { figma: unknown }).figma = {
+    mixed: Symbol("figma-mixed"),
+    getImageByHash: (hash: string) => {
+      const bytes = imagesByHash[hash];
+      if (!bytes) return null;
+      return { getBytesAsync: async () => bytes };
+    },
+  };
+}
+
+beforeEach(() => {
+  stubFigma({ "jpeg-hash": JPEG_BYTES, "png-hash": PNG_BYTES });
+});
+
+/**
+ * Defaults to a JPEG-sourced photo fill (confirmed opaque) so existing tests
+ * that only care about the (layout, item) -> asset wiring, not format
+ * detection itself, see the raster format they pass through unchanged.
+ */
+function fakeNode(
+  width: number,
+  height: number,
+  bytes: Uint8Array = new Uint8Array([1, 2, 3]),
+  overrides: { type?: string; fills?: unknown[] } = {},
+): SupportedItemNode {
   return {
     width,
     height,
+    type: overrides.type ?? "RECTANGLE",
+    fills: overrides.fills ?? [{ type: "IMAGE", visible: true, imageHash: "jpeg-hash" }],
     exportAsync: async () => bytes,
   } as unknown as SupportedItemNode;
 }
 
 function fakeItem(overrides: Partial<ScannedItem> & Pick<ScannedItem, "name" | "width" | "height">): ScannedItem {
-  return { x: 0, y: 0, zIndex: 0, node: fakeNode(overrides.width, overrides.height), ...overrides };
+  return { x: 0, y: 0, zIndex: 0, rotation: 0, node: fakeNode(overrides.width, overrides.height), ...overrides };
 }
 
 function scan(): ScanSuccess {
@@ -123,15 +159,143 @@ describe("attachImages", () => {
     expect(image?.bytes).toEqual(new Uint8Array([1, 2, 3]));
   });
 
-  it("uses the requested format's extension", async () => {
+  it("uses the requested raster format's extension for a confirmed-opaque photo", async () => {
     const scanResult = scan();
     const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
 
-    const outcome = await attachImages(composition, scanResult, "SVG");
+    const outcome = await attachImages(composition, scanResult, "JPG");
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) return;
 
-    expect(outcome.images.every((img) => img.path.endsWith(".svg"))).toBe(true);
+    // The default fake node is a JPEG-sourced image fill — confirmed opaque,
+    // so it's safe to honor the requested raster format.
+    expect(outcome.images.every((img) => img.path.endsWith(".jpg"))).toBe(true);
+  });
+
+  it("exports a vector shape as SVG regardless of the raster preference", async () => {
+    const scanResult: ScanSuccess = {
+      ok: true,
+      compositionName: "Mixed Formats",
+      warnings: [],
+      layouts: [
+        {
+          name: "Mobile",
+          width: 375,
+          height: 812,
+          items: [
+            fakeItem({
+              name: "icon",
+              width: 24,
+              height: 24,
+              node: { type: "VECTOR", width: 24, height: 24, exportAsync: async () => new Uint8Array([1]) } as unknown as ScannedItem["node"],
+            }),
+          ],
+        },
+      ],
+    };
+    const composition = assembled(scanResult, { Mobile: 0 });
+
+    const outcome = await attachImages(composition, scanResult, "JPG");
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    expect(outcome.images[0].path).toMatch(/\.svg$/);
+  });
+
+  it("exports a solid-filled shape with no image fill as SVG", async () => {
+    const scanResult: ScanSuccess = {
+      ok: true,
+      compositionName: "Mixed Formats",
+      warnings: [],
+      layouts: [
+        {
+          name: "Mobile",
+          width: 375,
+          height: 812,
+          items: [
+            fakeItem({
+              name: "swatch",
+              width: 100,
+              height: 100,
+              node: fakeNode(100, 100, new Uint8Array([1]), {
+                type: "RECTANGLE",
+                fills: [{ type: "SOLID", visible: true, color: { r: 1, g: 0, b: 0 } }],
+              }),
+            }),
+          ],
+        },
+      ],
+    };
+    const composition = assembled(scanResult, { Mobile: 0 });
+
+    const outcome = await attachImages(composition, scanResult, "JPG");
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    expect(outcome.images[0].path).toMatch(/\.svg$/);
+  });
+
+  it("always uses PNG for a PNG-sourced image fill, even when JPG is requested", async () => {
+    const scanResult: ScanSuccess = {
+      ok: true,
+      compositionName: "Mixed Formats",
+      warnings: [],
+      layouts: [
+        {
+          name: "Mobile",
+          width: 375,
+          height: 812,
+          items: [
+            fakeItem({
+              name: "sticker",
+              width: 100,
+              height: 100,
+              node: fakeNode(100, 100, new Uint8Array([1]), {
+                type: "RECTANGLE",
+                fills: [{ type: "IMAGE", visible: true, imageHash: "png-hash" }],
+              }),
+            }),
+          ],
+        },
+      ],
+    };
+    const composition = assembled(scanResult, { Mobile: 0 });
+
+    const outcome = await attachImages(composition, scanResult, "JPG");
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    expect(outcome.images[0].path).toMatch(/\.png$/);
+  });
+
+  it("always uses PNG for text, even when JPG is requested", async () => {
+    const scanResult: ScanSuccess = {
+      ok: true,
+      compositionName: "Mixed Formats",
+      warnings: [],
+      layouts: [
+        {
+          name: "Mobile",
+          width: 375,
+          height: 812,
+          items: [
+            fakeItem({
+              name: "label",
+              width: 100,
+              height: 20,
+              node: { type: "TEXT", width: 100, height: 20, exportAsync: async () => new Uint8Array([1]) } as unknown as ScannedItem["node"],
+            }),
+          ],
+        },
+      ],
+    };
+    const composition = assembled(scanResult, { Mobile: 0 });
+
+    const outcome = await attachImages(composition, scanResult, "JPG");
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    expect(outcome.images[0].path).toMatch(/\.png$/);
   });
 
   it("de-duplicates paths when two items slugify to the same stem", async () => {

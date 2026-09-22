@@ -5,6 +5,8 @@ export interface ScannedItem {
   width: number;
   height: number;
   zIndex: number;
+  /** Clockwise degrees (already converted from Figma's own counterclockwise-positive convention — see figmaRotationToCss), 0 for unrotated. */
+  rotation: number;
   /** The live Figma node this item was scanned from, for image export. Never sent to the UI thread (not cloneable) — internal to the main thread only. Optional so test fixtures can omit it. */
   node?: SupportedItemNode;
 }
@@ -34,7 +36,9 @@ export interface ScanFailure {
 
 export type ScanOutcome = ScanSuccess | ScanFailure;
 
-export type ImageFormat = "PNG" | "JPG" | "SVG";
+/** The user's raster preference — only meaningful for content that ends up rasterized at all; see formatForNode. */
+export type RasterFormat = "PNG" | "JPG";
+export type ImageFormat = RasterFormat | "SVG";
 
 export const IMAGE_EXTENSIONS: Record<ImageFormat, string> = {
   PNG: "png",
@@ -48,6 +52,98 @@ export function exportItemImage(node: SupportedItemNode, format: ImageFormat): P
     return node.exportAsync({ format: "SVG" });
   }
   return node.exportAsync({ format, constraint: { type: "SCALE", value: 1 } });
+}
+
+/** Node types that are inherently drawn vector shapes — always worth keeping as SVG, since rasterizing them is a pure loss of scalability. */
+const VECTOR_ITEM_TYPES = new Set<SupportedItemNode["type"]>([
+  "VECTOR",
+  "BOOLEAN_OPERATION",
+  "STAR",
+  "POLYGON",
+  "LINE",
+]);
+
+/** Node types whose `fills` decide raster vs. vector: an image fill means real photographic content (rasterize); anything else (solid, gradient, none) is still flat vector content. */
+type FillCheckableNode = Extract<SupportedItemNode, { fills: unknown }>;
+
+function isFillCheckable(node: SupportedItemNode): node is FillCheckableNode {
+  return "fills" in node;
+}
+
+/** The topmost (last-painted) visible IMAGE fill, if any — mirrors extractBackgroundColor's bottom-to-top reasoning. */
+function topImageFill(fills: Paint[]): ImagePaint | undefined {
+  const visibleImageFills = fills.filter(
+    (fill): fill is ImagePaint => fill.visible !== false && fill.type === "IMAGE",
+  );
+  return visibleImageFills[visibleImageFills.length - 1];
+}
+
+/**
+ * PNG is the only common source format an image fill can carry that
+ * supports alpha, so this is what decides whether a fill's transparency
+ * (if any) needs to be preserved through export. Checks the actual source
+ * bytes' magic number rather than trusting a file extension, since Figma
+ * doesn't expose the original filename. Errors (and anything that isn't
+ * clearly a non-alpha format) are treated as "may need alpha" — the safe
+ * direction, since the failure mode of guessing wrong is only ever a
+ * slightly larger PNG, never a silently flattened image.
+ */
+async function fillMayNeedAlpha(fill: ImagePaint): Promise<boolean> {
+  if (!fill.imageHash) {
+    return false;
+  }
+  const image = figma.getImageByHash(fill.imageHash);
+  if (!image) {
+    return false;
+  }
+  try {
+    const bytes = await image.getBytesAsync();
+    const isPng = bytes.length >= 4 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+    const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+    return !isJpeg || isPng;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Picks the export format for a single item automatically, rather than one
+ * format for an entire export — a real Figma file routinely mixes vector
+ * icons with photographic images in the same layout, so forcing one format
+ * on everything either rasterizes vector art needlessly or can't represent
+ * a photo as a vector at all.
+ *
+ * Both SVG and PNG are lossless with alpha support, and nothing here ever
+ * asks Figma to flatten a background onto either, so any transparency in
+ * a vector shape or a PNG-sourced image fill survives export unchanged.
+ * JPG has no alpha channel at all, so it's only ever used where transparency
+ * either doesn't apply (text, whose surrounding area needs to *stay*
+ * transparent, always uses PNG instead) or the source image is confirmed
+ * opaque (a JPEG-sourced fill) — anything else defaults to PNG rather than
+ * risk silently flattening a transparent image to JPG.
+ */
+export async function formatForNode(node: SupportedItemNode, rasterFormat: RasterFormat): Promise<ImageFormat> {
+  if (VECTOR_ITEM_TYPES.has(node.type)) {
+    return "SVG";
+  }
+  if (node.type === "TEXT") {
+    return "PNG";
+  }
+  if (!isFillCheckable(node)) {
+    return "PNG";
+  }
+
+  const fills = node.fills;
+  if (fills === figma.mixed || !Array.isArray(fills)) {
+    return "PNG";
+  }
+
+  const imageFill = topImageFill(fills);
+  if (!imageFill) {
+    return "SVG";
+  }
+
+  return (await fillMayNeedAlpha(imageFill)) ? "PNG" : rasterFormat;
 }
 
 const ROTATION_EPSILON = 0.01;
@@ -89,16 +185,37 @@ function isRotated(rotation: number): boolean {
 }
 
 /**
+ * Figma's `node.rotation` is counterclockwise-positive (the plugin API's own
+ * documented convention), while the composition schema (and CSS's
+ * `rotate()`, which is what ultimately renders it) is clockwise-positive —
+ * the same convention Figma's own UI displays to a designer. Converting
+ * once here, at the export boundary, means everything downstream (the
+ * schema, the renderer) can treat "rotation" as an ordinary clockwise
+ * degrees value without re-deriving this each time.
+ *
+ * NOTE: this specific sign flip hasn't been confirmed against a real
+ * rotated Figma layer in this environment (no way to launch Figma here) —
+ * verify a rotated export visually matches its source before relying on it.
+ */
+export function figmaRotationToCss(rotation: number): number {
+  if (Math.abs(rotation) <= ROTATION_EPSILON) {
+    return 0;
+  }
+  return Math.round(-rotation * 100) / 100;
+}
+
+/**
  * Reads the current Figma selection and extracts layout/item geometry.
  * Always re-derives from live selection state — callers should call this
  * fresh rather than cache the result, so moving/resizing/reordering layers
  * before export is reflected in the output.
  *
  * Only an invalid/missing selection is a hard failure. Everything else we
- * don't support yet (rotation, Auto Layout, groups, other unsupported node
- * types, duplicate names) is skipped individually and reported as a
- * warning, so one problem layer doesn't block exporting the rest of an
- * otherwise-valid composition.
+ * don't support yet (a rotated *layout* or composition frame, Auto Layout,
+ * groups, other unsupported node types, duplicate names) is skipped
+ * individually and reported as a warning, so one problem layer doesn't
+ * block exporting the rest of an otherwise-valid composition. An item's own
+ * rotation is fully supported — see figmaRotationToCss.
  */
 export function scanSelection(): ScanOutcome {
   const selection = figma.currentPage.selection;
@@ -230,11 +347,6 @@ function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem
       continue;
     }
 
-    if (isRotated(child.rotation)) {
-      warnings.push(`Skipped "${layoutNode.name}/${child.name}": rotation isn't supported yet.`);
-      continue;
-    }
-
     if (itemNames.has(child.name)) {
       warnings.push(
         `Skipped "${layoutNode.name}/${child.name}": duplicate layer name within this layout.`,
@@ -252,6 +364,7 @@ function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem
       width: child.width,
       height: child.height,
       zIndex: zIndex++,
+      rotation: figmaRotationToCss(child.rotation),
       node: child,
     });
   }
