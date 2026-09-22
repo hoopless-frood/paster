@@ -70,6 +70,7 @@ interface Item {
   width: number;
   height: number;
   zIndex: number;      // independent per-layout stacking order, 0 = furthest back
+  rotation?: number;   // clockwise degrees around the item's own center; omitted/0 = unrotated
   assetId?: string;    // which asset this item renders, if any
 }
 
@@ -88,7 +89,7 @@ interface Asset {
 | ------------- | -------------------------------------------------------- | ------------------- |
 | `Composition` | `version`, `id`, `name`, `layouts`, `assets`             | —                    |
 | `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `items`      | `backgroundColor`    |
-| `Item`        | `id`, `x`, `y`, `width`, `height`, `zIndex`               | `name`, `assetId`   |
+| `Item`        | `id`, `x`, `y`, `width`, `height`, `zIndex`               | `name`, `rotation`, `assetId`   |
 | `Asset`       | `id`, `path`, `width`, `height`                           | `alt`                |
 
 ## Coordinate system
@@ -101,6 +102,35 @@ coordinates.
 
 `x`/`y` may be negative or place an item partially outside its layout's
 bounds (Figma allows this); `width`/`height` must be positive.
+
+## Rotation
+
+`Item.rotation` is clockwise degrees, applied around the item's own
+center — `x`/`y`/`width`/`height` always describe the item's unrotated
+frame (the same fields, meaning the same thing, whether or not the item is
+rotated). This mirrors Figma's own model: `node.x`/`y`/`width`/`height` are
+a node's own local (unrotated) frame, and `node.x`/`y` specifically is
+where that frame's own top-left corner ends up, in its parent's coordinate
+space, *after* Figma rotates the node around its center — not the top-left
+of whatever axis-aligned box the rotated shape occupies.
+
+That matters for anyone rendering this data with a plain CSS
+`transform: rotate()`: positioning a box at `left: x, top: y` and then
+rotating it doesn't reproduce Figma's result, because CSS also rotates a
+box around its own center — but *that* center is derived from `left`/`top`
+directly, which is a different point than the one Figma used once rotation
+is non-zero. A renderer needs to first recover the item's true center from
+`x`/`y`/`width`/`height`/`rotation`, then re-derive the `left`/`top` CSS
+needs so its own center-based rotation lands the shape where Figma's did.
+`@paster/react`'s `computeItemStyle` (`frontend/react/src/item-style.ts`)
+does this; it's a real gotcha, not a formality — get it wrong and rotated
+items land in a visibly different place from where they were positioned in
+Figma.
+
+Figma's plugin API exposes `node.rotation` as counterclockwise-positive,
+the opposite of this schema (and of CSS) — the exporter converts it once,
+at export time, so `rotation` here always means "clockwise," matching what
+Figma's own UI shows a designer.
 
 ## Stacking order
 
@@ -138,6 +168,7 @@ fields above:
   layout.
 - `Item.id`, `Layout.id`, `Composition.id`, and `Asset.id` must each be
   unique within their scope.
+- `Item.rotation`, when present, must be a finite number (any value; degrees wrap naturally, same as CSS).
 - `Item.assetId`, when present, must reference an existing `Asset.id`.
 - `Asset.path` must be a safe, relative, portable path: no leading `/` or
   `\`, no `..` path segments, no URL scheme (`http://`, `file://`, etc.), and
@@ -231,9 +262,9 @@ export.zip
 
 ### Importing a ZIP
 
-The demo playground's **Upload .zip export** parses the archive entirely in
-the browser (via [JSZip](https://stuk.github.io/jszip/), no upload to a
-server):
+The demo playground's **Upload .json or .zip** button detects a ZIP by its
+file extension/MIME type and parses the archive entirely in the browser (via
+[JSZip](https://stuk.github.io/jszip/), no upload to a server):
 
 1. `composition.json` is extracted and validated exactly like pasted JSON.
 2. For each `Asset` the validated composition references, the matching ZIP
@@ -266,6 +297,11 @@ needs a real Figma file and a real plugin export, and isn't automated:
 - [ ] Each item's image matches the source Figma layer exactly — no
       unintended second crop, letterboxing, or stretch — at both a layout's
       native size and other viewport widths.
+- [ ] A rotated item lands in the same position, at the same angle, as in
+      Figma — including a heavily rotated one (close to 90°/180°), where a
+      wrong rotation pivot is most visibly off. If it visibly drifts, the
+      export's rotation *direction* may also need checking (see
+      [Rotation](#rotation) above).
 - [ ] Stacking order in the playground matches Figma's front-to-back order,
       independently per layout.
 - [ ] An item that shares an id across layouts, but points at a *different*
@@ -282,9 +318,11 @@ needs a real Figma file and a real plugin export, and isn't automated:
 ## Non-goals (MVP)
 
 This schema does not yet support (see [PLAN.md](../PLAN.md)'s backlog):
-nested groups, rotation/transforms/masks, Auto Layout, layout-specific
-visibility or non-identical item sets, or non-image node types as item
-content (native vector shapes, live text, video). Note this is distinct from
-*asset file format*: an `Asset.path` may point at a PNG, JPG, or (planned)
-rendered SVG export of an image item — the schema doesn't constrain format.
-These are explicit scope boundaries, not omissions.
+nested groups, non-rotation transforms/masks/constraints, Auto Layout,
+layout-specific visibility or non-identical item sets, or non-image node
+types as item content (native vector shapes, live text, video). An item's
+own rotation *is* supported (see [Rotation](#rotation) above) — a rotated
+*layout* frame, or the composition's own parent frame, is not. Note this is
+distinct from *asset file format*: an `Asset.path` may point at a PNG, JPG,
+or rendered SVG export of an image item — the schema doesn't constrain
+format. These are explicit scope boundaries, not omissions.

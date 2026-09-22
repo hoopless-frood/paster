@@ -84,9 +84,6 @@
   opacity: 0.85;
 }
 
-/* An item with a real, ZIP-imported image renders it directly rather than
-   the dashed-border placeholder — the tinted background/dashed border are
-   deliberately placeholder-only cues that a real image doesn't need. */
 .itemImageButton {
   appearance: none;
   font: inherit;
@@ -122,9 +119,6 @@
   border-color: var(--paster-color-magenta-haze);
 }
 
-/* Overlaid on top of the image rather than replacing it, with a fixed dark
-   scrim (not theme-reactive — same reasoning as the rest of this preview
-   area) so the text stays legible regardless of the underlying photo. */
 .itemImageDetails {
   position: absolute;
   inset: 0;

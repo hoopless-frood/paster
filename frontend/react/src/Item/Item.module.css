@@ -5,4 +5,5 @@
   width: var(--paster-item-width);
   height: var(--paster-item-height);
   z-index: var(--paster-item-z);
+  transform: var(--paster-item-transform);
 }

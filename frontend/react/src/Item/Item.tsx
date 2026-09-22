@@ -18,6 +18,7 @@ export function PasterItem({ item, context, resolveContent }: PasterItemProps) {
           "--paster-item-width": itemStyle.width,
           "--paster-item-height": itemStyle.height,
           "--paster-item-z": itemStyle.zIndex,
+          "--paster-item-transform": itemStyle.transform,
         } as CSSProperties
       }
     >

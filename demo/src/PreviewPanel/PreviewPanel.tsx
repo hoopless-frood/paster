@@ -75,6 +75,7 @@ export function PreviewPanel({ composition, assetUrls }: PreviewPanelProps) {
         </span>
         <span className={styles.itemGeometry}>
           w:{formatNumber(item.width)} h:{formatNumber(item.height)}
+          {item.rotation ? ` r:${formatNumber(item.rotation)}°` : ""}
         </span>
       </span>
     );

@@ -76,6 +76,31 @@ describe("validateComposition", () => {
     expect(result.valid).toBe(true);
   });
 
+  it("accepts an item with a rotation", () => {
+    const composition = clone();
+    composition.layouts[0].items[0].rotation = 45;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("accepts an item with no rotation at all", () => {
+    const composition = clone();
+    delete composition.layouts[0].items[0].rotation;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects a non-finite item rotation", () => {
+    const composition = clone();
+    // @ts-expect-error intentionally invalid for the test
+    composition.layouts[0].items[0].rotation = "45deg";
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.errors.some((e) => e.includes("rotation"))).toBe(true);
+    }
+  });
+
   it("rejects non-finite geometry", () => {
     const composition = clone();
     composition.layouts[0].items[0].x = Number.POSITIVE_INFINITY;

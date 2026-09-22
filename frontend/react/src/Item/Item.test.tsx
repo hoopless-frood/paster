@@ -27,6 +27,20 @@ describe("PasterItem", () => {
     expect(root.style.getPropertyValue("--paster-item-width")).toBe("50%");
     expect(root.style.getPropertyValue("--paster-item-height")).toBe("50%");
     expect(root.style.getPropertyValue("--paster-item-z")).toBe("3");
+    expect(root.style.getPropertyValue("--paster-item-transform")).toBe("none");
+  });
+
+  it("passes a rotation through as a CSS rotate() transform", () => {
+    const { container } = render(
+      <PasterItem
+        item={makeItem({ rotation: 30 })}
+        context={{ layout, asset: undefined, composition: { version: 1, id: "c", name: "C", layouts: [layout], assets: [] } }}
+        resolveContent={() => "content"}
+      />,
+    );
+
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.getPropertyValue("--paster-item-transform")).toBe("rotate(30deg)");
   });
 
   it("renders whatever resolveContent returns, and passes it the item/context", () => {

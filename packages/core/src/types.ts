@@ -19,6 +19,8 @@ export interface Item {
   height: number;
   /** Independent per-layout stacking order (0 = furthest back). */
   zIndex: number;
+  /** Clockwise degrees, applied around the item's own center (matching CSS `rotate()`'s default). Omitted (or 0) means unrotated. x/y/width/height describe the item's own unrotated frame, same as an unrotated item. */
+  rotation?: number;
   assetId?: string;
 }
 

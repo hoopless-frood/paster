@@ -201,6 +201,10 @@ function checkItems(
       }
     }
 
+    if (item.rotation !== undefined) {
+      checkFiniteNumber(item.rotation, `${path}.rotation`, errors);
+    }
+
     if (item.assetId !== undefined) {
       if (typeof item.assetId !== "string") {
         errors.push(`${path}.assetId: must be a string when present`);
