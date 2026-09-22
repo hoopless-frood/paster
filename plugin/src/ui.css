@@ -12,12 +12,13 @@ body {
   font-size: 12px;
   margin: 16px;
   color: #111;
+  background: var(--paster-surface);
 }
 
 h1 {
   font-size: 13px;
   margin: 0 0 8px;
-  color: var(--paster-color-brand-dark);
+  color: var(--paster-color-magenta-haze);
 }
 
 .row {
@@ -37,14 +38,14 @@ button {
   margin-right: 8px;
   padding: 4px 10px;
   border: 1px solid transparent;
-  background: var(--paster-color-brand);
-  color: var(--paster-color-brand-text);
+  background: var(--paster-color-blossom);
+  color: var(--paster-color-ink);
   font: inherit;
   cursor: pointer;
 }
 
 button:hover:not(:disabled) {
-  background: var(--paster-color-brand-dark);
+  background: var(--paster-color-magenta-haze);
 }
 
 button:disabled {
@@ -53,7 +54,7 @@ button:disabled {
 }
 
 button:focus-visible {
-  outline: 2px solid var(--paster-color-brand-text);
+  outline: 2px solid var(--paster-color-ink);
   outline-offset: 1px;
 }
 
@@ -104,7 +105,7 @@ textarea {
 
 #export-mode .row input[type="radio"] {
   width: auto;
-  accent-color: var(--paster-color-brand-dark);
+  accent-color: var(--paster-color-magenta-haze);
 }
 
 #format-row select {

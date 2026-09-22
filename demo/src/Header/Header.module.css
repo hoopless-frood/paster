@@ -1,12 +1,12 @@
 .header {
   display: flex;
   align-items: stretch;
-  height: 40px;
   flex: 0 0 auto;
-  padding: var(--edge-space);
+  padding: 0 var(--edge-space);
+  margin: calc(var(--edge-space) / 1.33) 0;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .heading {
@@ -21,7 +21,8 @@
   width: auto;
   aspect-ratio: 2235 / 626;
   display: block;
-  color: var(--paster-color-brand);
+  color: var(--paster-color-blossom);
+  max-height: 42px;
 }
 
 .right {
@@ -29,6 +30,7 @@
   align-items: center;
   gap: 10px;
   color: var(--paster-color-text);
+  margin-top: -3px;
 }
 
 .nav {

@@ -6,16 +6,16 @@ body,
 
 :root {
   /* Colors */
-  --paster-bg: #fff;
+  --paster-bg: var(--paster-surface);
   --paster-text: #111;
   --paster-border: #ddd;
   --paster-muted: #555;
-  --paster-accent-text: var(--paster-color-brand-dark);
+  --paster-canvas-bg: #fff;
+  --paster-accent-text: var(--paster-color-magenta-haze);
   --paster-error-text: #b00020;
-  --paster-hover: var(--paster-color-brand-dark);
-  /* Fixed (not theme-swapped) — same lighter-purple scrollbar hover in both
-     themes, deliberately distinct from --paster-hover. */
-  --paster-scrollbar-hover: #675382;
+  --paster-hover: var(--paster-color-magenta-haze);
+  --paster-scrollbar-hover: var(--paster-color-wisteria);
+
   /* Spacing */
   --edge-space: 1.5rem;
   --section-space: 20px;
@@ -32,10 +32,12 @@ body,
     --paster-bg: #19141f;
     --paster-text: #eee;
     --paster-border: #433654;
-    --paster-muted: #675382;
-    --paster-accent-text: var(--paster-color-brand);
+    --paster-muted: var(--paster-color-wisteria);
+    --paster-accent-text: var(--paster-color-blossom);
     --paster-error-text: #ff6b6b;
-    --paster-hover: var(--paster-color-brand-dark);
+    --paster-hover: var(--paster-color-magenta-haze);
+    --paster-canvas-bg: #241c30;
+    --focus-outline: var(--paster-color-blossom);
   }
 }
 
@@ -43,10 +45,12 @@ body,
   --paster-bg: #19141f;
   --paster-text: #eee;
   --paster-border: #433654;
-  --paster-muted: #675382;
-  --paster-accent-text: var(--paster-color-brand);
+  --paster-muted: var(--paster-color-wisteria);
+  --paster-accent-text: var(--paster-color-blossom);
   --paster-error-text: #ff6b6b;
-  --paster-hover: var(--paster-color-brand-dark);
+  --paster-hover: var(--paster-color-magenta-haze);
+  --paster-canvas-bg: #241c30;
+  --focus-outline: var(--paster-color-magenta-haze) solid 2px;
 }
 
 body {
@@ -56,6 +60,7 @@ body {
   box-sizing: border-box;
   scrollbar-color: var(--paster-muted) transparent;
   scrollbar-width: thin;
+  font-size: 16px;
 }
 
 a {

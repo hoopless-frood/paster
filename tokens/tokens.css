@@ -5,10 +5,14 @@
  * only — component styles that consume these belong in each consumer.
  */
 :root {
-  --paster-color-brand: #f1c3d4;
-  --paster-color-brand-hover: #da9db4;
-  --paster-color-brand-text: #111;
-  --paster-color-brand-dark: #963458;
+  --paster-color-blossom: #f1c3d4;
+  --paster-color-rosewood: #da9db4;
+  --paster-color-ink: #111;
+  --paster-color-magenta-haze: #963458;
+  --paster-color-wisteria: #675382;
+  /* A slightly distinct "paper" surface for panels/fields, rather than
+     blending flush into the page background. */
+  --paster-surface: #f7f4ef;
   --paster-font-body: "Atkinson Hyperlegible Next", -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
 }

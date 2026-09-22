@@ -1,8 +1,8 @@
 .button {
   padding: 0.4em 0.9em;
   border: 1px solid transparent;
-  background: var(--paster-color-brand);
-  color: var(--paster-color-brand-text);
+  background: var(--paster-color-blossom);
+  color: var(--paster-color-ink);
   font: inherit;
   cursor: pointer;
   transition:
@@ -20,6 +20,6 @@
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--paster-color-brand-text);
+  outline: 2px solid var(--paster-color-ink);
   outline-offset: 1px;
 }
