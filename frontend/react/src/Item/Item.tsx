@@ -5,7 +5,6 @@ import styles from "./Item.module.css";
 
 export type { ItemContentResolver, PasterItemProps } from "./Item.types";
 
-/** A single positioned item within a layout — currently an image or SVG, resolved entirely by the caller. */
 export function PasterItem({ item, context, resolveContent }: PasterItemProps) {
   const itemStyle = computeItemStyle(item, context.layout);
 

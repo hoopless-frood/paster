@@ -8,7 +8,6 @@ export interface ItemBoxStyle {
   zIndex: number;
 }
 
-/** Converts an item's layout-relative geometry into percentages of its layout's design-space size. */
 export function computeItemStyle(item: Item, layout: Layout): ItemBoxStyle {
   return {
     left: `${(item.x / layout.width) * 100}%`,
