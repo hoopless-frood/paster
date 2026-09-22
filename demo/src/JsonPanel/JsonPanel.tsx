@@ -51,21 +51,21 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
     runImport(sampleText);
   }
 
-  async function handleFileSelected(file: File) {
-    setIsReadingFile(true);
+  function isZipFile(file: File): boolean {
+    return file.name.toLowerCase().endsWith(".zip") || /zip/.test(file.type);
+  }
+
+  async function handleJsonFileSelected(file: File) {
     try {
       const content = await file.text();
       setText(content);
       runImport(content);
     } catch {
       setErrors(["Couldn't read that file — try again or paste the JSON directly."]);
-    } finally {
-      setIsReadingFile(false);
     }
   }
 
-  async function handleZipSelected(file: File) {
-    setIsReadingFile(true);
+  async function handleZipFileSelected(file: File) {
     try {
       const result = await importZip(file);
       if (result.ok) {
@@ -79,6 +79,17 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
       }
     } catch {
       setErrors(["Couldn't read that ZIP — try again or use a different export."]);
+    }
+  }
+
+  async function handleFileSelected(file: File) {
+    setIsReadingFile(true);
+    try {
+      if (isZipFile(file)) {
+        await handleZipFileSelected(file);
+      } else {
+        await handleJsonFileSelected(file);
+      }
     } finally {
       setIsReadingFile(false);
     }
@@ -91,14 +102,11 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
           Load sample JSON
         </Button>
         <FileUploadButton
-          accept=".json,application/json"
+          accept=".json,application/json,.zip,application/zip"
           disabled={isReadingFile}
           onFileSelected={handleFileSelected}
         >
-          Upload .json file
-        </FileUploadButton>
-        <FileUploadButton accept=".zip,application/zip" disabled={isReadingFile} onFileSelected={handleZipSelected}>
-          Upload .zip export
+          Upload .json or .zip
         </FileUploadButton>
       </div>
 
