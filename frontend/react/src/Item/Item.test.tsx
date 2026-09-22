@@ -30,7 +30,7 @@ describe("PasterItem", () => {
   });
 
   it("renders whatever resolveContent returns, and passes it the item/context", () => {
-    const item = makeItem({ id: "hero" });
+    const item = makeItem({ id: "image-a" });
     const composition = { version: 1 as const, id: "c", name: "C", layouts: [layout], assets: [] };
     const seen: unknown[] = [];
 
@@ -45,7 +45,7 @@ describe("PasterItem", () => {
       />,
     );
 
-    expect(getByText("hello from hero")).toBeTruthy();
+    expect(getByText("hello from image-a")).toBeTruthy();
     expect(seen).toEqual([[item, { layout, asset: undefined, composition }]]);
   });
 });

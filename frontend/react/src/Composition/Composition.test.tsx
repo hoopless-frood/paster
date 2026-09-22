@@ -35,10 +35,10 @@ describe("PasterComposition", () => {
     expect(root.style.getPropertyValue("--paster-layout-width")).toBe("375");
     expect(root.style.getPropertyValue("--paster-layout-height")).toBe("812");
 
-    // mobile layout: hero at x0,y0,w375 within a 375-wide layout
-    const hero = itemWrapper(container, "hero");
-    expect(hero.style.getPropertyValue("--paster-item-left")).toBe("0%");
-    expect(hero.style.getPropertyValue("--paster-item-width")).toBe("100%");
+    // mobile layout: image-a at x20,y40,w335 within a 375-wide layout
+    const imageA = itemWrapper(container, "image-a");
+    expect(parseFloat(imageA.style.getPropertyValue("--paster-item-left"))).toBeCloseTo((20 / 375) * 100);
+    expect(parseFloat(imageA.style.getPropertyValue("--paster-item-width"))).toBeCloseTo((335 / 375) * 100);
   });
 
   it("switches layout when the viewportWidth prop crosses a breakpoint", () => {
@@ -70,15 +70,17 @@ describe("PasterComposition", () => {
     );
     const zIndexOf = (el: HTMLElement) => Number(el.style.getPropertyValue("--paster-item-z"));
 
-    expect(zIndexOf(itemWrapper(container, "hero"))).toBeLessThan(
-      zIndexOf(itemWrapper(container, "portrait")),
+    // mobile: image-b (zIndex 0) sits behind image-a (zIndex 1)
+    expect(zIndexOf(itemWrapper(container, "image-a"))).toBeGreaterThan(
+      zIndexOf(itemWrapper(container, "image-b")),
     );
 
     rerender(
       <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={1440} />,
     );
-    expect(zIndexOf(itemWrapper(container, "hero"))).toBeGreaterThan(
-      zIndexOf(itemWrapper(container, "portrait")),
+    // desktop: image-a (zIndex 0) sits behind image-b (zIndex 1) — the order flipped
+    expect(zIndexOf(itemWrapper(container, "image-a"))).toBeLessThan(
+      zIndexOf(itemWrapper(container, "image-b")),
     );
   });
 
@@ -95,28 +97,29 @@ describe("PasterComposition", () => {
       />,
     );
 
-    expect(seen).toContain("images/hero.png");
-    expect(seen).toContain("images/portrait.png");
+    expect(seen).toContain("images/image-a.png");
+    expect(seen).toContain("images/image-b.png");
+    expect(seen).toContain("images/image-c.png");
   });
 
   it("resolves a different asset per layout for the same item id (layout-specific image overrides)", () => {
     const composition = structuredClone(sampleComposition);
     composition.assets.push({
-      id: "hero-image-desktop-crop",
-      path: "images/hero-desktop.png",
+      id: "image-a-desktop-crop",
+      path: "images/image-a-desktop.png",
       width: 2000,
       height: 900,
     });
-    const desktopHero = composition.layouts[1].items.find((item) => item.id === "hero");
-    if (!desktopHero) {
-      throw new Error("fixture missing desktop hero item");
+    const desktopImageA = composition.layouts[1].items.find((item) => item.id === "image-a");
+    if (!desktopImageA) {
+      throw new Error("fixture missing desktop image-a item");
     }
-    desktopHero.assetId = "hero-image-desktop-crop";
+    desktopImageA.assetId = "image-a-desktop-crop";
 
     const seenByWidth: Record<number, string | undefined> = {};
     let currentWidth = 320;
     const trackingResolver: ItemContentResolver = (item, { asset }) => {
-      if (item.id === "hero") {
+      if (item.id === "image-a") {
         seenByWidth[currentWidth] = asset?.path;
       }
       return null;
@@ -131,7 +134,7 @@ describe("PasterComposition", () => {
       <PasterComposition composition={composition} viewportWidth={currentWidth} resolveContent={trackingResolver} />,
     );
 
-    expect(seenByWidth[320]).toBe("images/hero.png");
-    expect(seenByWidth[1440]).toBe("images/hero-desktop.png");
+    expect(seenByWidth[320]).toBe("images/image-a.png");
+    expect(seenByWidth[1440]).toBe("images/image-a-desktop.png");
   });
 });
