@@ -47,9 +47,9 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 ### M3 — Figma geometry exporter
 - [x] Create/register a local Figma Design plugin with an actual generated manifest ID (never invent one).
-- [ ] Read one selected parent frame; discover direct child frames as layouts and obtain explicit breakpoint thresholds (e.g., plugin settings/UI, not guessed from frame widths).
-- [ ] Extract relative `x/y/width/height`, unique IDs, independent `zIndex` from back-to-front child order; skip hidden layers, reject unsupported rotation/Auto Layout/complex nesting clearly.
-- [ ] Validate against core; expose a copyable geometry-only JSON export and actionable error messages.
+- [x] Read one selected parent frame; discover direct child frames as layouts and obtain breakpoint thresholds via an editable plugin UI field per layout, pre-filled with a suggestion computed from each layout's frame width (midpoint between neighboring widths; smallest layout suggests 0) — the exported value always comes from the field the user reviewed, never silently substituted.
+- [x] Extract relative `x/y/width/height`, unique IDs, independent `zIndex` from back-to-front child order; skip hidden layers. Gracefully skip unsupported rotation/Auto Layout/complex nesting per-layer (with a clear warning) rather than blocking the whole export — only fail outright when nothing exportable remains.
+- [x] Validate against core; expose a copyable geometry-only JSON export and actionable error messages.
 
 **Accept:** moving/resizing/reordering Figma layers changes expected output; translating the parent frame doesn't change relative coordinates; multiple breakpoints work. Document hands-on checks if Figma cannot be run in the agent environment.  
 **Suggested commit:** `feat(plugin): export validated frame geometry`

@@ -18,10 +18,13 @@ export interface ScanSuccess {
   ok: true;
   compositionName: string;
   layouts: ScannedLayout[];
+  /** Unsupported/duplicate content that was skipped rather than blocking the export. */
+  warnings: string[];
 }
 
 export interface ScanFailure {
   ok: false;
+  /** Selection problems with no reasonable way to proceed: nothing was exported. */
   errors: string[];
 }
 
@@ -70,6 +73,12 @@ function isRotated(rotation: number): boolean {
  * Always re-derives from live selection state — callers should call this
  * fresh rather than cache the result, so moving/resizing/reordering layers
  * before export is reflected in the output.
+ *
+ * Only an invalid/missing selection is a hard failure. Everything else we
+ * don't support yet (rotation, Auto Layout, groups, other unsupported node
+ * types, duplicate names) is skipped individually and reported as a
+ * warning, so one problem layer doesn't block exporting the rest of an
+ * otherwise-valid composition.
  */
 export function scanSelection(): ScanOutcome {
   const selection = figma.currentPage.selection;
@@ -92,116 +101,99 @@ export function scanSelection(): ScanOutcome {
     };
   }
 
+  const warnings: string[] = [];
+
   if (isRotated(parent.rotation)) {
-    return {
-      ok: false,
-      errors: [`"${parent.name}" is rotated — rotate it back to 0° before exporting.`],
-    };
+    warnings.push(
+      `"${parent.name}" is rotated — this hasn't been tested; double-check the exported geometry.`,
+    );
   }
 
   if (parent.layoutMode !== "NONE") {
-    return {
-      ok: false,
-      errors: [`"${parent.name}" uses Auto Layout — Auto Layout isn't supported yet.`],
-    };
+    warnings.push(
+      `"${parent.name}" uses Auto Layout — this hasn't been tested; double-check the exported geometry.`,
+    );
   }
 
-  const layoutNodes = parent.children.filter(
+  const layoutCandidates = parent.children.filter(
     (child): child is FrameNode => child.type === "FRAME" && child.visible,
   );
 
-  if (layoutNodes.length === 0) {
-    return {
-      ok: false,
-      errors: [`"${parent.name}" has no visible frame children to use as layouts.`],
-    };
-  }
-
-  const errors: string[] = [];
   const layouts: ScannedLayout[] = [];
   const layoutNames = new Set<string>();
 
-  for (const layoutNode of layoutNodes) {
+  for (const layoutNode of layoutCandidates) {
     if (layoutNames.has(layoutNode.name)) {
-      errors.push(`Duplicate layout name "${layoutNode.name}" — layout names must be unique.`);
+      warnings.push(`Skipped layout "${layoutNode.name}": duplicate layout name.`);
       continue;
     }
-    layoutNames.add(layoutNode.name);
 
     if (isRotated(layoutNode.rotation)) {
-      errors.push(`Layout "${layoutNode.name}" is rotated — rotation isn't supported yet.`);
+      warnings.push(`Skipped layout "${layoutNode.name}": rotation isn't supported yet.`);
       continue;
     }
 
     if (layoutNode.layoutMode !== "NONE") {
-      errors.push(`Layout "${layoutNode.name}" uses Auto Layout — Auto Layout isn't supported yet.`);
+      warnings.push(`Skipped layout "${layoutNode.name}": Auto Layout isn't supported yet.`);
       continue;
     }
 
-    const frames = scanLayoutChildren(layoutNode, errors);
-    if (frames) {
-      layouts.push({
-        name: layoutNode.name,
-        width: layoutNode.width,
-        height: layoutNode.height,
-        frames,
-      });
+    const frames = scanLayoutChildren(layoutNode, warnings);
+
+    if (frames.length === 0) {
+      warnings.push(`Skipped layout "${layoutNode.name}": no visible, supported child layers.`);
+      continue;
     }
+
+    layoutNames.add(layoutNode.name);
+    layouts.push({ name: layoutNode.name, width: layoutNode.width, height: layoutNode.height, frames });
   }
 
-  if (errors.length > 0) {
-    return { ok: false, errors };
+  if (layouts.length === 0) {
+    return { ok: false, errors: [`"${parent.name}" has no exportable layouts.`, ...warnings] };
   }
 
-  return { ok: true, compositionName: parent.name, layouts };
+  return { ok: true, compositionName: parent.name, layouts, warnings };
 }
 
-function scanLayoutChildren(layoutNode: FrameNode, errors: string[]): ScannedFrame[] | null {
+function scanLayoutChildren(layoutNode: FrameNode, warnings: string[]): ScannedFrame[] {
   const visibleChildren = layoutNode.children.filter((child) => child.visible);
   const frames: ScannedFrame[] = [];
   const frameNames = new Set<string>();
-  let hadError = false;
+  let zIndex = 0;
 
-  visibleChildren.forEach((child, index) => {
+  for (const child of visibleChildren) {
     if (!isSupportedFrameChild(child)) {
       const hint = child.type === "GROUP" ? " (ungroup or flatten it)" : "";
-      errors.push(`"${layoutNode.name}/${child.name}" is a ${child.type.toLowerCase()}, which isn't supported yet${hint}.`);
-      hadError = true;
-      return;
+      warnings.push(
+        `Skipped "${layoutNode.name}/${child.name}": a ${child.type.toLowerCase()} isn't supported yet${hint}.`,
+      );
+      continue;
     }
 
     if (isRotated(child.rotation)) {
-      errors.push(`"${layoutNode.name}/${child.name}" is rotated — rotation isn't supported yet.`);
-      hadError = true;
-      return;
+      warnings.push(`Skipped "${layoutNode.name}/${child.name}": rotation isn't supported yet.`);
+      continue;
     }
 
     if (frameNames.has(child.name)) {
-      errors.push(
-        `Duplicate layer name "${child.name}" within layout "${layoutNode.name}" — names must be unique within a layout.`,
+      warnings.push(
+        `Skipped "${layoutNode.name}/${child.name}": duplicate layer name within this layout.`,
       );
-      hadError = true;
-      return;
+      continue;
     }
     frameNames.add(child.name);
 
+    // Reassigned contiguously over the *kept* children, so a skip never
+    // leaves a gap — zIndex still means "0 = furthest back among what's exported".
     frames.push({
       name: child.name,
       x: child.x,
       y: child.y,
       width: child.width,
       height: child.height,
-      zIndex: index,
+      zIndex: zIndex++,
     });
-  });
-
-  if (hadError) {
-    return null;
-  }
-
-  if (frames.length === 0) {
-    errors.push(`Layout "${layoutNode.name}" has no visible, supported child layers.`);
-    return null;
   }
 
   return frames;

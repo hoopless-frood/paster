@@ -64,12 +64,12 @@ You only need to import the manifest once. After making code changes, rebuild an
 Create a parent frame containing a frame for each responsive layout:
 
 ```text
-Homepage
-├── Desktop
+paster
+├── desktop
 │   ├── hero
 │   ├── portrait
 │   └── detail
-└── Mobile
+└── mobile
     ├── hero
     ├── portrait
     └── detail
@@ -84,10 +84,10 @@ Homepage
 ### Export
 
 1. Select the parent composition frame and run **Plugins → Development → Paster**. The plugin scans the selection and lists each layout it found.
-2. Enter each layout's breakpoint minimum width, in px — Paster never guesses this from a layout's own pixel width, you always set it explicitly.
+2. Each layout's breakpoint minimum width (px) is pre-filled with a suggestion based on its frame width — the smallest layout suggests 0, and each other layout suggests the midpoint between its width and the next-smaller layout's. Review and edit these before exporting; the exported value is always whatever's in the field, never silently substituted.
 3. Click **Export JSON**. The validated composition JSON appears in the text box, ready to copy.
 
-If the plugin reports a problem instead (wrong selection, rotated layers, Auto Layout, groups, mismatched layer names across layouts, etc.) — it lists every problem it finds, not just the first — fix it in Figma and click **Refresh selection** to re-scan.
+Individual layers the plugin doesn't support yet (rotation, Auto Layout, groups, duplicate names) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only a genuinely unusable selection (nothing selected, the wrong node type, or mismatched layer names across layouts that leave the schema invalid) blocks export outright; fix that in Figma and click **Refresh selection** to re-scan.
 
 There's no image export or ZIP packaging yet, and nothing in this repo can render or preview the exported JSON yet — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means.
 

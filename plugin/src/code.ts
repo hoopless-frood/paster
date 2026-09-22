@@ -1,6 +1,7 @@
 import { assembleComposition } from "./assemble";
 import { scanSelection } from "./figma-export";
 import type { MainToUiMessage, UiToMainMessage } from "./protocol";
+import { suggestMinWidths } from "./suggest-min-width";
 
 figma.showUI(__html__, { width: 360, height: 480 });
 
@@ -16,11 +17,17 @@ function handleScan(): void {
     return;
   }
 
+  const suggestions = suggestMinWidths(result.layouts);
+
   postToUi({
     type: "scan-result",
     ok: true,
     compositionName: result.compositionName,
-    layouts: result.layouts.map((layout) => ({ name: layout.name })),
+    layouts: result.layouts.map((layout) => ({
+      name: layout.name,
+      suggestedMinWidth: suggestions[layout.name],
+    })),
+    warnings: result.warnings,
   });
 }
 
@@ -45,6 +52,7 @@ function handleExport(minWidths: Record<string, number>): void {
     type: "export-result",
     ok: true,
     json: JSON.stringify(validation.composition, null, 2),
+    warnings: result.warnings,
   });
 }
 

@@ -10,6 +10,8 @@
     "src/figma-export.ts",
     "src/assemble.ts",
     "src/assemble.test.ts",
-    "src/protocol.ts"
+    "src/protocol.ts",
+    "src/suggest-min-width.ts",
+    "src/suggest-min-width.test.ts"
   ]
 }

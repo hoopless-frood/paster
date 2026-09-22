@@ -6,22 +6,23 @@ const exportButton = document.getElementById("export") as HTMLButtonElement;
 const refreshButton = document.getElementById("refresh") as HTMLButtonElement;
 const outputEl = document.getElementById("output") as HTMLTextAreaElement;
 const errorsEl = document.getElementById("errors") as HTMLUListElement;
+const warningsEl = document.getElementById("warnings") as HTMLUListElement;
 
 function sendToMain(message: UiToMainMessage): void {
   parent.postMessage({ pluginMessage: message }, "*");
 }
 
-function renderErrors(errors: string[]): void {
-  errorsEl.innerHTML = "";
-  errors.forEach((error) => {
+function renderList(el: HTMLUListElement, items: string[]): void {
+  el.innerHTML = "";
+  items.forEach((text) => {
     const item = document.createElement("li");
-    item.textContent = error;
-    errorsEl.appendChild(item);
+    item.textContent = text;
+    el.appendChild(item);
   });
 }
 
 function renderLayoutForm(compositionName: string, layouts: LayoutSummary[]): void {
-  statusEl.textContent = `"${compositionName}" — ${layouts.length} layout${layouts.length === 1 ? "" : "s"} found.`;
+  statusEl.textContent = `"${compositionName}" — ${layouts.length} layout${layouts.length === 1 ? "" : "s"} found. Min-width is suggested from each layout's frame width — review and edit before exporting.`;
   formEl.innerHTML = "";
   outputEl.value = "";
 
@@ -34,13 +35,16 @@ function renderLayoutForm(compositionName: string, layouts: LayoutSummary[]): vo
     input.type = "number";
     input.min = "0";
     input.step = "1";
+    input.value = String(layout.suggestedMinWidth);
     input.dataset.layout = layout.name;
 
     row.appendChild(input);
     formEl.appendChild(row);
   });
 
-  exportButton.disabled = layouts.length === 0;
+  // A successful scan always has at least one layout (scanSelection fails
+  // rather than returning an empty list), so export is safe to enable here.
+  exportButton.disabled = false;
 }
 
 window.onmessage = (event: MessageEvent<{ pluginMessage: MainToUiMessage }>) => {
@@ -48,26 +52,29 @@ window.onmessage = (event: MessageEvent<{ pluginMessage: MainToUiMessage }>) => 
 
   if (message.type === "scan-result") {
     if (message.ok) {
-      renderErrors([]);
+      renderList(errorsEl, []);
+      renderList(warningsEl, message.warnings);
       renderLayoutForm(message.compositionName, message.layouts);
     } else {
       formEl.innerHTML = "";
       exportButton.disabled = true;
       statusEl.textContent = "Selection isn't ready to export yet.";
-      renderErrors(message.errors);
+      renderList(warningsEl, []);
+      renderList(errorsEl, message.errors);
     }
     return;
   }
 
   if (message.type === "export-result") {
     if (message.ok) {
-      renderErrors([]);
+      renderList(errorsEl, []);
+      renderList(warningsEl, message.warnings);
       outputEl.value = message.json;
       outputEl.focus();
       outputEl.select();
     } else {
       outputEl.value = "";
-      renderErrors(message.errors);
+      renderList(errorsEl, message.errors);
     }
   }
 };
@@ -83,7 +90,10 @@ exportButton.addEventListener("click", () => {
     .map((input) => input.dataset.layout);
 
   if (emptyLayouts.length > 0) {
-    renderErrors(emptyLayouts.map((name) => `Enter a min-width for layout "${name}" before exporting.`));
+    renderList(
+      errorsEl,
+      emptyLayouts.map((name) => `Enter a min-width for layout "${name}" before exporting.`),
+    );
     return;
   }
 

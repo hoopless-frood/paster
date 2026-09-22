@@ -6,6 +6,7 @@ function scan(): ScanSuccess {
   return {
     ok: true,
     compositionName: "Homepage",
+    warnings: [],
     layouts: [
       {
         name: "Mobile",
