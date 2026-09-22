@@ -2,11 +2,11 @@
 
 Paster is an open-source tool for translating art-directed Figma compositions into responsive web layouts.
 
-It extracts frame geometry and stacking order from Figma, eliminating manual coordinate entry while preserving independent compositions across breakpoints.
+It extracts item geometry and stacking order from Figma, eliminating manual coordinate entry while preserving independent compositions across breakpoints.
 
 ## Status
 
-Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; and the Figma plugin can scan a selection and export validated, geometry-only composition JSON. **There is no image export, renderer, or playground yet** — you can produce a composition JSON file today, but nothing in this repo renders it. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
+Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated, geometry-only composition JSON; and [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply. **There is no image export or interactive playground yet** — the demo renders the sample composition with placeholder boxes, not real images or JSON import. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
 
 ## How it works
 
@@ -39,7 +39,7 @@ pnpm run build:plugin # build just the plugin and its @paster/core dependency
 pnpm run dev:plugin   # rebuild the plugin on change (run `build` at least once first)
 ```
 
-The demo currently renders only a placeholder shell — the "Preview" and "Implement" steps below aren't functional yet (see [Status](#status)). The plugin steps that follow are real: scanning a selection and exporting geometry-only JSON works today.
+The demo renders `@paster/core`'s sample composition with `@paster/react`, using placeholder boxes in place of real images — the "Preview" step below (an interactive playground with JSON import) isn't built yet, but "Export" and "Implement" are both real (see [Status](#status)).
 
 ### Build the plugin
 
@@ -77,7 +77,7 @@ paster
 
 - The parent frame represents the composition.
 - Each layout frame defines its own dimensions and coordinate system.
-- Image frames are direct children of their layout.
+- Items (currently images or SVGs) are direct children of their layout.
 - Matching layer names identify the same content across layouts.
 - Position, size, and stacking order can differ between breakpoints.
 
@@ -89,7 +89,7 @@ paster
 
 Individual layers the plugin doesn't support yet (rotation, Auto Layout, groups, duplicate names) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only a genuinely unusable selection (nothing selected, the wrong node type, or mismatched layer names across layouts that leave the schema invalid) blocks export outright; fix that in Figma and click **Refresh selection** to re-scan.
 
-There's no image export or ZIP packaging yet, and nothing in this repo can render or preview the exported JSON yet — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means.
+There's no image export or ZIP packaging yet, so the exported JSON's `assets` array is always empty — but [`@paster/react`](./frontend/react) can render the geometry today, given content you supply yourself. There's no interactive playground to paste JSON into yet — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means.
 
 ## Project structure
 

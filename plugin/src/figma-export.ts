@@ -1,4 +1,4 @@
-export interface ScannedFrame {
+export interface ScannedItem {
   name: string;
   x: number;
   y: number;
@@ -11,7 +11,7 @@ export interface ScannedLayout {
   name: string;
   width: number;
   height: number;
-  frames: ScannedFrame[];
+  items: ScannedItem[];
 }
 
 export interface ScanSuccess {
@@ -32,7 +32,7 @@ export type ScanOutcome = ScanSuccess | ScanFailure;
 
 const ROTATION_EPSILON = 0.01;
 
-const SUPPORTED_FRAME_CHILD_TYPES = new Set<SceneNode["type"]>([
+const SUPPORTED_ITEM_TYPES = new Set<SceneNode["type"]>([
   "FRAME",
   "COMPONENT",
   "INSTANCE",
@@ -46,8 +46,8 @@ const SUPPORTED_FRAME_CHILD_TYPES = new Set<SceneNode["type"]>([
   "BOOLEAN_OPERATION",
 ]);
 
-type SupportedFrameChildNode = Extract<SceneNode, { type: SupportedFrameChildType }>;
-type SupportedFrameChildType =
+type SupportedItemNode = Extract<SceneNode, { type: SupportedItemType }>;
+type SupportedItemType =
   | "FRAME"
   | "COMPONENT"
   | "INSTANCE"
@@ -60,8 +60,8 @@ type SupportedFrameChildType =
   | "POLYGON"
   | "BOOLEAN_OPERATION";
 
-function isSupportedFrameChild(node: SceneNode): node is SupportedFrameChildNode {
-  return SUPPORTED_FRAME_CHILD_TYPES.has(node.type);
+function isSupportedItemNode(node: SceneNode): node is SupportedItemNode {
+  return SUPPORTED_ITEM_TYPES.has(node.type);
 }
 
 function isRotated(rotation: number): boolean {
@@ -69,7 +69,7 @@ function isRotated(rotation: number): boolean {
 }
 
 /**
- * Reads the current Figma selection and extracts layout/frame geometry.
+ * Reads the current Figma selection and extracts layout/item geometry.
  * Always re-derives from live selection state — callers should call this
  * fresh rather than cache the result, so moving/resizing/reordering layers
  * before export is reflected in the output.
@@ -138,15 +138,15 @@ export function scanSelection(): ScanOutcome {
       continue;
     }
 
-    const frames = scanLayoutChildren(layoutNode, warnings);
+    const items = scanLayoutItems(layoutNode, warnings);
 
-    if (frames.length === 0) {
+    if (items.length === 0) {
       warnings.push(`Skipped layout "${layoutNode.name}": no visible, supported child layers.`);
       continue;
     }
 
     layoutNames.add(layoutNode.name);
-    layouts.push({ name: layoutNode.name, width: layoutNode.width, height: layoutNode.height, frames });
+    layouts.push({ name: layoutNode.name, width: layoutNode.width, height: layoutNode.height, items });
   }
 
   if (layouts.length === 0) {
@@ -156,14 +156,14 @@ export function scanSelection(): ScanOutcome {
   return { ok: true, compositionName: parent.name, layouts, warnings };
 }
 
-function scanLayoutChildren(layoutNode: FrameNode, warnings: string[]): ScannedFrame[] {
+function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem[] {
   const visibleChildren = layoutNode.children.filter((child) => child.visible);
-  const frames: ScannedFrame[] = [];
-  const frameNames = new Set<string>();
+  const items: ScannedItem[] = [];
+  const itemNames = new Set<string>();
   let zIndex = 0;
 
   for (const child of visibleChildren) {
-    if (!isSupportedFrameChild(child)) {
+    if (!isSupportedItemNode(child)) {
       const hint = child.type === "GROUP" ? " (ungroup or flatten it)" : "";
       warnings.push(
         `Skipped "${layoutNode.name}/${child.name}": a ${child.type.toLowerCase()} isn't supported yet${hint}.`,
@@ -176,17 +176,17 @@ function scanLayoutChildren(layoutNode: FrameNode, warnings: string[]): ScannedF
       continue;
     }
 
-    if (frameNames.has(child.name)) {
+    if (itemNames.has(child.name)) {
       warnings.push(
         `Skipped "${layoutNode.name}/${child.name}": duplicate layer name within this layout.`,
       );
       continue;
     }
-    frameNames.add(child.name);
+    itemNames.add(child.name);
 
     // Reassigned contiguously over the *kept* children, so a skip never
     // leaves a gap — zIndex still means "0 = furthest back among what's exported".
-    frames.push({
+    items.push({
       name: child.name,
       x: child.x,
       y: child.y,
@@ -196,5 +196,5 @@ function scanLayoutChildren(layoutNode: FrameNode, warnings: string[]): ScannedF
     });
   }
 
-  return frames;
+  return items;
 }

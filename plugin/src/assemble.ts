@@ -9,7 +9,7 @@ import type { ScanSuccess } from "./figma-export";
 /**
  * Merges a fresh scan with the min-width values collected from the UI,
  * builds a Composition, and validates it against @paster/core. Geometry-only:
- * frames never carry an assetId yet (image export is a later milestone).
+ * items never carry an assetId yet (image export is a later milestone).
  */
 export function assembleComposition(
   scan: ScanSuccess,
@@ -34,14 +34,14 @@ export function assembleComposition(
       minWidth: minWidths[layout.name],
       width: layout.width,
       height: layout.height,
-      frames: layout.frames.map((frame) => ({
-        id: frame.name,
-        name: frame.name,
-        x: frame.x,
-        y: frame.y,
-        width: frame.width,
-        height: frame.height,
-        zIndex: frame.zIndex,
+      items: layout.items.map((item) => ({
+        id: item.name,
+        name: item.name,
+        x: item.x,
+        y: item.y,
+        width: item.width,
+        height: item.height,
+        zIndex: item.zIndex,
       })),
     })),
   };

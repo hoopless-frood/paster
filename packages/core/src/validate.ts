@@ -81,7 +81,7 @@ function checkLayouts(value: unknown, assetIds: Set<string>, errors: string[]): 
   const layoutIds = new Set<string>();
   const minWidths = new Set<number>();
   let baseLayoutCount = 0;
-  let referenceFrameIds: Set<string> | null = null;
+  let referenceItemIds: Set<string> | null = null;
 
   value.forEach((layout, index) => {
     const path = `composition.layouts[${index}]`;
@@ -121,13 +121,13 @@ function checkLayouts(value: unknown, assetIds: Set<string>, errors: string[]): 
     checkPositiveFiniteNumber(layout.width, `${path}.width`, errors);
     checkPositiveFiniteNumber(layout.height, `${path}.height`, errors);
 
-    const frameIds = checkFrames(layout.frames, assetIds, path, errors);
-    if (frameIds) {
-      if (referenceFrameIds === null) {
-        referenceFrameIds = frameIds;
-      } else if (!setsEqual(referenceFrameIds, frameIds)) {
+    const itemIds = checkItems(layout.items, assetIds, path, errors);
+    if (itemIds) {
+      if (referenceItemIds === null) {
+        referenceItemIds = itemIds;
+      } else if (!setsEqual(referenceItemIds, itemIds)) {
         errors.push(
-          `${path}.frames: frame id set must match every other layout (MVP requires identical frame ids across layouts)`,
+          `${path}.items: item id set must match every other layout (MVP requires identical item ids across layouts)`,
         );
       }
     }
@@ -140,48 +140,48 @@ function checkLayouts(value: unknown, assetIds: Set<string>, errors: string[]): 
   }
 }
 
-function checkFrames(
+function checkItems(
   value: unknown,
   assetIds: Set<string>,
   layoutPath: string,
   errors: string[],
 ): Set<string> | null {
   if (!Array.isArray(value) || value.length === 0) {
-    errors.push(`${layoutPath}.frames: must be a non-empty array`);
+    errors.push(`${layoutPath}.items: must be a non-empty array`);
     return null;
   }
 
-  const frameIds = new Set<string>();
+  const itemIds = new Set<string>();
   const zIndexes = new Set<number>();
 
-  value.forEach((frame, index) => {
-    const path = `${layoutPath}.frames[${index}]`;
+  value.forEach((item, index) => {
+    const path = `${layoutPath}.items[${index}]`;
 
-    if (!isRecord(frame)) {
+    if (!isRecord(item)) {
       errors.push(`${path}: must be an object`);
       return;
     }
 
-    if (checkNonEmptyString(frame.id, `${path}.id`, errors)) {
-      const id = frame.id as string;
-      if (frameIds.has(id)) {
-        errors.push(`${path}.id: duplicate frame id "${id}" within layout`);
+    if (checkNonEmptyString(item.id, `${path}.id`, errors)) {
+      const id = item.id as string;
+      if (itemIds.has(id)) {
+        errors.push(`${path}.id: duplicate item id "${id}" within layout`);
       } else {
-        frameIds.add(id);
+        itemIds.add(id);
       }
     }
 
-    if (frame.name !== undefined && typeof frame.name !== "string") {
+    if (item.name !== undefined && typeof item.name !== "string") {
       errors.push(`${path}.name: must be a string when present`);
     }
 
-    checkFiniteNumber(frame.x, `${path}.x`, errors);
-    checkFiniteNumber(frame.y, `${path}.y`, errors);
-    checkPositiveFiniteNumber(frame.width, `${path}.width`, errors);
-    checkPositiveFiniteNumber(frame.height, `${path}.height`, errors);
+    checkFiniteNumber(item.x, `${path}.x`, errors);
+    checkFiniteNumber(item.y, `${path}.y`, errors);
+    checkPositiveFiniteNumber(item.width, `${path}.width`, errors);
+    checkPositiveFiniteNumber(item.height, `${path}.height`, errors);
 
-    if (checkInteger(frame.zIndex, `${path}.zIndex`, errors)) {
-      const zIndex = frame.zIndex as number;
+    if (checkInteger(item.zIndex, `${path}.zIndex`, errors)) {
+      const zIndex = item.zIndex as number;
       if (zIndex < 0) {
         errors.push(`${path}.zIndex: must be >= 0`);
       } else if (zIndexes.has(zIndex)) {
@@ -191,16 +191,16 @@ function checkFrames(
       }
     }
 
-    if (frame.assetId !== undefined) {
-      if (typeof frame.assetId !== "string") {
+    if (item.assetId !== undefined) {
+      if (typeof item.assetId !== "string") {
         errors.push(`${path}.assetId: must be a string when present`);
-      } else if (!assetIds.has(frame.assetId)) {
-        errors.push(`${path}.assetId: references unknown asset "${frame.assetId}"`);
+      } else if (!assetIds.has(item.assetId)) {
+        errors.push(`${path}.assetId: references unknown asset "${item.assetId}"`);
       }
     }
   });
 
-  return frameIds;
+  return itemIds;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

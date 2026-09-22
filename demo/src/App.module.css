@@ -6,7 +6,21 @@
   color: #111;
 }
 
-.meta {
-  color: #555;
-  font-size: 0.875rem;
+.composition {
+  margin-top: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.itemPlaceholder {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  border: 1px dashed #7c86ff;
+  color: #333;
+  font-size: 0.75rem;
 }

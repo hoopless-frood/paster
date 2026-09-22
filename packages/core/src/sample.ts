@@ -15,7 +15,7 @@ export const sampleComposition: Composition = {
       minWidth: 0,
       width: 375,
       height: 812,
-      frames: [
+      items: [
         { id: "hero", x: 0, y: 0, width: 375, height: 240, zIndex: 0, assetId: "hero-image" },
         {
           id: "portrait",
@@ -34,7 +34,7 @@ export const sampleComposition: Composition = {
       minWidth: 1024,
       width: 1440,
       height: 900,
-      frames: [
+      items: [
         {
           id: "portrait",
           x: 80,

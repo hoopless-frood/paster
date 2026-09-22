@@ -10,9 +10,9 @@ Paster converts art-directed Figma compositions into portable, responsive layout
 - `demo/`: Vite playground for JSON/ZIP imports and preview.
 - Use pnpm workspaces and TypeScript throughout.
 
-Terminology: **Composition → Layout (breakpoint) → Frame**.
+Terminology: **Composition → Layout (breakpoint) → Item**. In Figma, a Layout is a Frame node; an Item is not necessarily one (it's whatever visual content — currently an image or SVG — sits inside a layout).
 
-Frames have `x`, `y`, `width`, `height`, and `zIndex`. Keep geometry separate from assets and content. Support data-driven breakpoints with independent geometry, stacking, and image overrides.
+Items have `x`, `y`, `width`, `height`, and `zIndex`. Keep geometry separate from assets and content. Support data-driven breakpoints with independent geometry, stacking, and image overrides.
 
 ## Build
 

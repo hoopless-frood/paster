@@ -48,9 +48,9 @@ describe("validateComposition", () => {
     }
   });
 
-  it("rejects non-positive frame dimensions", () => {
+  it("rejects non-positive item dimensions", () => {
     const composition = clone();
-    composition.layouts[0].frames[0].width = 0;
+    composition.layouts[0].items[0].width = 0;
     const result = validateComposition(composition);
     expect(result.valid).toBe(false);
     if (!result.valid) {
@@ -60,36 +60,36 @@ describe("validateComposition", () => {
 
   it("rejects non-finite geometry", () => {
     const composition = clone();
-    composition.layouts[0].frames[0].x = Number.POSITIVE_INFINITY;
+    composition.layouts[0].items[0].x = Number.POSITIVE_INFINITY;
     const result = validateComposition(composition);
     expect(result.valid).toBe(false);
   });
 
-  it("rejects mismatched frame id sets across layouts", () => {
+  it("rejects mismatched item id sets across layouts", () => {
     const composition = clone();
-    composition.layouts[1].frames = composition.layouts[1].frames.filter(
-      (frame) => frame.id !== "portrait",
+    composition.layouts[1].items = composition.layouts[1].items.filter(
+      (item) => item.id !== "portrait",
     );
     const result = validateComposition(composition);
     expect(result.valid).toBe(false);
     if (!result.valid) {
-      expect(result.errors.some((e) => e.includes("frame id set must match"))).toBe(true);
+      expect(result.errors.some((e) => e.includes("item id set must match"))).toBe(true);
     }
   });
 
-  it("rejects duplicate frame ids within a layout", () => {
+  it("rejects duplicate item ids within a layout", () => {
     const composition = clone();
-    composition.layouts[0].frames.push({ ...composition.layouts[0].frames[0] });
+    composition.layouts[0].items.push({ ...composition.layouts[0].items[0] });
     const result = validateComposition(composition);
     expect(result.valid).toBe(false);
     if (!result.valid) {
-      expect(result.errors.some((e) => e.includes("duplicate frame id"))).toBe(true);
+      expect(result.errors.some((e) => e.includes("duplicate item id"))).toBe(true);
     }
   });
 
   it("rejects an asset reference to an unknown asset id", () => {
     const composition = clone();
-    composition.layouts[0].frames[0].assetId = "does-not-exist";
+    composition.layouts[0].items[0].assetId = "does-not-exist";
     const result = validateComposition(composition);
     expect(result.valid).toBe(false);
     if (!result.valid) {
@@ -123,7 +123,7 @@ describe("validateComposition", () => {
 
   it("rejects duplicate zIndex values within a layout", () => {
     const composition = clone();
-    composition.layouts[0].frames[1].zIndex = composition.layouts[0].frames[0].zIndex;
+    composition.layouts[0].items[1].zIndex = composition.layouts[0].items[0].zIndex;
     const result = validateComposition(composition);
     expect(result.valid).toBe(false);
     if (!result.valid) {

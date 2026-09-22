@@ -9,22 +9,25 @@ The format is defined and validated in [`@paster/core`](../packages/core)
 (`packages/core/src/types.ts` and `validate.ts`), which has no Figma, React, or
 browser dependencies.
 
-## Model: Composition → Layout → Frame
+## Model: Composition → Layout → Item
 
 - A **Composition** is one exported design: a set of breakpoint **Layouts**
   sharing a pool of **Assets**.
 - A **Layout** is one breakpoint's arrangement: a design-space canvas
-  (`width` × `height`) containing positioned **Frames**, active starting at a
-  given viewport width (`minWidth`).
-- A **Frame** is a single positioned object within a layout — coordinates,
-  size, stacking order, and (optionally) which asset it renders. The same
-  `id` in two different layouts means "this is the same piece of content,
+  (`width` × `height`) containing positioned **Items**, active starting at a
+  given viewport width (`minWidth`). In Figma, a Layout corresponds to an
+  actual Figma Frame node.
+- An **Item** is a single positioned object within a layout — coordinates,
+  size, stacking order, and (optionally) which asset it renders. Unlike a
+  Layout, an Item isn't necessarily a Figma Frame node — it's whatever visual
+  content (currently an image or SVG) sits inside one. The same `id` in two
+  different layouts means "this is the same piece of content,
   positioned/sized/stacked independently in each layout."
 
-Assets and content are deliberately kept separate from layout geometry: a
-`Frame` references an asset by `assetId` rather than embedding image data, so
+Assets and content are deliberately kept separate from layout geometry: an
+`Item` references an asset by `assetId` rather than embedding image data, so
 the same physical asset can be reused across layouts, and each layout can
-point a frame at a *different* asset (a different rendered crop) via its own
+point an item at a *different* asset (a different rendered crop) via its own
 `assetId` — geometry, stacking, and asset selection are all independent
 per layout.
 
@@ -53,12 +56,12 @@ interface Layout {
   id: string;
   name: string;
   minWidth: number; // viewport width (CSS px) this layout activates at
-  width: number;    // design-space width of the layout frame
-  height: number;   // design-space height of the layout frame
-  frames: Frame[];
+  width: number;    // design-space width of the layout
+  height: number;   // design-space height of the layout
+  items: Item[];
 }
 
-interface Frame {
+interface Item {
   id: string;        // stable identity linking the same content across layouts
   name?: string;      // human-readable label (e.g. the Figma layer name); not identity
   x: number;
@@ -66,7 +69,7 @@ interface Frame {
   width: number;
   height: number;
   zIndex: number;      // independent per-layout stacking order, 0 = furthest back
-  assetId?: string;    // which asset this frame renders, if any
+  assetId?: string;    // which asset this item renders, if any
 }
 
 interface Asset {
@@ -83,24 +86,24 @@ interface Asset {
 | Type          | Required fields                                        | Optional fields    |
 | ------------- | -------------------------------------------------------- | ------------------- |
 | `Composition` | `version`, `id`, `name`, `layouts`, `assets`             | —                    |
-| `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `frames`     | —                    |
-| `Frame`       | `id`, `x`, `y`, `width`, `height`, `zIndex`               | `name`, `assetId`   |
+| `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `items`      | —                    |
+| `Item`        | `id`, `x`, `y`, `width`, `height`, `zIndex`               | `name`, `assetId`   |
 | `Asset`       | `id`, `path`, `width`, `height`                           | `alt`                |
 
 ## Coordinate system
 
-`x`/`y`/`width`/`height` on a `Frame` are relative to its own layout's
+`x`/`y`/`width`/`height` on an `Item` are relative to its own layout's
 origin (top-left of that layout's `width` × `height` canvas) — not to the
 Figma page, not to the composition, and not to any other layout. Translating
-the whole composition in Figma must not change any frame's exported
+the whole composition in Figma must not change any item's exported
 coordinates.
 
-`x`/`y` may be negative or place a frame partially outside its layout's
+`x`/`y` may be negative or place an item partially outside its layout's
 bounds (Figma allows this); `width`/`height` must be positive.
 
 ## Stacking order
 
-`zIndex` is independent per layout: a frame that's in front in one layout can
+`zIndex` is independent per layout: an item that's in front in one layout can
 be behind in another. Within a single layout, `zIndex` values must be unique,
 non-negative integers (in practice, `0..n-1` reflecting Figma's back-to-front
 child order at export time).
@@ -128,16 +131,16 @@ fields above:
 - `version` must equal `COMPOSITION_SCHEMA_VERSION` (currently `1`).
 - Exactly one layout must have `minWidth: 0` (a base layout); every other
   `minWidth` must be a unique, non-negative number.
-- `Layout.width`/`height` and `Frame.width`/`height` must be finite numbers
-  greater than 0; `Frame.x`/`y` must be finite numbers (may be negative).
-- `Frame.zIndex` must be a finite, non-negative integer, unique within its
+- `Layout.width`/`height` and `Item.width`/`height` must be finite numbers
+  greater than 0; `Item.x`/`y` must be finite numbers (may be negative).
+- `Item.zIndex` must be a finite, non-negative integer, unique within its
   layout.
-- Every layout must have identical frame `id` sets (MVP requires matching
-  frame identity across all layouts — layout-specific visibility/frame sets
+- Every layout must have identical item `id` sets (MVP requires matching
+  item identity across all layouts — layout-specific visibility/item sets
   are backlog, not supported yet).
-- `Frame.id`, `Layout.id`, `Composition.id`, and `Asset.id` must each be
+- `Item.id`, `Layout.id`, `Composition.id`, and `Asset.id` must each be
   unique within their scope.
-- `Frame.assetId`, when present, must reference an existing `Asset.id`.
+- `Item.assetId`, when present, must reference an existing `Asset.id`.
 - `Asset.path` must be a safe, relative, portable path: no leading `/` or
   `\`, no `..` path segments, no URL scheme (`http://`, `file://`, etc.), and
   no Windows drive prefix.
@@ -165,7 +168,7 @@ rather than just the first one.
       "minWidth": 0,
       "width": 375,
       "height": 812,
-      "frames": [
+      "items": [
         { "id": "hero", "x": 0, "y": 0, "width": 375, "height": 240, "zIndex": 0, "assetId": "hero-image" },
         { "id": "portrait", "x": 24, "y": 260, "width": 327, "height": 400, "zIndex": 1, "assetId": "portrait-image" }
       ]
@@ -176,7 +179,7 @@ rather than just the first one.
       "minWidth": 1024,
       "width": 1440,
       "height": 900,
-      "frames": [
+      "items": [
         { "id": "portrait", "x": 80, "y": 80, "width": 480, "height": 600, "zIndex": 0, "assetId": "portrait-image" },
         { "id": "hero", "x": 600, "y": 0, "width": 840, "height": 900, "zIndex": 1, "assetId": "hero-image" }
       ]
@@ -185,7 +188,7 @@ rather than just the first one.
 }
 ```
 
-Note how `hero` and `portrait` appear in both layouts (matching frame
+Note how `hero` and `portrait` appear in both layouts (matching item
 identity), but with different geometry *and* different relative stacking —
 `hero` is behind `portrait` on mobile (`zIndex: 0` vs. `1`) and in front of it
 on desktop. This exact composition is exported as `sampleComposition` from
@@ -195,8 +198,8 @@ on desktop. This exact composition is exported as `sampleComposition` from
 
 This schema does not yet support (see [PLAN.md](../PLAN.md)'s backlog):
 nested groups, rotation/transforms/masks, Auto Layout, layout-specific
-visibility or non-identical frame sets, or non-image node types as frame
+visibility or non-identical item sets, or non-image node types as item
 content (native vector shapes, live text, video). Note this is distinct from
 *asset file format*: an `Asset.path` may point at a PNG, JPG, or (planned)
-rendered SVG export of an image frame — the schema doesn't constrain format.
+rendered SVG export of an image item — the schema doesn't constrain format.
 These are explicit scope boundaries, not omissions.

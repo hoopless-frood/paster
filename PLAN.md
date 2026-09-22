@@ -1,6 +1,6 @@
 # Paster — implementation plan
 
-Paster exports a Figma **Composition** (one selected parent frame) containing any number of named breakpoint **Layouts**. Each layout has a design-space size and positioned **Frames**. It produces a versioned, portable JSON contract, optionally packaged with rendered images, and can be previewed by a framework-independent core + React renderer in a Vite playground.
+Paster exports a Figma **Composition** (one selected parent frame) containing any number of named breakpoint **Layouts**. Each layout has a design-space size and positioned **Items**. It produces a versioned, portable JSON contract, optionally packaged with rendered images, and can be previewed by a framework-independent core + React renderer in a Vite playground.
 
 **Workflow:** one milestone = one review checkpoint = one maintainer-made commit. Claude implements only the requested milestone, reports changes and checks, then stops without staging, committing, pushing, or advancing. Mark boxes complete only after review. Suggested commit messages are proposals, not commands.
 
@@ -8,13 +8,13 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 - Monorepo: pnpm workspaces, TypeScript; CSS Modules for the React renderer and demo. Vite for demo, esbuild for plugin bundle; use a test runner such as Vitest where appropriate.
 - Folders: `plugin/`, `packages/core/`, `frontend/react/`, `demo/`.
-- Model: `Composition → Layout → Frame`; `Frame` is the public positioned-object term. Keep Figma-specific node types at the adapter boundary.
+- Model: `Composition → Layout → Item`; `Item` is the public positioned-object term. In Figma, a Layout is a Frame node; an Item is not necessarily one. Keep Figma-specific node types at the adapter boundary.
 - A selected parent Figma frame holds named layout frames; do not require exactly two layouts. Layout selection uses explicit, validated viewport minimum widths, including one base layout at 0; design-space width is not implicitly the CSS breakpoint.
 - Coordinates and dimensions are relative to the layout frame. `zIndex` reflects each layout's Figma child stacking order, independently; the MVP accepts only visible, unrotated direct children of ordinary layout frames.
-- Frame identity links layouts to shared content; assets and content remain separate from layout geometry. Support per-layout asset overrides for differing rendered crops. A production consumer may supply its own asset mapping.
+- Item identity links layouts to shared content; assets and content remain separate from layout geometry. Support per-layout asset overrides for differing rendered crops. A production consumer may supply its own asset mapping.
 - Version exports (`version: 1`). Keep an explicit schema and validate all untrusted JSON before rendering. No automatic uploads, external image hosting, or Figma account authentication in the MVP.
 - Geometry-only JSON export and composition-with-images ZIP export are separate modes. ZIP contains `composition.json` plus relative-path images. The demo resolves imported images locally and releases object URLs during cleanup.
-- For MVP image fidelity, export **rendered** image frames (including Figma crop/visual treatment); do not mistake them for original production images. Preserve image aspect ratio, avoid accidental double cropping, and document the flattened-image trade-off.
+- For MVP image fidelity, export **rendered** images per item (including Figma crop/visual treatment); do not mistake them for original production images. Preserve image aspect ratio, avoid accidental double cropping, and document the flattened-image trade-off.
 - Use a README for people and `CLAUDE.md` for concise working conventions. Keep the public repository free of private assets, credentials, and client information. Choose a license explicitly before publishing.
 
 ## Milestones — one commit each
@@ -36,11 +36,11 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 **Suggested commit:** `chore: scaffold Paster monorepo`
 
 ### M2 — Versioned core schema and validation
-- [x] Define TypeScript types for composition, viewport rules, layouts, frames, assets, and optional layout-specific asset references.
+- [x] Define TypeScript types for composition, viewport rules, layouts, items, assets, and optional layout-specific asset references.
 - [x] Specify a concrete JSON example and documented breakpoint selection rules, including one layout at min-width 0, unique thresholds, and deterministic ordering.
-- [x] Validate positive container/frame dimensions, finite geometry, unique IDs, safe asset paths, and references; explicitly decide whether layout frame sets may differ (MVP: require matching IDs).
+- [x] Validate positive container/item dimensions, finite geometry, unique IDs, safe asset paths, and references; explicitly decide whether layout item sets may differ (MVP: require matching IDs).
 - [x] Add unit tests for valid/invalid data and breakpoint selection.
-- [x] Add `docs/composition-format.md` as the canonical schema reference for anyone implementing another frontend renderer. Document the Composition → Layout → Frame model, the versioned JSON schema, breakpoint selection, coordinate system, stacking order, asset references, and validation rules. Include a complete JSON example and state which fields are required vs. optional.
+- [x] Add `docs/composition-format.md` as the canonical schema reference for anyone implementing another frontend renderer. Document the Composition → Layout → Item model, the versioned JSON schema, breakpoint selection, coordinate system, stacking order, asset references, and validation rules. Include a complete JSON example and state which fields are required vs. optional.
 
 **Accept:** core is importable without Figma/React; tests pass; sample validates.  
 **Suggested commit:** `feat(core): define and validate composition format`
@@ -55,16 +55,16 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 **Suggested commit:** `feat(plugin): export validated frame geometry`
 
 ### M4 — React renderer
-- [ ] Render the versioned composition using `@paster/core` types and a consumer-supplied asset/content resolver.
-- [ ] Preserve composition aspect ratio, relative positions, viewport breakpoint choice, independent stacking, and layout-specific image overrides.
-- [ ] Use scoped CSS Modules and a local stacking context. Provide accessible image-content examples without inventing alt text.
-- [ ] Test geometry/breakpoints and document SSR and viewport behavior.
+- [x] Render the versioned composition using `@paster/core` types and a consumer-supplied asset/content resolver.
+- [x] Preserve composition aspect ratio, relative positions, viewport breakpoint choice, independent stacking, and layout-specific image overrides.
+- [x] Use scoped CSS Modules and a local stacking context. Provide accessible image-content examples without inventing alt text.
+- [x] Test geometry/breakpoints and document SSR and viewport behavior.
 
 **Accept:** same data renders proportionally across widths, and layer order changes correctly at a breakpoint.  
 **Suggested commit:** `feat(react): render responsive compositions`
 
 ### M5 — Playground with JSON import
-- [ ] Build a usable Vite playground with built-in sample data/assets, JSON paste/upload, validation errors, viewport-width control, and frame outlines/IDs.
+- [ ] Build a usable Vite playground with built-in sample data/assets, JSON paste/upload, validation errors, viewport-width control, and item outlines/IDs.
 - [ ] Show the active breakpoint and its design-space dimensions; keep preview consistent with actual renderer.
 - [ ] Provide accessible controls, keyboard interaction, and basic empty/loading/error states.
 
@@ -73,7 +73,7 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 ### M6 — Figma image export and ZIP packaging
 - [ ] Add export mode: geometry-only JSON or complete ZIP (`composition.json` and `images/`).
-- [ ] Export rendered frame images as PNG initially; name files deterministically and avoid collisions across layouts; support per-layout image references.
+- [ ] Export rendered item images as PNG initially; name files deterministically and avoid collisions across layouts; support per-layout image references.
 - [ ] Support SVG asset export alongside PNG and JPG.
 - [ ] Preserve SVG assets in ZIP exports, using the same naming/path conventions as raster assets.
 - [ ] Assemble/download ZIP in plugin UI; keep asset paths portable, relative, and validated. Report failures explicitly and handle large exports without silently creating incomplete packages.
@@ -95,7 +95,7 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 ### M8 — Public-release hardening
 - [ ] Add `docs/architecture.md`: explain how the monorepo fits together (Figma → Plugin → Composition JSON + assets → `@paster/core` → `@paster/react` → playground/consumer website). Cover package boundaries, responsibilities, and why assets are kept separate from geometry — keep this reasoning here rather than spreading it across code comments.
-- [ ] Add `docs/figma-guide.md`: a practical guide for designers and developers, distinct from the README's quick start — detailed instructions and troubleshooting belong here. Cover the required layer hierarchy, matching frame names, supported node types, image export formats, and how independent breakpoint layouts work. Document current limitations explicitly: nested groups, transforms, masks, Auto Layout, and any unsupported effects.
+- [ ] Add `docs/figma-guide.md`: a practical guide for designers and developers, distinct from the README's quick start — detailed instructions and troubleshooting belong here. Cover the required layer hierarchy, matching item names, supported node types, image export formats, and how independent breakpoint layouts work. Document current limitations explicitly: nested groups, transforms, masks, Auto Layout, and any unsupported effects.
 - [ ] Finalize license, contribution guidance, supported/unsupported Figma features, architecture and schema docs, examples, and screenshots with cleared rights.
 - [ ] Run all tests, builds, typechecking and accessibility checks; address actual findings.
 - [ ] Review repository contents for private/client files, credentials, and generated build artifacts; document plugin installation and known limitations.
@@ -107,18 +107,30 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 Move items into GitHub Issues when ready to implement; link the issue here rather than duplicating detailed tracking.
 
+### WordPress integration
+
+- [ ] Create an installable plugin in `frontend/wordpress/`.
+- [ ] Configure Gutenberg build tooling and local wp-env development.
+- [ ] Implement a block with composition ZIP import and preview.
+- [ ] Import assets into the WordPress Media Library.
+- [ ] Support replacing assets with existing media attachments.
+- [ ] Render compositions server-side using PHP and CSS.
+- [ ] Validate composition data and asset references server-side.
+- [ ] Test rendering parity against shared core fixtures.
+- [ ] Package a self-contained WordPress plugin ZIP for releases.
+
 ### Figma structure and fidelity
 - [ ] **Groups and nested compositions:** recursive node model, local coordinates, group opacity, clipping, and nested stacking contexts; define migration for schema v1.
 - [ ] Mixed children: text, SVG, video, and arbitrary elements beyond images.
 - [ ] Rotation, transforms, masks, constraints, and Auto Layout (including reverse stacking behavior).
-- [ ] Support layout-specific visibility and non-identical frame sets.
-- [ ] Persistent frame identity independent of layer names (e.g., Figma plugin data).
+- [ ] Support layout-specific visibility and non-identical item sets.
+- [ ] Persistent item identity independent of layer names (e.g., Figma plugin data).
 - [ ] Recover original image bytes, identify formats, deduplicate fills, translate crop modes/focal points, and assess production image quality.
-- [ ] Support per-asset export format selection (choosing PNG/JPG/SVG per frame rather than one format for the whole export).
-- [ ] Investigate automatic vector/raster format detection (e.g., default vector-only frames to SVG export).
+- [ ] Support per-asset export format selection (choosing PNG/JPG/SVG per item rather than one format for the whole export).
+- [ ] Investigate automatic vector/raster format detection (e.g., default vector-only items to SVG export).
 
 ### Motion and interaction
-- [ ] **Motion for layers:** entrance/exit transitions, per-frame timing/easing, stagger, depth/parallax, and breakpoint transitions. Define declarative data model only after prototyping.
+- [ ] **Motion for layers:** entrance/exit transitions, per-item timing/easing, stagger, depth/parallax, and breakpoint transitions. Define declarative data model only after prototyping.
 - [ ] Honor `prefers-reduced-motion` with meaningful static equivalents.
 - [ ] Interactive layers, pointer/focus behavior, and stacking for interactive controls.
 

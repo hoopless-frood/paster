@@ -1,0 +1,8 @@
+.root {
+  position: relative;
+  width: 100%;
+  /* Establishes a local stacking context so item z-indices never interact
+     with the surrounding page's, and clips items to the layout's canvas. */
+  isolation: isolate;
+  overflow: hidden;
+}

@@ -9,7 +9,7 @@ export interface Asset {
   alt?: string;
 }
 
-export interface Frame {
+export interface Item {
   /** Stable identity linking the same content across layouts. */
   id: string;
   name?: string;
@@ -27,11 +27,11 @@ export interface Layout {
   name: string;
   /** Viewport width (CSS px) at which this layout becomes active. Exactly one layout must be 0. */
   minWidth: number;
-  /** Design-space width of the layout frame. */
+  /** Design-space width of the layout. */
   width: number;
-  /** Design-space height of the layout frame. */
+  /** Design-space height of the layout. */
   height: number;
-  frames: Frame[];
+  items: Item[];
 }
 
 export interface Composition {
