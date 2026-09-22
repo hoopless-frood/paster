@@ -36,11 +36,11 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 **Suggested commit:** `chore: scaffold Paster monorepo`
 
 ### M2 — Versioned core schema and validation
-- [ ] Define TypeScript types for composition, viewport rules, layouts, frames, assets, and optional layout-specific asset references.
-- [ ] Specify a concrete JSON example and documented breakpoint selection rules, including one layout at min-width 0, unique thresholds, and deterministic ordering.
-- [ ] Validate positive container/frame dimensions, finite geometry, unique IDs, safe asset paths, and references; explicitly decide whether layout frame sets may differ (MVP: require matching IDs).
-- [ ] Add unit tests for valid/invalid data and breakpoint selection.
-- [ ] Add `docs/composition-format.md` as the canonical schema reference for anyone implementing another frontend renderer. Document the Composition → Layout → Frame model, the versioned JSON schema, breakpoint selection, coordinate system, stacking order, asset references, and validation rules. Include a complete JSON example and state which fields are required vs. optional.
+- [x] Define TypeScript types for composition, viewport rules, layouts, frames, assets, and optional layout-specific asset references.
+- [x] Specify a concrete JSON example and documented breakpoint selection rules, including one layout at min-width 0, unique thresholds, and deterministic ordering.
+- [x] Validate positive container/frame dimensions, finite geometry, unique IDs, safe asset paths, and references; explicitly decide whether layout frame sets may differ (MVP: require matching IDs).
+- [x] Add unit tests for valid/invalid data and breakpoint selection.
+- [x] Add `docs/composition-format.md` as the canonical schema reference for anyone implementing another frontend renderer. Document the Composition → Layout → Frame model, the versioned JSON schema, breakpoint selection, coordinate system, stacking order, asset references, and validation rules. Include a complete JSON example and state which fields are required vs. optional.
 
 **Accept:** core is importable without Figma/React; tests pass; sample validates.  
 **Suggested commit:** `feat(core): define and validate composition format`

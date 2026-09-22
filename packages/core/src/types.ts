@@ -1,0 +1,43 @@
+export const COMPOSITION_SCHEMA_VERSION = 1;
+
+export interface Asset {
+  id: string;
+  /** Relative, portable path within the export (or ZIP); never a URL or absolute path. */
+  path: string;
+  width: number;
+  height: number;
+  alt?: string;
+}
+
+export interface Frame {
+  /** Stable identity linking the same content across layouts. */
+  id: string;
+  name?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  /** Independent per-layout stacking order (0 = furthest back). */
+  zIndex: number;
+  assetId?: string;
+}
+
+export interface Layout {
+  id: string;
+  name: string;
+  /** Viewport width (CSS px) at which this layout becomes active. Exactly one layout must be 0. */
+  minWidth: number;
+  /** Design-space width of the layout frame. */
+  width: number;
+  /** Design-space height of the layout frame. */
+  height: number;
+  frames: Frame[];
+}
+
+export interface Composition {
+  version: typeof COMPOSITION_SCHEMA_VERSION;
+  id: string;
+  name: string;
+  layouts: Layout[];
+  assets: Asset[];
+}
