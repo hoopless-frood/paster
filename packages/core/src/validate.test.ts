@@ -65,15 +65,15 @@ describe("validateComposition", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("rejects mismatched item id sets across layouts", () => {
+  it("warns, but doesn't reject, mismatched item id sets across layouts", () => {
     const composition = clone();
     composition.layouts[1].items = composition.layouts[1].items.filter(
-      (item) => item.id !== "portrait",
+      (item) => item.id !== "image-b",
     );
     const result = validateComposition(composition);
-    expect(result.valid).toBe(false);
-    if (!result.valid) {
-      expect(result.errors.some((e) => e.includes("item id set must match"))).toBe(true);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.warnings.some((w) => w.includes("item ids differ"))).toBe(true);
     }
   });
 

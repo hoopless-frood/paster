@@ -5,7 +5,7 @@ import type { ScanSuccess } from "./figma-export";
 function scan(): ScanSuccess {
   return {
     ok: true,
-    compositionName: "Homepage",
+    compositionName: "Asymmetric Grid",
     warnings: [],
     layouts: [
       {
@@ -13,8 +13,8 @@ function scan(): ScanSuccess {
         width: 375,
         height: 812,
         items: [
-          { name: "hero", x: 0, y: 0, width: 375, height: 240, zIndex: 0 },
-          { name: "portrait", x: 24, y: 260, width: 327, height: 400, zIndex: 1 },
+          { name: "image-a", x: 0, y: 0, width: 375, height: 240, zIndex: 0 },
+          { name: "image-b", x: 24, y: 260, width: 327, height: 400, zIndex: 1 },
         ],
       },
       {
@@ -22,8 +22,8 @@ function scan(): ScanSuccess {
         width: 1440,
         height: 900,
         items: [
-          { name: "portrait", x: 80, y: 80, width: 480, height: 600, zIndex: 0 },
-          { name: "hero", x: 600, y: 0, width: 840, height: 900, zIndex: 1 },
+          { name: "image-b", x: 80, y: 80, width: 480, height: 600, zIndex: 0 },
+          { name: "image-a", x: 600, y: 0, width: 840, height: 900, zIndex: 1 },
         ],
       },
     ],
@@ -56,15 +56,15 @@ describe("assembleComposition", () => {
     }
   });
 
-  it("surfaces core validation errors for mismatched item sets across layouts", () => {
+  it("surfaces a core validation warning for mismatched item sets across layouts, without rejecting", () => {
     const withMismatch = scan();
     withMismatch.layouts[1].items = withMismatch.layouts[1].items.filter(
-      (item) => item.name !== "portrait",
+      (item) => item.name !== "image-b",
     );
     const result = assembleComposition(withMismatch, { Mobile: 0, Desktop: 1024 });
-    expect(result.valid).toBe(false);
-    if (!result.valid) {
-      expect(result.errors.some((e) => e.includes("item id set must match"))).toBe(true);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.warnings.some((w) => w.includes("item ids differ"))).toBe(true);
     }
   });
 });

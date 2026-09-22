@@ -1,11 +1,12 @@
 import { COMPOSITION_SCHEMA_VERSION, type Composition } from "./types.js";
 
 export type ValidationResult =
-  | { valid: true; composition: Composition }
+  | { valid: true; composition: Composition; warnings: string[] }
   | { valid: false; errors: string[] };
 
 export function validateComposition(input: unknown): ValidationResult {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   if (!isRecord(input)) {
     return { valid: false, errors: ["composition: must be an object"] };
@@ -21,13 +22,13 @@ export function validateComposition(input: unknown): ValidationResult {
   checkNonEmptyString(input.name, "composition.name", errors);
 
   const assetIds = checkAssets(input.assets, errors);
-  checkLayouts(input.layouts, assetIds, errors);
+  checkLayouts(input.layouts, assetIds, errors, warnings);
 
   if (errors.length > 0) {
     return { valid: false, errors };
   }
 
-  return { valid: true, composition: input as unknown as Composition };
+  return { valid: true, composition: input as unknown as Composition, warnings };
 }
 
 function checkAssets(value: unknown, errors: string[]): Set<string> {
@@ -72,7 +73,12 @@ function checkAssets(value: unknown, errors: string[]): Set<string> {
   return ids;
 }
 
-function checkLayouts(value: unknown, assetIds: Set<string>, errors: string[]): void {
+function checkLayouts(
+  value: unknown,
+  assetIds: Set<string>,
+  errors: string[],
+  warnings: string[],
+): void {
   if (!Array.isArray(value) || value.length === 0) {
     errors.push("composition.layouts: must be a non-empty array");
     return;
@@ -126,8 +132,8 @@ function checkLayouts(value: unknown, assetIds: Set<string>, errors: string[]): 
       if (referenceItemIds === null) {
         referenceItemIds = itemIds;
       } else if (!setsEqual(referenceItemIds, itemIds)) {
-        errors.push(
-          `${path}.items: item id set must match every other layout (MVP requires identical item ids across layouts)`,
+        warnings.push(
+          `${path}.items: item ids differ from another layout's — layouts can have different item counts, but an id shared across layouts is treated as the same item.`,
         );
       }
     }
