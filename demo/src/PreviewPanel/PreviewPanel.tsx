@@ -18,6 +18,11 @@ function allItemIds(composition: PreviewPanelProps["composition"]): Set<string> 
   return new Set(composition.layouts.flatMap((layout) => layout.items.map((item) => item.id)));
 }
 
+// Trims float noise (e.g. 19.999999998) without hiding real sub-pixel values.
+function formatNumber(value: number): string {
+  return String(Math.round(value * 10) / 10);
+}
+
 export function PreviewPanel({ composition }: PreviewPanelProps) {
   // Both default to (and keep tracking) the window's current width, so the
   // preview fills the screen and the slider can't go past it.
@@ -63,7 +68,22 @@ export function PreviewPanel({ composition }: PreviewPanelProps) {
           })
         }
       >
-        {isOutlined ? `${item.name ?? item.id} (${item.id})` : (item.name ?? item.id)}
+        {isOutlined ? (
+          <span className={styles.itemDetails}>
+            <span>
+              {item.name ?? item.id} ({item.id})
+            </span>
+            {item.assetId && <span className={styles.itemGeometry}>asset:{item.assetId}</span>}
+            <span className={styles.itemGeometry}>
+              x:{formatNumber(item.x)} y:{formatNumber(item.y)} z:{item.zIndex}
+            </span>
+            <span className={styles.itemGeometry}>
+              w:{formatNumber(item.width)} h:{formatNumber(item.height)}
+            </span>
+          </span>
+        ) : (
+          (item.name ?? item.id)
+        )}
       </button>
     );
   };
@@ -79,7 +99,7 @@ export function PreviewPanel({ composition }: PreviewPanelProps) {
 
       <div className={styles.widthGroup}>
         <label htmlFor={viewportInputId}>
-          Preview width: {viewportWidth}px ({activeLayout.name})
+          <span>Preview width: {viewportWidth}px</span> <span>({activeLayout.name})</span>
         </label>
 
         <Slider
