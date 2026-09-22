@@ -18,9 +18,13 @@ async function buildOnce() {
     logLevel: "silent",
   });
   const uiScript = uiBundle.outputFiles[0].text;
+  // Shared design tokens come first so ui.css's own rules can reference them.
+  const uiStyle = readFileSync("../tokens/tokens.css", "utf8") + "\n" + readFileSync("src/ui.css", "utf8");
 
   const template = readFileSync("src/ui.html", "utf8");
-  const html = template.replace("<!-- SCRIPT -->", `<script>\n${uiScript}\n</script>`);
+  const html = template
+    .replace("<!-- STYLE -->", `<style>\n${uiStyle}</style>`)
+    .replace("<!-- SCRIPT -->", `<script>\n${uiScript}\n</script>`);
   writeFileSync("dist/ui.html", html);
 
   await build({
