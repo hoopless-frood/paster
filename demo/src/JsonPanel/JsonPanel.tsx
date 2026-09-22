@@ -4,6 +4,7 @@ import { FileUploadButton } from "../FileUploadButton/FileUploadButton";
 import { JsonEditor } from "../JsonEditor/JsonEditor";
 import { MessageList } from "../MessageList/MessageList";
 import { importComposition } from "./import-composition";
+import { importZip } from "./import-zip";
 import type { JsonPanelProps } from "./JsonPanel.types";
 import styles from "./JsonPanel.module.css";
 
@@ -11,7 +12,7 @@ export type { JsonPanelProps } from "./JsonPanel.types";
 
 const VALIDATE_DEBOUNCE_MS = 400;
 
-export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonPanelProps) {
+export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsChange }: JsonPanelProps) {
   const [text, setText] = useState(() => JSON.stringify(sampleComposition, null, 2));
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -63,6 +64,26 @@ export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonP
     }
   }
 
+  async function handleZipSelected(file: File) {
+    setIsReadingFile(true);
+    try {
+      const result = await importZip(file);
+      if (result.ok) {
+        setErrors([]);
+        setWarnings(result.warnings);
+        setText(JSON.stringify(result.composition, null, 2));
+        onImportZip(result.composition, result.assetUrls);
+      } else {
+        setErrors(result.errors);
+        setWarnings([]);
+      }
+    } catch {
+      setErrors(["Couldn't read that ZIP — try again or use a different export."]);
+    } finally {
+      setIsReadingFile(false);
+    }
+  }
+
   return (
     <section className={styles.panel} aria-label="Composition JSON">
       <div className={styles.actions}>
@@ -75,6 +96,9 @@ export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonP
           onFileSelected={handleFileSelected}
         >
           Upload .json file
+        </FileUploadButton>
+        <FileUploadButton accept=".zip,application/zip" disabled={isReadingFile} onFileSelected={handleZipSelected}>
+          Upload .zip export
         </FileUploadButton>
       </div>
 

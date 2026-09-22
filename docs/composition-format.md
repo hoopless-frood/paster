@@ -204,6 +204,81 @@ on mobile (`zIndex: 0` vs. `1`) and in front of it on desktop. This exact
 composition is exported as `sampleComposition` from
 `@paster/core` and used in its test suite.
 
+## ZIP packaging
+
+The Figma plugin's **Export ZIP** mode packages a complete, portable export:
+
+```text
+export.zip
+├── composition.json
+└── images/
+    ├── mobile-image-a.png
+    ├── desktop-image-a.png
+    └── ...
+```
+
+- `composition.json` sits at the archive root and is exactly the JSON
+  described above.
+- Every `Asset.path` is a path *within the ZIP*, relative to its root (e.g.
+  `images/mobile-image-a.png`) — the same field used for a standalone,
+  images-supplied-separately JSON export.
+- One image is exported per (layout, item) pair, even when the same item id
+  is visually identical across layouts, so each layout can point at a
+  different rendered crop via its own `assetId`.
+- PNG, JPG, and SVG are all supported; the plugin's naming/collision rules
+  (deterministic, slugified `<layout>-<item>` stems, de-duplicated with a
+  numeric suffix) keep paths portable and unambiguous.
+
+### Importing a ZIP
+
+The demo playground's **Upload .zip export** parses the archive entirely in
+the browser (via [JSZip](https://stuk.github.io/jszip/), no upload to a
+server):
+
+1. `composition.json` is extracted and validated exactly like pasted JSON.
+2. For each `Asset` the validated composition references, the matching ZIP
+   entry is extracted and turned into an in-memory `blob:` URL.
+3. Only entries the composition actually references are ever read — since
+   `Asset.path` is already required to be a safe, traversal-free relative
+   path (see [Validation rules](#validation-rules) above) before it's used
+   to look up an archive entry, an unreferenced or maliciously-named entry
+   elsewhere in the ZIP is never extracted at all.
+4. Every asset format, including SVG, is rendered as an `<img src>` rather
+   than inserted as inline markup — a browser never executes scripts or
+   fetches external references from an SVG used as an image source, so this
+   holds regardless of what an untrusted export's SVG might contain.
+5. A missing referenced asset, an oversized upload, or a corrupt archive all
+   surface as explicit errors rather than a partial or silently-broken
+   import.
+
+Re-importing a JSON-only export, or hand-editing the JSON after a ZIP
+import, doesn't discard the images already loaded from that ZIP — only a
+*new* ZIP import replaces them (revoking the previous `blob:` URLs).
+
+### Manual QA checklist (Figma → ZIP → playground)
+
+Automated tests cover `importZip` against synthetic archives; the following
+needs a real Figma file and a real plugin export, and isn't automated:
+
+- [ ] Export a composition with at least two layouts as a ZIP; every layout's
+      images appear correctly when the playground's viewport slider crosses
+      into that layout.
+- [ ] Each item's image matches the source Figma layer exactly — no
+      unintended second crop, letterboxing, or stretch — at both a layout's
+      native size and other viewport widths.
+- [ ] Stacking order in the playground matches Figma's front-to-back order,
+      independently per layout.
+- [ ] An item that shares an id across layouts, but points at a *different*
+      `assetId` per layout, shows the right image for the active layout.
+- [ ] Export includes at least one SVG asset; it renders correctly and (open
+      devtools) never appears as an inline `<svg>` in the DOM, only an
+      `<img>`.
+- [ ] Uploading a ZIP that's missing a referenced image, isn't a ZIP at all,
+      or contains a corrupted `composition.json` each produce a clear error,
+      not a blank preview or a console exception.
+- [ ] Uploading a second ZIP after a first replaces its images cleanly (no
+      leftover images from the first one bleeding through).
+
 ## Non-goals (MVP)
 
 This schema does not yet support (see [PLAN.md](../PLAN.md)'s backlog):

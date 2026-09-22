@@ -83,3 +83,60 @@
   font-size: 0.85em;
   opacity: 0.85;
 }
+
+/* An item with a real, ZIP-imported image renders it directly rather than
+   the dashed-border placeholder — the tinted background/dashed border are
+   deliberately placeholder-only cues that a real image doesn't need. */
+.itemImageButton {
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 2px solid transparent;
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.itemImageButton:focus-visible {
+  outline: 2px solid var(--paster-color-magenta-haze);
+  outline-offset: 2px;
+}
+
+.itemImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter var(--paster-transition);
+}
+
+.itemImageButton:hover .itemImage {
+  filter: brightness(0.92);
+}
+
+.itemImageOutline {
+  border-color: var(--paster-color-magenta-haze);
+}
+
+/* Overlaid on top of the image rather than replacing it, with a fixed dark
+   scrim (not theme-reactive — same reasoning as the rest of this preview
+   area) so the text stays legible regardless of the underlying photo. */
+.itemImageDetails {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.15rem;
+  text-align: left;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: clamp(11px, 1.5vw, 16px);
+  font-weight: 600;
+}
