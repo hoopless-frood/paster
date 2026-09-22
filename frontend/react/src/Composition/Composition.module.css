@@ -1,8 +1,8 @@
 .root {
   position: relative;
   width: 100%;
-  /* Establishes a local stacking context so item z-indices never interact
-     with the surrounding page's, and clips items to the layout's canvas. */
+  aspect-ratio: var(--paster-layout-width) / var(--paster-layout-height);
+  /* Local stacking context, so item z-indices never leak into the page's. */
   isolation: isolate;
   overflow: hidden;
 }

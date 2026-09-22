@@ -32,11 +32,13 @@ describe("PasterComposition", () => {
 
     const root = container.firstElementChild as HTMLElement;
     expect(root.dataset.pasterLayout).toBe("mobile");
+    expect(root.style.getPropertyValue("--paster-layout-width")).toBe("375");
+    expect(root.style.getPropertyValue("--paster-layout-height")).toBe("812");
 
     // mobile layout: hero at x0,y0,w375 within a 375-wide layout
     const hero = itemWrapper(container, "hero");
-    expect(hero.style.left).toBe("0%");
-    expect(hero.style.width).toBe("100%");
+    expect(hero.style.getPropertyValue("--paster-item-left")).toBe("0%");
+    expect(hero.style.getPropertyValue("--paster-item-width")).toBe("100%");
   });
 
   it("switches layout when the viewportWidth prop crosses a breakpoint", () => {
@@ -66,15 +68,17 @@ describe("PasterComposition", () => {
     const { container, rerender } = render(
       <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,
     );
-    expect(Number(itemWrapper(container, "hero").style.zIndex)).toBeLessThan(
-      Number(itemWrapper(container, "portrait").style.zIndex),
+    const zIndexOf = (el: HTMLElement) => Number(el.style.getPropertyValue("--paster-item-z"));
+
+    expect(zIndexOf(itemWrapper(container, "hero"))).toBeLessThan(
+      zIndexOf(itemWrapper(container, "portrait")),
     );
 
     rerender(
       <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={1440} />,
     );
-    expect(Number(itemWrapper(container, "hero").style.zIndex)).toBeGreaterThan(
-      Number(itemWrapper(container, "portrait").style.zIndex),
+    expect(zIndexOf(itemWrapper(container, "hero"))).toBeGreaterThan(
+      zIndexOf(itemWrapper(container, "portrait")),
     );
   });
 

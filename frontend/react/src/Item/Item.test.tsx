@@ -22,11 +22,11 @@ describe("PasterItem", () => {
     );
 
     const root = container.firstElementChild as HTMLElement;
-    expect(root.style.left).toBe("25%");
-    expect(root.style.top).toBe("25%");
-    expect(root.style.width).toBe("50%");
-    expect(root.style.height).toBe("50%");
-    expect(root.style.zIndex).toBe("3");
+    expect(root.style.getPropertyValue("--paster-item-left")).toBe("25%");
+    expect(root.style.getPropertyValue("--paster-item-top")).toBe("25%");
+    expect(root.style.getPropertyValue("--paster-item-width")).toBe("50%");
+    expect(root.style.getPropertyValue("--paster-item-height")).toBe("50%");
+    expect(root.style.getPropertyValue("--paster-item-z")).toBe("3");
   });
 
   it("renders whatever resolveContent returns, and passes it the item/context", () => {

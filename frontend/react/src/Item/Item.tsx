@@ -1,13 +1,9 @@
-import type { Asset, Composition, Item, Layout } from "@paster/core";
+import type { CSSProperties } from "react";
 import { computeItemStyle } from "../item-style";
-import type { ItemContentResolver } from "../Composition/Composition";
+import type { PasterItemProps } from "./Item.types";
 import styles from "./Item.module.css";
 
-export interface PasterItemProps {
-  item: Item;
-  context: { layout: Layout; asset: Asset | undefined; composition: Composition };
-  resolveContent: ItemContentResolver;
-}
+export type { ItemContentResolver, PasterItemProps } from "./Item.types";
 
 /** A single positioned item within a layout — currently an image or SVG, resolved entirely by the caller. */
 export function PasterItem({ item, context, resolveContent }: PasterItemProps) {
@@ -16,13 +12,15 @@ export function PasterItem({ item, context, resolveContent }: PasterItemProps) {
   return (
     <div
       className={styles.item}
-      style={{
-        left: itemStyle.left,
-        top: itemStyle.top,
-        width: itemStyle.width,
-        height: itemStyle.height,
-        zIndex: itemStyle.zIndex,
-      }}
+      style={
+        {
+          "--paster-item-left": itemStyle.left,
+          "--paster-item-top": itemStyle.top,
+          "--paster-item-width": itemStyle.width,
+          "--paster-item-height": itemStyle.height,
+          "--paster-item-z": itemStyle.zIndex,
+        } as CSSProperties
+      }
     >
       {resolveContent(item, context)}
     </div>

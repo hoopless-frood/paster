@@ -1,31 +1,12 @@
-import { selectLayout, type Asset, type Composition, type Item, type Layout } from "@paster/core";
-import { useMemo, type ReactNode } from "react";
+import { selectLayout } from "@paster/core";
+import { useMemo, type CSSProperties } from "react";
 import { PasterItem } from "../Item/Item";
 import { useViewportWidth } from "./useViewportWidth";
+import type { PasterCompositionProps } from "./Composition.types";
 import styles from "./Composition.module.css";
 
-/**
- * Resolves what an item renders. Paster never invents content or alt text —
- * this is entirely the consumer's decision, given the item, its active
- * layout, and its resolved asset (if `item.assetId` is set and the asset
- * exists in `composition.assets`).
- */
-export type ItemContentResolver = (
-  item: Item,
-  context: { layout: Layout; asset: Asset | undefined; composition: Composition },
-) => ReactNode;
-
-export interface PasterCompositionProps {
-  composition: Composition;
-  resolveContent: ItemContentResolver;
-  /**
-   * Viewport width (px) to render at. Omit to track the real browser
-   * viewport reactively; pass it explicitly for SSR determinism, tests, or
-   * a fixed-size embed. See useViewportWidth for the SSR fallback behavior.
-   */
-  viewportWidth?: number;
-  className?: string;
-}
+export type { ItemContentResolver } from "../Item/Item";
+export type { PasterCompositionProps } from "./Composition.types";
 
 export function PasterComposition({
   composition,
@@ -44,7 +25,12 @@ export function PasterComposition({
   return (
     <div
       className={className ? `${styles.root} ${className}` : styles.root}
-      style={{ aspectRatio: `${layout.width} / ${layout.height}` }}
+      style={
+        {
+          "--paster-layout-width": layout.width,
+          "--paster-layout-height": layout.height,
+        } as CSSProperties
+      }
       data-paster-layout={layout.id}
     >
       {layout.items.map((item) => (
