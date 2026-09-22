@@ -1,4 +1,4 @@
-import { COMPOSITION_SCHEMA_VERSION, type Composition } from "./types";
+import { COMPOSITION_SCHEMA_VERSION, type Composition } from "./types.js";
 
 export type ValidationResult =
   | { valid: true; composition: Composition }

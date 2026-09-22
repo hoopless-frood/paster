@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { selectLayout } from "./breakpoints";
-import { sampleComposition } from "./sample";
-import type { Composition } from "./types";
+import { selectLayout } from "./breakpoints.js";
+import { sampleComposition } from "./sample.js";
+import type { Composition } from "./types.js";
 
 describe("selectLayout", () => {
   it("selects the base (minWidth 0) layout below the next threshold", () => {

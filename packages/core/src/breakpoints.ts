@@ -1,4 +1,4 @@
-import type { Composition, Layout } from "./types";
+import type { Composition, Layout } from "./types.js";
 
 /**
  * Mobile-first breakpoint selection: the active layout is the one with the

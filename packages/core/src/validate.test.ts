@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { sampleComposition } from "./sample";
-import { validateComposition } from "./validate";
+import { sampleComposition } from "./sample.js";
+import { validateComposition } from "./validate.js";
 
 function clone(): typeof sampleComposition {
   return structuredClone(sampleComposition);

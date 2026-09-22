@@ -1,6 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // Overrides the base's bundler-oriented resolution: @paster/core is the
+    // one package meant to run without a bundler, so its build output must
+    // be plain-Node-ESM-loadable — which requires explicit .js extensions
+    // on relative imports, and NodeNext is what enforces/expects that.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "noEmit": true
   },
   "include": ["src"]
