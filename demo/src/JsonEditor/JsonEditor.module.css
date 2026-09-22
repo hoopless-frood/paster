@@ -1,0 +1,15 @@
+.editor {
+  box-sizing: border-box;
+  width: 100%;
+  /* Unlike a <textarea>, this wrapper is a plain div: its content's height
+     otherwise feeds back into flex-basis: auto, so without flex-shrink it
+     would refuse to shrink below content height and overflow the page
+     instead of filling available space. Shrinking down to min-height lets
+     it fill the remaining viewport and scroll internally past that. */
+  flex: 1 1 auto;
+  min-height: 240px;
+  /* CodeMirror has its own internal scroller, so the wrapper only needs to
+     clip (required for resize to apply) rather than scroll itself. */
+  overflow: hidden;
+  resize: vertical;
+}

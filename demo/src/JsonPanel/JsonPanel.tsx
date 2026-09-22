@@ -1,8 +1,8 @@
 import { useEffect, useId, useState } from "react";
 import { Button } from "../Button/Button";
 import { FileUploadButton } from "../FileUploadButton/FileUploadButton";
+import { JsonEditor } from "../JsonEditor/JsonEditor";
 import { MessageList } from "../MessageList/MessageList";
-import { TextArea } from "../TextArea/TextArea";
 import { importComposition } from "./import-composition";
 import type { JsonPanelProps } from "./JsonPanel.types";
 import styles from "./JsonPanel.module.css";
@@ -89,13 +89,7 @@ export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonP
 
       <div className={styles.jsonGroup}>
         <label htmlFor={textareaId}>Current JSON:</label>
-        <TextArea
-          id={textareaId}
-          className={styles.jsonInput}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          spellCheck={false}
-        />
+        <JsonEditor id={textareaId} value={text} onChange={setText} spellCheck={false} />
       </div>
     </section>
   );

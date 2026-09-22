@@ -1,16 +1,20 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: var(--section-space);
-  margin: var(--section-space) 0;
-  padding: 0 var(--edge-space);
+  margin: var(--section-space) 0 0;
   flex: 1 1 auto;
   min-height: 0;
+
+  & > * + * {
+    margin-top: var(--section-space);
+  }
 }
 
 .actions {
   display: flex;
-  gap: 0.5rem;
+  gap: max(10px, calc(var(--edge-space) / 1.33));
+  margin: var(--section-space) 0;
+  padding: 0 var(--edge-space);
 }
 
 .status {
@@ -21,13 +25,11 @@
 .jsonGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   flex: 1 1 auto;
   min-height: 0;
-}
 
-.jsonInput {
-  flex: 1 0 auto;
-  min-height: 240px;
-  resize: vertical;
+  & label {
+    padding: 0 var(--edge-space);
+    margin-bottom: var(--section-space);
+  }
 }
