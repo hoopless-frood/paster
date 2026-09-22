@@ -31,7 +31,13 @@
   margin-top: var(--section-space);
 }
 
+/* A <button>, not a <div>: clicking an item toggles its own outline/ID
+   (see PreviewPanel.tsx), so it needs to be a real, keyboard-operable
+   control — these resets just keep it looking like the plain box it was. */
 .itemPlaceholder {
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -42,8 +48,19 @@
   padding: 0.25rem;
   background: color-mix(in srgb, var(--paster-color-brand) 35%, white);
   border: 1px dashed var(--paster-color-brand-dark);
+  border-radius: 0;
   color: #333;
   font-size: 0.75rem;
+  transition: background-color var(--paster-transition);
+}
+
+.itemPlaceholder:hover {
+  background: color-mix(in srgb, var(--paster-color-brand) 55%, white);
+}
+
+.itemPlaceholder:focus-visible {
+  outline: 2px solid var(--paster-color-brand-dark);
+  outline-offset: 2px;
 }
 
 .itemOutline {
