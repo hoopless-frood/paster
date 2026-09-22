@@ -1,0 +1,27 @@
+{
+  "name": "paster",
+  "version": "1.0.0",
+  "author": "Anna Pearson",
+  "license": "Apache-2.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r run build",
+    "build:plugin": "pnpm --filter \"@paster/plugin...\" run build",
+    "dev:plugin": "pnpm --filter @paster/plugin dev",
+    "dev": "pnpm --filter @paster/demo dev",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "keywords": [],
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.5.1",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.5.1",
+  "type": "module"
+}

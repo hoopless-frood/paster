@@ -1,0 +1,7 @@
+packages:
+  - plugin
+  - packages/*
+  - frontend/*
+  - demo
+allowBuilds:
+  esbuild: true

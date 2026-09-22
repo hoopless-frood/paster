@@ -1,0 +1,44 @@
+# Figma Documentation References
+
+Official Figma documentation relevant to developing Paster.
+
+Paster uses the **Figma Plugin API**, not the REST API. The plugin runs inside Figma to inspect compositions, extract geometry, and export assets.
+
+## Plugin setup
+
+- [Plugin API introduction](https://developers.figma.com/docs/plugins/) — Overview of the plugin environment.
+- [Plugin quickstart](https://developers.figma.com/docs/plugins/plugin-quickstart-guide/) — Local installation and development.
+- [Plugin manifest](https://developers.figma.com/docs/plugins/manifest/) — Entry points, configuration, and permissions.
+- [How plugins run](https://developers.figma.com/docs/plugins/how-plugins-run/) — Plugin sandbox and UI architecture.
+
+## Document structure and geometry
+
+- [Accessing the document](https://developers.figma.com/docs/plugins/accessing-document/) — Read selections and traverse document nodes.
+- [FrameNode](https://developers.figma.com/docs/plugins/api/FrameNode/) — Frame properties and dimensions.
+- [Node properties](https://developers.figma.com/docs/plugins/api/node-properties/) — Shared geometry, visibility, and transforms.
+- [Children](https://developers.figma.com/docs/plugins/api/properties/nodes-children/) — Traverse child nodes and determine stacking order.
+- [itemReverseZIndex](https://developers.figma.com/docs/plugins/api/properties/nodes-itemreversezindex/) — Reversed stacking in Auto Layout.
+
+Paster uses bounding boxes to calculate frame coordinates relative to each layout's origin. Child order determines the exported z-index.
+
+## Images and SVG
+
+- [exportAsync](https://developers.figma.com/docs/plugins/api/properties/nodes-exportasync/) — Export rendered nodes as PNG, JPG, or SVG.
+- [ExportSettings](https://developers.figma.com/docs/plugins/api/ExportSettings/) — Configure image formats and export options.
+- [Image API](https://developers.figma.com/docs/plugins/api/Image/) — Retrieve original image bytes and dimensions.
+
+Rendered-node exports preserve the visual appearance of a Figma frame. Original image extraction is a separate workflow.
+
+## Plugin UI and messaging
+
+- [Creating a UI](https://developers.figma.com/docs/plugins/creating-ui/) — Build the plugin interface.
+- [figma.ui](https://developers.figma.com/docs/plugins/api/figma-ui/) — Communicate between plugin code and the UI.
+- [postMessage](https://developers.figma.com/docs/plugins/api/properties/figma-ui-postmessage/) — Transfer composition data and exported assets.
+
+## Future development
+
+- [Plugin data](https://developers.figma.com/docs/plugins/api/properties/nodes-setplugindata/) — Store persistent frame identifiers.
+- [GroupNode](https://developers.figma.com/docs/plugins/api/GroupNode/) — Support nested compositions and groups.
+- [Transform](https://developers.figma.com/docs/plugins/api/Transform/) — Handle rotation and transformation matrices.
+
+Refer to [PLAN.md](../PLAN.md) for implementation milestones and the feature backlog.

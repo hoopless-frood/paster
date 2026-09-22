@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Paster</title>
+    <style>
+      body {
+        font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 16px;
+        color: #111;
+      }
+      button {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Paster's export tooling isn't implemented yet. This scaffold only
+      confirms the plugin loads and can talk to <code>@paster/core</code>.
+    </p>
+    <p id="status">Waiting for core schema version&hellip;</p>
+    <button id="close" type="button">Close</button>
+    <script>
+      var status = document.getElementById("status");
+      window.onmessage = function (event) {
+        var message = event.data.pluginMessage;
+        if (message && message.type === "core-schema-version") {
+          status.textContent = "Loaded @paster/core schema v" + message.version + ".";
+        }
+      };
+      document.getElementById("close").addEventListener("click", function () {
+        parent.postMessage({ pluginMessage: {} }, "*");
+      });
+    </script>
+  </body>
+</html>

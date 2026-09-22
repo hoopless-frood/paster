@@ -1,0 +1,1 @@
+export { PasterPlaceholder } from "./PasterPlaceholder";
