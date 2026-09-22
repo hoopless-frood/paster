@@ -5,5 +5,11 @@
     "types": ["@figma/plugin-typings"],
     "noEmit": true
   },
-  "include": ["src"]
+  "include": [
+    "src/code.ts",
+    "src/figma-export.ts",
+    "src/assemble.ts",
+    "src/assemble.test.ts",
+    "src/protocol.ts"
+  ]
 }

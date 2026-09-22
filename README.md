@@ -6,7 +6,7 @@ It extracts frame geometry and stacking order from Figma, eliminating manual coo
 
 ## Status
 
-Paster is a new, public, work-in-progress project. The workspace now installs, builds, and typechecks, and the demo runs a placeholder shell — but **there is no working Figma exporter, schema validation, renderer, or playground content yet**. The Figma workflow and playground sections below describe the intended design, not current functionality. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
+Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; and the Figma plugin can scan a selection and export validated, geometry-only composition JSON. **There is no image export, renderer, or playground yet** — you can produce a composition JSON file today, but nothing in this repo renders it. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
 
 ## How it works
 
@@ -39,7 +39,7 @@ pnpm run build:plugin # build just the plugin and its @paster/core dependency
 pnpm run dev:plugin   # rebuild the plugin on change (run `build` at least once first)
 ```
 
-The demo currently renders only a placeholder shell. The rest of this section — the Figma plugin workflow — describes the intended design; it isn't functional yet (see [Status](#status)).
+The demo currently renders only a placeholder shell — the "Preview" and "Implement" steps below aren't functional yet (see [Status](#status)). The plugin steps that follow are real: scanning a selection and exporting geometry-only JSON works today.
 
 ### Build the plugin
 
@@ -58,8 +58,6 @@ Using the Figma desktop app:
 3. Select `plugin/manifest.json` from your local repository.
 
 You only need to import the manifest once. After making code changes, rebuild and rerun the plugin.
-
-`plugin/manifest.json` is currently an empty placeholder. Figma generates the real file (including the plugin's `id`) the first time you use **Plugins → Development → New Plugin...** in the desktop app — that step, and wiring the generated manifest to this build's `plugin/dist/code.js` and `plugin/dist/ui.html`, is planned for a later milestone (see [PLAN.md](./PLAN.md)); the plugin can't be imported into Figma until then.
 
 ### Prepare your composition
 
@@ -83,11 +81,15 @@ Homepage
 - Matching layer names identify the same content across layouts.
 - Position, size, and stacking order can differ between breakpoints.
 
-### Export and preview
+### Export
 
-Select the parent composition frame and run **Plugins → Development → Paster**.
+1. Select the parent composition frame and run **Plugins → Development → Paster**. The plugin scans the selection and lists each layout it found.
+2. Enter each layout's breakpoint minimum width, in px — Paster never guesses this from a layout's own pixel width, you always set it explicitly.
+3. Click **Export JSON**. The validated composition JSON appears in the text box, ready to copy.
 
-Export the composition as JSON or include rendered images in a ZIP. Import the result into the playground to inspect the layout at different viewport sizes.
+If the plugin reports a problem instead (wrong selection, rotated layers, Auto Layout, groups, mismatched layer names across layouts, etc.) — it lists every problem it finds, not just the first — fix it in Figma and click **Refresh selection** to re-scan.
+
+There's no image export or ZIP packaging yet, and nothing in this repo can render or preview the exported JSON yet — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means.
 
 ## Project structure
 

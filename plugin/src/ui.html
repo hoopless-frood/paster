@@ -9,29 +9,54 @@
         margin: 16px;
         color: #111;
       }
+      h1 {
+        font-size: 13px;
+        margin: 0 0 8px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .row input {
+        width: 80px;
+      }
       button {
+        margin-top: 4px;
+        margin-right: 8px;
+      }
+      textarea {
+        box-sizing: border-box;
+        width: 100%;
+        height: 160px;
         margin-top: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+      }
+      #errors {
+        color: #b00020;
+        padding-left: 18px;
+        margin: 8px 0;
+      }
+      #errors:empty {
+        margin: 0;
       }
     </style>
   </head>
   <body>
-    <p>
-      Paster's export tooling isn't implemented yet. This scaffold only
-      confirms the plugin loads and can talk to <code>@paster/core</code>.
-    </p>
-    <p id="status">Waiting for core schema version&hellip;</p>
-    <button id="close" type="button">Close</button>
-    <script>
-      var status = document.getElementById("status");
-      window.onmessage = function (event) {
-        var message = event.data.pluginMessage;
-        if (message && message.type === "core-schema-version") {
-          status.textContent = "Loaded @paster/core schema v" + message.version + ".";
-        }
-      };
-      document.getElementById("close").addEventListener("click", function () {
-        parent.postMessage({ pluginMessage: {} }, "*");
-      });
-    </script>
+    <h1>Paster</h1>
+    <p id="status">Scanning selection&hellip;</p>
+    <div id="layouts"></div>
+    <ul id="errors"></ul>
+    <button id="refresh" type="button">Refresh selection</button>
+    <button id="export" type="button" disabled>Export JSON</button>
+    <textarea
+      id="output"
+      readonly
+      placeholder="Exported JSON will appear here — copy it from this box."
+    ></textarea>
+    <!-- SCRIPT -->
   </body>
 </html>

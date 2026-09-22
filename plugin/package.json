@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node build.mjs",
     "dev": "node build.mjs --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.ui.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@paster/core": "workspace:*"
@@ -13,6 +14,7 @@
   "devDependencies": {
     "@figma/plugin-typings": "^1.138.0",
     "esbuild": "^0.28.2",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.1"
   }
 }

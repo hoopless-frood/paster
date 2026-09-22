@@ -46,7 +46,7 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 **Suggested commit:** `feat(core): define and validate composition format`
 
 ### M3 — Figma geometry exporter
-- [ ] Create/register a local Figma Design plugin with an actual generated manifest ID (never invent one).
+- [x] Create/register a local Figma Design plugin with an actual generated manifest ID (never invent one).
 - [ ] Read one selected parent frame; discover direct child frames as layouts and obtain explicit breakpoint thresholds (e.g., plugin settings/UI, not guessed from frame widths).
 - [ ] Extract relative `x/y/width/height`, unique IDs, independent `zIndex` from back-to-front child order; skip hidden layers, reject unsupported rotation/Auto Layout/complex nesting clearly.
 - [ ] Validate against core; expose a copyable geometry-only JSON export and actionable error messages.
