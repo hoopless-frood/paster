@@ -31,6 +31,8 @@ export interface Layout {
   width: number;
   /** Design-space height of the layout. */
   height: number;
+  /** CSS color (e.g. a hex or rgba() string) from the layout frame's own Figma fill. Independent per layout, like everything else here. Omitted when the source frame has no solid fill. */
+  backgroundColor?: string;
   items: Item[];
 }
 

@@ -56,6 +56,17 @@ describe("assembleComposition", () => {
     }
   });
 
+  it("propagates a layout's backgroundColor into the assembled composition", () => {
+    const withBackground = scan();
+    withBackground.layouts[0].backgroundColor = "#f5f1ea";
+    const result = assembleComposition(withBackground, { Mobile: 0, Desktop: 1024 });
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.composition.layouts[0].backgroundColor).toBe("#f5f1ea");
+      expect(result.composition.layouts[1].backgroundColor).toBeUndefined();
+    }
+  });
+
   it("surfaces a core validation warning for mismatched item sets across layouts, without rejecting", () => {
     const withMismatch = scan();
     withMismatch.layouts[1].items = withMismatch.layouts[1].items.filter(

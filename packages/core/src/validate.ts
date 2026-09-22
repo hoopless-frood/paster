@@ -127,6 +127,10 @@ function checkLayouts(
     checkPositiveFiniteNumber(layout.width, `${path}.width`, errors);
     checkPositiveFiniteNumber(layout.height, `${path}.height`, errors);
 
+    if (layout.backgroundColor !== undefined && typeof layout.backgroundColor !== "string") {
+      errors.push(`${path}.backgroundColor: must be a string when present`);
+    }
+
     const itemIds = checkItems(layout.items, assetIds, path, errors);
     if (itemIds) {
       if (referenceItemIds === null) {

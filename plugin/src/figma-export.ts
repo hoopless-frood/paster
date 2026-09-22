@@ -11,6 +11,8 @@ export interface ScannedLayout {
   name: string;
   width: number;
   height: number;
+  /** CSS color from the layout frame's own topmost visible solid fill. Omitted when there's no solid fill (mixed, gradient, image, or none). */
+  backgroundColor?: string;
   items: ScannedItem[];
 }
 
@@ -146,7 +148,13 @@ export function scanSelection(): ScanOutcome {
     }
 
     layoutNames.add(layoutNode.name);
-    layouts.push({ name: layoutNode.name, width: layoutNode.width, height: layoutNode.height, items });
+    layouts.push({
+      name: layoutNode.name,
+      width: layoutNode.width,
+      height: layoutNode.height,
+      backgroundColor: extractBackgroundColor(layoutNode),
+      items,
+    });
   }
 
   if (layouts.length === 0) {
@@ -154,6 +162,39 @@ export function scanSelection(): ScanOutcome {
   }
 
   return { ok: true, compositionName: parent.name, layouts, warnings };
+}
+
+/**
+ * The layout frame's topmost visible fill, if it's a plain solid color.
+ * Figma paints render bottom-to-top, so the last visible entry in `fills`
+ * is what's actually shown; a gradient/image on top, or a mixed/empty fill,
+ * has no single CSS color to report, so this omits it rather than guess.
+ */
+function extractBackgroundColor(node: FrameNode): string | undefined {
+  const fills = node.fills;
+  if (fills === figma.mixed || !Array.isArray(fills)) {
+    return undefined;
+  }
+
+  const visibleFills = fills.filter((fill) => fill.visible !== false);
+  const topFill = visibleFills[visibleFills.length - 1];
+  if (!topFill || topFill.type !== "SOLID") {
+    return undefined;
+  }
+
+  return solidPaintToCss(topFill);
+}
+
+function solidPaintToCss(fill: SolidPaint): string {
+  const { r, g, b } = fill.color;
+  const opacity = fill.opacity ?? 1;
+  const toByte = (channel: number) => Math.round(channel * 255);
+  const toHex = (channel: number) => toByte(channel).toString(16).padStart(2, "0");
+
+  if (opacity >= 1) {
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+  return `rgba(${toByte(r)}, ${toByte(g)}, ${toByte(b)}, ${Number(opacity.toFixed(3))})`;
 }
 
 function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem[] {

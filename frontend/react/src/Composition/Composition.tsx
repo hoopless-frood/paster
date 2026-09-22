@@ -29,6 +29,7 @@ export function PasterComposition({
         {
           "--paster-layout-width": layout.width,
           "--paster-layout-height": layout.height,
+          "--paster-layout-background": layout.backgroundColor ?? "transparent",
         } as CSSProperties
       }
       data-paster-layout={layout.id}

@@ -58,6 +58,7 @@ interface Layout {
   minWidth: number; // viewport width (CSS px) this layout activates at
   width: number;    // design-space width of the layout
   height: number;   // design-space height of the layout
+  backgroundColor?: string; // CSS color from the layout frame's own Figma fill
   items: Item[];
 }
 
@@ -86,7 +87,7 @@ interface Asset {
 | Type          | Required fields                                        | Optional fields    |
 | ------------- | -------------------------------------------------------- | ------------------- |
 | `Composition` | `version`, `id`, `name`, `layouts`, `assets`             | —                    |
-| `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `items`      | —                    |
+| `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `items`      | `backgroundColor`    |
 | `Item`        | `id`, `x`, `y`, `width`, `height`, `zIndex`               | `name`, `assetId`   |
 | `Asset`       | `id`, `path`, `width`, `height`                           | `alt`                |
 
@@ -135,9 +136,6 @@ fields above:
   greater than 0; `Item.x`/`y` must be finite numbers (may be negative).
 - `Item.zIndex` must be a finite, non-negative integer, unique within its
   layout.
-- Every layout must have identical item `id` sets (MVP requires matching
-  item identity across all layouts — layout-specific visibility/item sets
-  are backlog, not supported yet).
 - `Item.id`, `Layout.id`, `Composition.id`, and `Asset.id` must each be
   unique within their scope.
 - `Item.assetId`, when present, must reference an existing `Asset.id`.
@@ -145,8 +143,13 @@ fields above:
   `\`, no `..` path segments, no URL scheme (`http://`, `file://`, etc.), and
   no Windows drive prefix.
 
-`validateComposition` returns `{ valid: true, composition }` or
-`{ valid: false, errors: string[] }` — it never throws, so callers (the
+Layouts don't need identical item `id` sets — a layout can have more or
+fewer items than another. An id that *is* shared across layouts is still
+treated as the same item everywhere, so mismatched sets produce a
+non-blocking warning rather than an error, in case it wasn't intentional.
+
+`validateComposition` returns `{ valid: true, composition, warnings: string[] }`
+or `{ valid: false, errors: string[] }` — it never throws, so callers (the
 playground's import UI, in particular) can show every problem with the input
 rather than just the first one.
 
@@ -169,6 +172,7 @@ rather than just the first one.
       "minWidth": 0,
       "width": 375,
       "height": 812,
+      "backgroundColor": "#f5f1ea",
       "items": [
         { "id": "image-a", "x": 20, "y": 40, "width": 335, "height": 280, "zIndex": 1, "assetId": "image-a-asset" },
         { "id": "image-b", "x": 110, "y": 360, "width": 245, "height": 200, "zIndex": 0, "assetId": "image-b-asset" },
@@ -181,6 +185,7 @@ rather than just the first one.
       "minWidth": 1024,
       "width": 1440,
       "height": 900,
+      "backgroundColor": "#eae6e0",
       "items": [
         { "id": "image-a", "x": 80, "y": 80, "width": 680, "height": 500, "zIndex": 0, "assetId": "image-a-asset" },
         { "id": "image-b", "x": 860, "y": 200, "width": 500, "height": 340, "zIndex": 1, "assetId": "image-b-asset" },

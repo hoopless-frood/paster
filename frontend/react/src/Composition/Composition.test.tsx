@@ -41,6 +41,34 @@ describe("PasterComposition", () => {
     expect(parseFloat(imageA.style.getPropertyValue("--paster-item-width"))).toBeCloseTo((335 / 375) * 100);
   });
 
+  it("applies each layout's own backgroundColor as a CSS custom property", () => {
+    const { container, rerender } = render(
+      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.getPropertyValue("--paster-layout-background")).toBe(
+      sampleComposition.layouts[0].backgroundColor,
+    );
+
+    rerender(
+      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={1440} />,
+    );
+    const desktopRoot = container.firstElementChild as HTMLElement;
+    expect(desktopRoot.style.getPropertyValue("--paster-layout-background")).toBe(
+      sampleComposition.layouts[1].backgroundColor,
+    );
+  });
+
+  it("falls back to transparent when a layout has no backgroundColor", () => {
+    const composition = structuredClone(sampleComposition);
+    delete composition.layouts[0].backgroundColor;
+    const { container } = render(
+      <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={320} />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.getPropertyValue("--paster-layout-background")).toBe("transparent");
+  });
+
   it("switches layout when the viewportWidth prop crosses a breakpoint", () => {
     const { container, rerender } = render(
       <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,

@@ -58,6 +58,24 @@ describe("validateComposition", () => {
     }
   });
 
+  it("rejects a non-string layout backgroundColor", () => {
+    const composition = clone();
+    // @ts-expect-error intentionally invalid for the test
+    composition.layouts[0].backgroundColor = 123;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.errors.some((e) => e.includes("backgroundColor"))).toBe(true);
+    }
+  });
+
+  it("accepts a layout with no backgroundColor at all", () => {
+    const composition = clone();
+    delete composition.layouts[0].backgroundColor;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
   it("rejects non-finite geometry", () => {
     const composition = clone();
     composition.layouts[0].items[0].x = Number.POSITIVE_INFINITY;

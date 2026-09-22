@@ -34,6 +34,7 @@ export function assembleComposition(
       minWidth: minWidths[layout.name],
       width: layout.width,
       height: layout.height,
+      backgroundColor: layout.backgroundColor,
       items: layout.items.map((item) => ({
         id: item.name,
         name: item.name,

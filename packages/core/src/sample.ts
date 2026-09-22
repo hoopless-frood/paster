@@ -18,6 +18,7 @@ export const sampleComposition: Composition = {
       minWidth: 0,
       width: 375,
       height: 812,
+      backgroundColor: "#f5f1ea",
       items: [
         { id: "image-a", x: 20, y: 40, width: 335, height: 280, zIndex: 1, assetId: "image-a-asset" },
         { id: "image-b", x: 110, y: 360, width: 245, height: 200, zIndex: 0, assetId: "image-b-asset" },
@@ -30,6 +31,7 @@ export const sampleComposition: Composition = {
       minWidth: 1024,
       width: 1440,
       height: 900,
+      backgroundColor: "#eae6e0",
       items: [
         { id: "image-a", x: 80, y: 80, width: 680, height: 500, zIndex: 0, assetId: "image-a-asset" },
         { id: "image-b", x: 860, y: 200, width: 500, height: 340, zIndex: 1, assetId: "image-b-asset" },
