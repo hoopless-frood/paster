@@ -94,7 +94,9 @@ There's no image export or ZIP packaging yet, so the exported JSON's `assets` ar
 
 ### Preview
 
-Run `pnpm run dev` and open the demo in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON (e.g. copied from the plugin's **Export JSON** step) to preview it instead. Invalid JSON or a composition that fails schema validation shows every problem found, without losing your last valid preview.
+A hosted copy of the demo is live at [paster.annapearson.dev](https://paster.annapearson.dev/) — no local setup needed to try it.
+
+To run it yourself, run `pnpm run dev` and open the demo in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON (e.g. copied from the plugin's **Export JSON** step) to preview it instead. Invalid JSON or a composition that fails schema validation shows every problem found, without losing your last valid preview.
 
 - **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width; the exact breakpoint and design-space dimensions are shown alongside the preview.
 - **Show item outlines and IDs** — overlay each item's bounds and identity, useful for checking geometry against the source Figma file.

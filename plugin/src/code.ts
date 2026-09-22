@@ -1,4 +1,4 @@
-import { assembleComposition } from "./assemble";
+import { assembleComposition, attachImages } from "./assemble";
 import { scanSelection } from "./figma-export";
 import type { MainToUiMessage, UiToMainMessage } from "./protocol";
 import { suggestMinWidths } from "./suggest-min-width";
@@ -31,7 +31,7 @@ function handleScan(): void {
   });
 }
 
-function handleExport(minWidths: Record<string, number>): void {
+async function handleExport(message: Extract<UiToMainMessage, { type: "export" }>): Promise<void> {
   // Re-scan rather than reuse the last scan result, so edits made after the
   // last "Refresh" (moving/resizing/reordering layers) are reflected.
   const result = scanSelection();
@@ -41,17 +41,38 @@ function handleExport(minWidths: Record<string, number>): void {
     return;
   }
 
-  const validation = assembleComposition(result, minWidths);
+  const validation = assembleComposition(result, message.minWidths);
 
   if (!validation.valid) {
     postToUi({ type: "export-result", ok: false, errors: validation.errors });
     return;
   }
 
+  if (message.mode === "json") {
+    postToUi({
+      type: "export-result",
+      ok: true,
+      mode: "json",
+      json: JSON.stringify(validation.composition, null, 2),
+      warnings: result.warnings,
+    });
+    return;
+  }
+
+  const withImages = await attachImages(validation.composition, result, message.format);
+
+  if (!withImages.ok) {
+    postToUi({ type: "export-result", ok: false, errors: withImages.errors });
+    return;
+  }
+
   postToUi({
     type: "export-result",
     ok: true,
-    json: JSON.stringify(validation.composition, null, 2),
+    mode: "zip",
+    compositionName: result.compositionName,
+    json: JSON.stringify(withImages.composition, null, 2),
+    images: withImages.images,
     warnings: result.warnings,
   });
 }
@@ -60,7 +81,7 @@ figma.ui.onmessage = (message: UiToMainMessage) => {
   if (message.type === "scan") {
     handleScan();
   } else if (message.type === "export") {
-    handleExport(message.minWidths);
+    void handleExport(message);
   }
 };
 

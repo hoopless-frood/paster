@@ -5,6 +5,8 @@ export interface ScannedItem {
   width: number;
   height: number;
   zIndex: number;
+  /** The live Figma node this item was scanned from, for image export. Never sent to the UI thread (not cloneable) — internal to the main thread only. Optional so test fixtures can omit it. */
+  node?: SupportedItemNode;
 }
 
 export interface ScannedLayout {
@@ -32,6 +34,22 @@ export interface ScanFailure {
 
 export type ScanOutcome = ScanSuccess | ScanFailure;
 
+export type ImageFormat = "PNG" | "JPG" | "SVG";
+
+export const IMAGE_EXTENSIONS: Record<ImageFormat, string> = {
+  PNG: "png",
+  JPG: "jpg",
+  SVG: "svg",
+};
+
+/** Renders a single item node to image bytes in the given format. Runs on the main thread (only nodes have exportAsync); rejects if Figma's own export fails. */
+export function exportItemImage(node: SupportedItemNode, format: ImageFormat): Promise<Uint8Array> {
+  if (format === "SVG") {
+    return node.exportAsync({ format: "SVG" });
+  }
+  return node.exportAsync({ format, constraint: { type: "SCALE", value: 1 } });
+}
+
 const ROTATION_EPSILON = 0.01;
 
 const SUPPORTED_ITEM_TYPES = new Set<SceneNode["type"]>([
@@ -48,7 +66,7 @@ const SUPPORTED_ITEM_TYPES = new Set<SceneNode["type"]>([
   "BOOLEAN_OPERATION",
 ]);
 
-type SupportedItemNode = Extract<SceneNode, { type: SupportedItemType }>;
+export type SupportedItemNode = Extract<SceneNode, { type: SupportedItemType }>;
 type SupportedItemType =
   | "FRAME"
   | "COMPONENT"
@@ -234,6 +252,7 @@ function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem
       width: child.width,
       height: child.height,
       zIndex: zIndex++,
+      node: child,
     });
   }
 
