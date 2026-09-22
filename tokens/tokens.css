@@ -1,0 +1,14 @@
+/*
+ * Design tokens shared between demo/ (imported directly) and plugin/
+ * (inlined at build time by plugin/build.mjs, since Figma's plugin UI has
+ * no way to load an external stylesheet). Keep this file to token values
+ * only — component styles that consume these belong in each consumer.
+ */
+:root {
+  --paster-color-brand: #f1c3d4;
+  --paster-color-brand-hover: #da9db4;
+  --paster-color-brand-text: #111;
+  --paster-color-brand-dark: #963458;
+  --paster-font-body: "Atkinson Hyperlegible Next", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
