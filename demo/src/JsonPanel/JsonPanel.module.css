@@ -1,0 +1,36 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-space);
+  margin-top: var(--section-space);
+  padding: 0 var(--edge-space);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.status {
+  color: var(--paster-muted);
+  margin: 0;
+}
+
+.jsonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.jsonInput {
+  /* No shrink: a user dragging the native resize handle taller than the
+     available space should actually grow it (the tab scrolls), not get
+     snapped back to fit by the flex algorithm. */
+  flex: 1 0 auto;
+  min-height: 240px;
+  resize: vertical;
+}

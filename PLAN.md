@@ -64,9 +64,9 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 **Suggested commit:** `feat(react): render responsive compositions`
 
 ### M5 — Playground with JSON import
-- [ ] Build a usable Vite playground with built-in sample data/assets, JSON paste/upload, validation errors, viewport-width control, and item outlines/IDs.
-- [ ] Show the active breakpoint and its design-space dimensions; keep preview consistent with actual renderer.
-- [ ] Provide accessible controls, keyboard interaction, and basic empty/loading/error states.
+- [x] Build a usable Vite playground with built-in sample data/assets, JSON paste/upload, validation errors, viewport-width control, and item outlines/IDs.
+- [x] Show the active breakpoint and its design-space dimensions; keep preview consistent with actual renderer.
+- [x] Provide accessible controls, keyboard interaction, and basic empty/loading/error states.
 
 **Accept:** a fresh clone can preview sample data and valid imported JSON without Figma or a server.  
 **Suggested commit:** `feat(demo): preview and inspect compositions`
@@ -124,8 +124,10 @@ Move items into GitHub Issues when ready to implement; link the issue here rathe
 - [ ] Mixed children: text, SVG, video, and arbitrary elements beyond images.
 - [ ] Rotation, transforms, masks, constraints, and Auto Layout (including reverse stacking behavior).
 - [ ] Support layout-specific visibility and non-identical item sets.
+- [ ] Export each layout's background color/fill from Figma (currently unmodeled — `Layout` has no background field, so renderers/consumers assume white). Should be independent per layout, like everything else on `Layout`.
 - [ ] Persistent item identity independent of layer names (e.g., Figma plugin data).
 - [ ] Recover original image bytes, identify formats, deduplicate fills, translate crop modes/focal points, and assess production image quality.
+- [ ] Animated GIF support: not covered by the planned PNG/JPG/SVG export — Figma's render API (`exportAsync`) can't produce an animated GIF, so this depends on recovering original uploaded image bytes (above) rather than re-rendering through Figma. Also implicates `prefers-reduced-motion` handling (see Motion and interaction) once animated content can appear.
 - [ ] Support per-asset export format selection (choosing PNG/JPG/SVG per item rather than one format for the whole export).
 - [ ] Investigate automatic vector/raster format detection (e.g., default vector-only items to SVG export).
 

@@ -1,0 +1,21 @@
+.toggle {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--paster-text);
+  cursor: pointer;
+  transition: color var(--paster-transition);
+  color: var(--paster-text);
+}
+
+.toggle:hover {
+  color: var(--paster-hover);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--paster-accent-text);
+  outline-offset: 2px;
+}

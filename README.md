@@ -6,18 +6,16 @@ It extracts item geometry and stacking order from Figma, eliminating manual coor
 
 ## Status
 
-Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated, geometry-only composition JSON; and [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply. **There is no image export or interactive playground yet** — the demo renders the sample composition with placeholder boxes, not real images or JSON import. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
+Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated, geometry-only composition JSON; [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the demo is a working playground — paste or upload composition JSON, adjust a viewport-width control, and preview it live. **There is no image export yet** — every item still renders as a labeled placeholder box, since the exported JSON's `assets` array is always empty until Figma image export lands. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
 
 ## How it works
 
-The following describes Paster's target workflow, once built:
-
 1. **Compose:** Arrange your images in Figma, creating a layout for each breakpoint.
-2. **Export:** Generate structured JSON or a ZIP containing the composition and its images.
+2. **Export:** Generate structured JSON — a ZIP with real exported images is planned but not built yet (see [Status](#status)).
 3. **Preview:** Import the composition into the interactive playground to test responsive behavior.
 4. **Implement:** Use the React renderer to reproduce the composition in your project.
 
-Each layout scales proportionally between breakpoints while preserving its original arrangement.
+Each layout scales proportionally between breakpoints while preserving its original arrangement. Steps 1, 3, and 4 are fully working today; step 2 produces real, validated geometry JSON, just without image bytes yet.
 
 ## Getting started
 
@@ -39,7 +37,7 @@ pnpm run build:plugin # build just the plugin and its @paster/core dependency
 pnpm run dev:plugin   # rebuild the plugin on change (run `build` at least once first)
 ```
 
-The demo renders `@paster/core`'s sample composition with `@paster/react`, using placeholder boxes in place of real images — the "Preview" step below (an interactive playground with JSON import) isn't built yet, but "Export" and "Implement" are both real (see [Status](#status)).
+`pnpm run dev` opens the playground described in [Preview](#preview) below.
 
 ### Build the plugin
 
@@ -61,18 +59,21 @@ You only need to import the manifest once. After making code changes, rebuild an
 
 ### Prepare your composition
 
-Create a parent frame containing a frame for each responsive layout:
+Paster is meant for a single art-directed composition — an asymmetric grid of
+images with intentional negative space, not a page of conventional sections
+like a hero banner. Create a parent frame containing a frame for each
+responsive layout:
 
 ```text
 paster
 ├── desktop
-│   ├── hero
-│   ├── portrait
-│   └── detail
+│   ├── image-a
+│   ├── image-b
+│   └── image-c
 └── mobile
-    ├── hero
-    ├── portrait
-    └── detail
+    ├── image-a
+    ├── image-b
+    └── image-c
 ```
 
 - The parent frame represents the composition.
@@ -89,7 +90,16 @@ paster
 
 Individual layers the plugin doesn't support yet (rotation, Auto Layout, groups, duplicate names) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only a genuinely unusable selection (nothing selected, the wrong node type, or mismatched layer names across layouts that leave the schema invalid) blocks export outright; fix that in Figma and click **Refresh selection** to re-scan.
 
-There's no image export or ZIP packaging yet, so the exported JSON's `assets` array is always empty — but [`@paster/react`](./frontend/react) can render the geometry today, given content you supply yourself. There's no interactive playground to paste JSON into yet — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means.
+There's no image export or ZIP packaging yet, so the exported JSON's `assets` array is always empty. Paste the copied JSON straight into the demo playground (`pnpm run dev`) to preview it, or use [`@paster/react`](./frontend/react) directly, given content you supply yourself — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means.
+
+### Preview
+
+Run `pnpm run dev` and open the demo in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON (e.g. copied from the plugin's **Export JSON** step) to preview it instead. Invalid JSON or a composition that fails schema validation shows every problem found, without losing your last valid preview.
+
+- **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width; the exact breakpoint and design-space dimensions are shown alongside the preview.
+- **Show item outlines and IDs** — overlay each item's bounds and identity, useful for checking geometry against the source Figma file.
+
+Since there's no image export yet, every item renders as a labeled placeholder box rather than a real image.
 
 ## Project structure
 
@@ -102,13 +112,3 @@ paster/
 ```
 
 Paster uses pnpm workspaces, TypeScript, React, Vite, and CSS Modules. Its composition format is framework-independent, allowing additional renderers without changing the exporter.
-
-## Development
-
-Paster is under active, public development and not yet ready to use. See [PLAN.md](./PLAN.md) for implementation milestones, acceptance criteria, and planned features. Interfaces, schema versions, and the export format may change without notice until noted otherwise there.
-
-## License
-
-Paster is licensed under the [Apache License 2.0](./LICENSE).
-
-Created by Anna Pearson.

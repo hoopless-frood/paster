@@ -1,0 +1,29 @@
+.error,
+.warning {
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+.error p,
+.warning p {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.error ul,
+.warning ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.error {
+  color: #b00020;
+  background: #fdecea;
+  border: 1px solid #f5c2c0;
+}
+
+.warning {
+  color: #664200;
+  background: #fff3cd;
+  border: 1px solid #ffe69c;
+}

@@ -1,0 +1,25 @@
+.button {
+  padding: 0.4em 0.9em;
+  border: 1px solid transparent;
+  background: var(--paster-color-brand);
+  color: var(--paster-color-brand-text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--paster-transition),
+    opacity var(--paster-transition);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--paster-hover);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--paster-color-brand-text);
+  outline-offset: 1px;
+}

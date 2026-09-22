@@ -1,0 +1,101 @@
+html,
+body,
+#root {
+  height: 100%;
+}
+
+:root {
+  /* Colors */
+  --paster-bg: #fff;
+  --paster-text: #111;
+  --paster-border: #ddd;
+  --paster-muted: #555;
+  --paster-accent-text: var(--paster-color-brand-dark);
+  --paster-error-text: #b00020;
+  --paster-hover: var(--paster-color-brand-dark);
+  /* Fixed (not theme-swapped) — same lighter-purple scrollbar hover in both
+     themes, deliberately distinct from --paster-hover. */
+  --paster-scrollbar-hover: #675382;
+  /* Spacing */
+  --edge-space: 1.5rem;
+  --section-space: 20px;
+  /* Transitions */
+  --paster-transition: 150ms ease;
+}
+
+/* Dark values apply on system preference (unless the toggle explicitly
+   chose light) and, separately, whenever the toggle explicitly chose dark —
+   the toggle only sets data-theme for the current session, nothing is
+   persisted, so a refresh always goes back to following the system. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paster-bg: #19141f;
+    --paster-text: #eee;
+    --paster-border: #433654;
+    --paster-muted: #675382;
+    --paster-accent-text: var(--paster-color-brand);
+    --paster-error-text: #ff6b6b;
+    --paster-hover: var(--paster-color-brand-dark);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paster-bg: #19141f;
+  --paster-text: #eee;
+  --paster-border: #433654;
+  --paster-muted: #675382;
+  --paster-accent-text: var(--paster-color-brand);
+  --paster-error-text: #ff6b6b;
+  --paster-hover: var(--paster-color-brand-dark);
+}
+
+body {
+  margin: 0;
+  background: var(--paster-bg);
+  color: var(--paster-text);
+  box-sizing: border-box;
+  scrollbar-color: var(--paster-muted) transparent;
+  scrollbar-width: thin;
+}
+
+a {
+  color: var(--paster-text);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.2em;
+  transition: color var(--paster-transition);
+
+  &:hover {
+    color: var(--paster-hover);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--paster-muted);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--paster-scrollbar-hover);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

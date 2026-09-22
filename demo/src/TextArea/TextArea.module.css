@@ -1,0 +1,18 @@
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  background: var(--paster-bg);
+  color: var(--paster-text);
+  /* Always 2px (not 1px), so focus only changes the color, not the width —
+     otherwise the border growing on focus would shift surrounding layout. */
+  border: 2px solid var(--paster-border);
+  transition: border-color var(--paster-transition);
+}
+
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--paster-accent-text);
+}

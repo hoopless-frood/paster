@@ -1,0 +1,46 @@
+.tabList {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--paster-border);
+  flex: 0 0 auto;
+  padding: 0 var(--edge-space);
+}
+
+.tab {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--paster-muted);
+  cursor: pointer;
+  transition: color var(--paster-transition),
+    border-bottom-color var(--paster-transition);
+}
+
+.tab:hover:not([aria-selected="true"]) {
+  color: var(--paster-hover);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--paster-accent-text);
+  outline-offset: 2px;
+}
+
+.tab[aria-selected="true"] {
+  color: var(--paster-accent-text);
+  border-bottom-color: var(--paster-accent-text);
+  /* Already selected — hovering it shouldn't imply it's clickable-to-do-something. */
+  cursor: default;
+}
+
+/* Signals unapplied JSON edits (invalid/unsaved) from any tab, since the
+   error list itself is only visible while the JSON tab is active. */
+.tabBadge {
+  margin-left: 0.35rem;
+  color: var(--paster-error-text);
+  font-weight: 700;
+}
