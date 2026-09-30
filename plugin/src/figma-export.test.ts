@@ -119,6 +119,16 @@ describe("formatForNode", () => {
     expect(formatForNode(frame([{ type: "VECTOR", fills: solid }, { type: "ELLIPSE", fills: solid }]))).toBe("SVG");
   });
 
+  it("keeps a group of vectors as SVG, and rasterizes a group containing a photo", () => {
+    // Unlike a frame, a real group has no fills of its own at all.
+    const group = (children: { type: string; fills?: unknown[] }[]) => {
+      const { fills: _fills, ...rest } = frame(children) as unknown as Record<string, unknown>;
+      return { ...rest, type: "GROUP" } as unknown as SupportedItemNode;
+    };
+    expect(formatForNode(group([{ type: "VECTOR", fills: solid }]))).toBe("SVG");
+    expect(formatForNode(group([{ type: "RECTANGLE", fills: photo }]))).toBe("PNG");
+  });
+
   it("ignores hidden content inside a frame", () => {
     expect(formatForNode(frame([{ type: "RECTANGLE", fills: photo, visible: false }]))).toBe("SVG");
   });

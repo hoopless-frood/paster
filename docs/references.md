@@ -43,7 +43,7 @@ Rendered-node exports preserve the visual appearance of a Figma frame. Original 
 ## Future development
 
 - [Plugin data](https://developers.figma.com/docs/plugins/api/properties/nodes-setplugindata/) — Store persistent frame identifiers.
-- [GroupNode](https://developers.figma.com/docs/plugins/api/GroupNode/) — Support nested compositions and groups.
+- [GroupNode](https://developers.figma.com/docs/plugins/api/GroupNode/) — Groups are exported as single items today; nested compositions would build on this.
 - [Transform](https://developers.figma.com/docs/plugins/api/Transform/) — Handle non-rotation transforms (skew, matrices); rotation itself is already handled (see above).
 
 Refer to [PLAN.md](../PLAN.md) for implementation milestones and the feature backlog.

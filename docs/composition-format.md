@@ -352,7 +352,8 @@ needs a real Figma file and a real plugin export, and isn't automated:
 ## Non-goals (MVP)
 
 This schema does not yet support (see [PLAN.md](../PLAN.md)'s backlog):
-nested groups, non-rotation transforms/masks/constraints, Auto Layout,
+nested compositions (layers inside a group or frame item positioned
+independently per layout), non-rotation transforms/masks/constraints, Auto Layout,
 or non-image node types as item content (native vector shapes, live text,
 video). An item's
 own rotation *is* supported (see [Rotation](#rotation) above) — a rotated

@@ -78,7 +78,7 @@ paster
 
 - The parent frame represents the composition.
 - Each layout frame defines its own dimensions and coordinate system.
-- Items (frames, shapes, vectors, text — see [the Figma guide](./docs/figma-guide.md) for the full list) are direct children of their layout; groups aren't supported, so ungroup or flatten first.
+- Items (frames, groups, shapes, vectors, text — see [the Figma guide](./docs/figma-guide.md) for the full list) are direct children of their layout. A group or frame item is exported as one image of everything in it.
 - Matching layer names identify the same content across layouts.
 - Position, size, stacking order, and rotation can differ between breakpoints.
 
@@ -91,7 +91,7 @@ paster
 
 Each layout's breakpoint min-width is set automatically from frame widths (see [the Figma guide](./docs/figma-guide.md#breakpoints-and-layout-order)); adjust it afterwards in the JSON or your CMS.
 
-An item's own rotation is preserved. Individual layers the plugin doesn't support yet (Auto Layout, groups, duplicate names, or a rotated *layout* frame) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only an unusable selection (nothing selected, something other than a frame, or no layout with any supported layers) blocks export outright; fix that in Figma and click **Refresh**. Layer names that don't match across layouts are allowed, with a warning in case it wasn't intentional.
+An item's own rotation is preserved. Individual layers the plugin doesn't support yet (Auto Layout, duplicate names, or a rotated *layout* frame) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only an unusable selection (nothing selected, something other than a frame, or no layout with any supported layers) blocks export outright; fix that in Figma and click **Refresh**. Layer names that don't match across layouts are allowed, with a warning in case it wasn't intentional.
 
 Paste JSON, or drop a ZIP, straight into the playground (`pnpm run dev`) to preview it, or use [`@paster/react`](./frontend/react) directly, given content you supply yourself — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means and how a ZIP export is packaged.
 

@@ -119,9 +119,9 @@ export function formatForNode(node: SupportedItemNode): ImageFormat {
   if (needsRaster(node)) {
     return "PNG";
   }
-  // A frame, component or instance exports as one image of everything
-  // inside it, so its contents decide too: a photo inside a plain-colored
-  // frame would otherwise end up base64-embedded in an SVG.
+  // A frame, component, instance or group exports as one image of
+  // everything inside it, so its contents decide too: a photo inside a
+  // plain-colored frame would otherwise end up base64-embedded in an SVG.
   if ("findOne" in node && node.findOne((child) => child.visible && needsRaster(child))) {
     return "PNG";
   }
@@ -142,6 +142,8 @@ const SUPPORTED_ITEM_TYPES = new Set<SceneNode["type"]>([
   "STAR",
   "POLYGON",
   "BOOLEAN_OPERATION",
+  // A group is exported as one image of everything in it, like a frame.
+  "GROUP",
 ]);
 
 export type SupportedItemNode = Extract<SceneNode, { type: SupportedItemType }>;
@@ -156,7 +158,8 @@ type SupportedItemType =
   | "LINE"
   | "STAR"
   | "POLYGON"
-  | "BOOLEAN_OPERATION";
+  | "BOOLEAN_OPERATION"
+  | "GROUP";
 
 function isSupportedItemNode(node: SceneNode): node is SupportedItemNode {
   return SUPPORTED_ITEM_TYPES.has(node.type);
@@ -190,7 +193,7 @@ export function figmaRotationToCss(rotation: number): number {
  *
  * Only an invalid/missing selection is a hard failure. Everything else we
  * don't support yet (a rotated *layout* or composition frame, Auto Layout,
- * groups, other unsupported node types, duplicate names) is skipped
+ * unsupported node types, duplicate names) is skipped
  * individually and reported as a warning, so one problem layer doesn't
  * block exporting the rest of an otherwise-valid composition. An item's own
  * rotation is fully supported — see figmaRotationToCss.
@@ -319,10 +322,7 @@ function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem
 
   for (const child of visibleChildren) {
     if (!isSupportedItemNode(child)) {
-      const hint = child.type === "GROUP" ? " (ungroup or flatten it)" : "";
-      warnings.push(
-        `Skipped "${layoutNode.name}/${child.name}": a ${child.type.toLowerCase()} isn't supported yet${hint}.`,
-      );
+      warnings.push(`Skipped "${layoutNode.name}/${child.name}": a ${child.type.toLowerCase()} isn't supported yet.`);
       continue;
     }
 

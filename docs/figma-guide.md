@@ -35,31 +35,29 @@ paster                    ← the composition: select this frame to export
   recurs across layouts (that's the point). An item can also appear in
   only some layouts: leave it out of (or hide it in) the others, and the
   plugin just warns, in case that wasn't intentional.
-- Layouts and items just need to be **visible, direct children** — a layout
-  nested inside another frame, or an item nested inside a group, won't be
-  found. See [Groups](#groups-and-nesting) below for the common way this
-  bites people.
+- Layouts and items just need to be **visible, direct children**: a layout
+  nested inside another frame won't be found, and layers inside an item
+  are part of that item's image rather than items of their own. See
+  [Groups and nesting](#groups-and-nesting) below.
 
 ## Supported item layer types
 
-An item can be any of: **Frame, Component, Instance, Rectangle, Ellipse,
-Vector, Text, Line, Star, Polygon, Boolean Operation**. Anything else
-(Group, Slice, Section, Sticky, Connector, Widget, …) is skipped with a
+An item can be any of: **Frame, Group, Component, Instance, Rectangle,
+Ellipse, Vector, Text, Line, Star, Polygon, Boolean Operation**. Anything
+else (Slice, Section, Sticky, Connector, Widget, …) is skipped with a
 warning rather than blocking the rest of the export.
 
 ### Groups and nesting
 
-**Groups are not supported as items or as layouts.** If a layer is a Group,
-ungroup it (`Shift+Ctrl+G` / `Shift+Cmd+G`) or flatten it into a single
-layer, then click **Refresh**. The plugin's warning for this
-(`a group isn't supported yet (ungroup or flatten it)`) tells you exactly
-which layer needs it.
+Only direct children of a layout frame become items. A **group** or
+**frame** item is exported as a single image of everything inside it, so
+either works for keeping several layers together, such as an imported SVG
+illustration made of many vector layers. A group of only vector content
+exports as one SVG; if it contains a photo or text, it exports as a PNG.
 
-Only direct children of a layout frame become items. To keep several
-layers together as one item, put them in a **frame** instead of a group
-(`Ctrl+Alt+G` / `Cmd+Option+G`): a frame item is exported as a single
-image of everything inside it. The layers inside it aren't separate
-items, so they can't be positioned independently per layout.
+The layers inside a group or frame aren't separate items, so they can't be
+positioned independently per layout. Layouts themselves must be frames; a
+group directly inside the composition isn't treated as a layout.
 
 ## Breakpoints and layout order
 
@@ -145,7 +143,6 @@ around the flagged layer. Fix what you want in Figma, then click
 
 | Warning | What it means |
 | --- | --- |
-| `a group isn't supported yet (ungroup or flatten it)` | See [Groups and nesting](#groups-and-nesting). |
 | `a <type> isn't supported yet` | The layer's node type isn't in the supported list above — recreate it as one that is (often: rasterize it as an image, or redraw as a shape). |
 | `duplicate layer name within this layout` | Two items in the *same* layout share a name — item identity is scoped per layout, so give each a unique name within its own layout. |
 | `duplicate layout name` | Two layout (breakpoint) frames share a name at the composition's top level — rename one. |
@@ -162,8 +159,8 @@ everything else above degrades gracefully.
 
 Not yet supported, tracked as backlog work (see [PLAN.md](../PLAN.md)):
 
-- **Groups**, and nested compositions (layers inside an item positioned
-  independently per layout).
+- **Nested compositions**: layers inside a group or frame item positioned
+  independently per layout.
 - **Transforms other than rotation** — skew, non-uniform scale, and
   Figma's corner/edge constraints.
 - **Masks** and clipping paths (beyond a layout frame's own Clip content
