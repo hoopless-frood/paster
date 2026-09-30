@@ -1,12 +1,12 @@
 # Paster
 
-Paster is an open-source tool for translating art-directed Figma compositions into responsive web layouts.
+Paster is a tool for translating art-directed Figma compositions into responsive web layouts.
 
 It extracts item geometry and stacking order from Figma, eliminating manual coordinate entry while preserving independent compositions across breakpoints.
 
 ## Status
 
-Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated composition JSON, either alone or packaged as a ZIP with real exported images (PNG, JPG, or SVG); [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the playground lets you paste or upload composition JSON, upload a complete ZIP export, adjust a viewport-width control, and preview it live. Items without a real image (e.g. the built-in sample composition) still render as labeled placeholder boxes. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
+The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated composition JSON, either alone or packaged as a ZIP with real exported images (PNG, JPG, or SVG); [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the playground lets you paste or upload composition JSON, upload a complete ZIP export, adjust a viewport-width control, and preview it live. Items without a real image (e.g. the built-in sample composition) still render as labeled placeholder boxes. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
 
 ## How it works
 
