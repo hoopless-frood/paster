@@ -17,6 +17,8 @@ export interface ScannedLayout {
   height: number;
   /** CSS color from the layout frame's own topmost visible solid fill. Omitted when there's no solid fill (mixed, gradient, image, or none). */
   backgroundColor?: string;
+  /** The layout frame's own "Clip content" setting. */
+  clipsContent: boolean;
   items: ScannedItem[];
 }
 
@@ -288,6 +290,7 @@ export function scanSelection(): ScanOutcome {
       width: layoutNode.width,
       height: layoutNode.height,
       backgroundColor: extractBackgroundColor(layoutNode),
+      clipsContent: layoutNode.clipsContent,
       items,
     });
   }

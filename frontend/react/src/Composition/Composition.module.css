@@ -5,5 +5,5 @@
   background: var(--paster-layout-background);
   /* Local stacking context, so item z-indices never leak into the page's. */
   isolation: isolate;
-  overflow: hidden;
+  overflow: var(--paster-layout-overflow);
 }

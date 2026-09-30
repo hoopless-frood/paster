@@ -59,6 +59,7 @@ interface Layout {
   width: number;    // design-space width of the layout
   height: number;   // design-space height of the layout
   backgroundColor?: string; // CSS color from the layout frame's own Figma fill
+  clipsContent?: boolean;   // matches the frame's own "Clip content" setting; omitted/true = clipped
   items: Item[];
 }
 
@@ -88,7 +89,7 @@ interface Asset {
 | Type          | Required fields                                        | Optional fields    |
 | ------------- | -------------------------------------------------------- | ------------------- |
 | `Composition` | `version`, `id`, `name`, `layouts`, `assets`             | —                    |
-| `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `items`      | `backgroundColor`    |
+| `Layout`      | `id`, `name`, `minWidth`, `width`, `height`, `items`      | `backgroundColor`, `clipsContent`    |
 | `Item`        | `id`, `x`, `y`, `width`, `height`, `zIndex`               | `name`, `rotation`, `assetId`   |
 | `Asset`       | `id`, `path`, `width`, `height`                           | `alt`                |
 
@@ -101,7 +102,10 @@ the whole composition in Figma must not change any item's exported
 coordinates.
 
 `x`/`y` may be negative or place an item partially outside its layout's
-bounds (Figma allows this); `width`/`height` must be positive.
+bounds (Figma allows this, e.g. a deliberately bleeding image); `width`/
+`height` must be positive. Whether that overflow is visually clipped is
+`Layout.clipsContent` (default/omitted: clipped, matching Figma's own
+default for a frame).
 
 ## Rotation
 
@@ -131,6 +135,16 @@ Figma's plugin API exposes `node.rotation` as counterclockwise-positive,
 the opposite of this schema (and of CSS) — the exporter converts it once,
 at export time, so `rotation` here always means "clockwise," matching what
 Figma's own UI shows a designer.
+
+A rotated item's visual footprint (its axis-aligned bounding box) is always
+*larger* than its own unrotated `width`/`height` — rotating a box necessarily
+makes it taller and/or wider on screen. An item positioned and sized to fit
+neatly inside its layout when unrotated can easily have that larger rotated
+footprint extend past the layout's edges even though nothing about its
+position is wrong. Whether that gets clipped is exactly what
+`Layout.clipsContent` controls (see [Required vs. optional
+fields](#required-vs-optional-fields) above) — the same setting that governs
+an ordinary bleed image (see [Coordinate system](#coordinate-system)).
 
 ## Stacking order
 
@@ -169,6 +183,7 @@ fields above:
 - `Item.id`, `Layout.id`, `Composition.id`, and `Asset.id` must each be
   unique within their scope.
 - `Item.rotation`, when present, must be a finite number (any value; degrees wrap naturally, same as CSS).
+- `Layout.clipsContent`, when present, must be a boolean.
 - `Item.assetId`, when present, must reference an existing `Asset.id`.
 - `Asset.path` must be a safe, relative, portable path: no leading `/` or
   `\`, no `..` path segments, no URL scheme (`http://`, `file://`, etc.), and
@@ -302,6 +317,9 @@ needs a real Figma file and a real plugin export, and isn't automated:
       wrong rotation pivot is most visibly off. If it visibly drifts, the
       export's rotation *direction* may also need checking (see
       [Rotation](#rotation) above).
+- [ ] A layout with "Clip content" off in Figma shows bleeding/rotated
+      content un-clipped in the playground; a layout with it on (the
+      default) still clips at its own edges.
 - [ ] Stacking order in the playground matches Figma's front-to-back order,
       independently per layout.
 - [ ] An item that shares an id across layouts, but points at a *different*

@@ -60,6 +60,7 @@ function scan(): ScanSuccess {
         name: "Mobile",
         width: 375,
         height: 812,
+        clipsContent: true,
         items: [
           fakeItem({ name: "image-a", x: 0, y: 0, width: 375, height: 240, zIndex: 0 }),
           fakeItem({ name: "image-b", x: 24, y: 260, width: 327, height: 400, zIndex: 1 }),
@@ -69,6 +70,7 @@ function scan(): ScanSuccess {
         name: "Desktop",
         width: 1440,
         height: 900,
+        clipsContent: true,
         items: [
           fakeItem({ name: "image-b", x: 80, y: 80, width: 480, height: 600, zIndex: 0 }),
           fakeItem({ name: "image-a", x: 600, y: 0, width: 840, height: 900, zIndex: 1 }),
@@ -112,6 +114,17 @@ describe("assembleComposition", () => {
     if (result.valid) {
       expect(result.composition.layouts[0].backgroundColor).toBe("#f5f1ea");
       expect(result.composition.layouts[1].backgroundColor).toBeUndefined();
+    }
+  });
+
+  it("omits clipsContent when true (Figma's own default), but propagates it when false", () => {
+    const withNonClipping = scan();
+    withNonClipping.layouts[0].clipsContent = false;
+    const result = assembleComposition(withNonClipping, { Mobile: 0, Desktop: 1024 });
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.composition.layouts[0].clipsContent).toBe(false);
+      expect(result.composition.layouts[1].clipsContent).toBeUndefined();
     }
   });
 
@@ -182,6 +195,7 @@ describe("attachImages", () => {
           name: "Mobile",
           width: 375,
           height: 812,
+          clipsContent: true,
           items: [
             fakeItem({
               name: "icon",
@@ -212,6 +226,7 @@ describe("attachImages", () => {
           name: "Mobile",
           width: 375,
           height: 812,
+          clipsContent: true,
           items: [
             fakeItem({
               name: "swatch",
@@ -245,6 +260,7 @@ describe("attachImages", () => {
           name: "Mobile",
           width: 375,
           height: 812,
+          clipsContent: true,
           items: [
             fakeItem({
               name: "sticker",
@@ -278,6 +294,7 @@ describe("attachImages", () => {
           name: "Mobile",
           width: 375,
           height: 812,
+          clipsContent: true,
           items: [
             fakeItem({
               name: "label",
@@ -308,6 +325,7 @@ describe("attachImages", () => {
           name: "Mobile",
           width: 375,
           height: 812,
+          clipsContent: true,
           items: [
             fakeItem({ name: "Image A", x: 0, y: 0, width: 100, height: 100, zIndex: 0 }),
             fakeItem({ name: "image-a", x: 0, y: 0, width: 100, height: 100, zIndex: 1 }),
@@ -356,7 +374,7 @@ describe("attachImages", () => {
       ok: true,
       compositionName: "Huge",
       warnings: [],
-      layouts: [{ name: "Mobile", width: 375, height: 812, items: manyItems }],
+      layouts: [{ name: "Mobile", width: 375, height: 812, clipsContent: true, items: manyItems }],
     };
     const composition = assembled(scanResult, { Mobile: 0 });
 

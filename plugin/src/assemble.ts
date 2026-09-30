@@ -55,6 +55,9 @@ export function assembleComposition(
       width: layout.width,
       height: layout.height,
       backgroundColor: layout.backgroundColor,
+      // Omitted rather than false, so a clipping (the common, Figma-default)
+      // layout's JSON stays exactly as it looked before this was captured.
+      clipsContent: layout.clipsContent === true ? undefined : layout.clipsContent,
       items: layout.items.map((item) => ({
         id: item.name,
         name: item.name,

@@ -76,6 +76,31 @@ describe("validateComposition", () => {
     expect(result.valid).toBe(true);
   });
 
+  it("accepts a layout with clipsContent set to false", () => {
+    const composition = clone();
+    composition.layouts[0].clipsContent = false;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("accepts a layout with no clipsContent at all", () => {
+    const composition = clone();
+    delete composition.layouts[0].clipsContent;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects a non-boolean layout clipsContent", () => {
+    const composition = clone();
+    // @ts-expect-error intentionally invalid for the test
+    composition.layouts[0].clipsContent = "false";
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.errors.some((e) => e.includes("clipsContent"))).toBe(true);
+    }
+  });
+
   it("accepts an item with a rotation", () => {
     const composition = clone();
     composition.layouts[0].items[0].rotation = 45;
