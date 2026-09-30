@@ -1,16 +1,16 @@
 import { sampleComposition, type Composition } from "@paster/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "../Header/Header";
 import { JsonPanel } from "../JsonPanel/JsonPanel";
-import { PreviewPanel } from "../PreviewPanel/PreviewPanel";
+import { LayoutPanel } from "../LayoutPanel/LayoutPanel";
 import { Tabs } from "../Tabs/Tabs";
 import styles from "./App.module.css";
 
-type TabId = "json" | "preview";
+type TabId = "json" | "layout";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "json", label: "JSON" },
-  { id: "preview", label: "Preview" },
+  { id: "layout", label: "Layout" },
 ];
 
 function readTabFromUrl(): TabId {
@@ -20,6 +20,16 @@ function readTabFromUrl(): TabId {
 
 export function App() {
   const [composition, setComposition] = useState<Composition>(sampleComposition);
+  // Path -> blob: URL, populated by importing a ZIP export. Plain JSON edits
+  // (typing, pasting, a .json upload) leave this untouched, so images from a
+  // previously imported ZIP survive ordinary tweaks to the same composition.
+  const [assetUrls, setAssetUrls] = useState<Map<string, string>>(new Map());
+  // Mirrors assetUrls so the unmount-only cleanup below can revoke whatever
+  // is *currently* held rather than whatever existed when that effect was
+  // first set up (an effect with an empty dependency array only ever sees
+  // the state from its first render).
+  const assetUrlsRef = useRef(assetUrls);
+  assetUrlsRef.current = assetUrls;
   const [activeTab, setActiveTab] = useState<TabId>(readTabFromUrl);
   const [jsonHasErrors, setJsonHasErrors] = useState(false);
 
@@ -31,12 +41,27 @@ export function App() {
     window.history.replaceState(null, "", url);
   }, [activeTab]);
 
+  // Revokes every object URL currently held, on unmount only — a fresh ZIP
+  // import revokes its own predecessor directly (see handleImportZip),
+  // rather than through this effect re-running.
+  useEffect(() => {
+    return () => {
+      assetUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
+
+  function handleImportZip(nextComposition: Composition, nextAssetUrls: Map<string, string>) {
+    assetUrls.forEach((url) => URL.revokeObjectURL(url));
+    setComposition(nextComposition);
+    setAssetUrls(nextAssetUrls);
+  }
+
   return (
     <main className={styles.app}>
       <Header />
 
       <Tabs
-        label="Paster demo views"
+        label="Paster playground views"
         tabs={TABS.map((tab) => ({ ...tab, hasError: tab.id === "json" && jsonHasErrors }))}
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -52,18 +77,19 @@ export function App() {
         <JsonPanel
           sampleComposition={sampleComposition}
           onImport={setComposition}
+          onImportZip={handleImportZip}
           onErrorsChange={setJsonHasErrors}
         />
       </div>
 
       <div
-        id="panel-preview"
+        id="panel-layout"
         role="tabpanel"
-        aria-labelledby="tab-preview"
-        hidden={activeTab !== "preview"}
+        aria-labelledby="tab-layout"
+        hidden={activeTab !== "layout"}
         className={styles.tabPanel}
       >
-        <PreviewPanel composition={composition} />
+        <LayoutPanel composition={composition} assetUrls={assetUrls} />
       </div>
     </main>
   );

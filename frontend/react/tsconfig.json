@@ -3,6 +3,9 @@
   "compilerOptions": {
     "lib": ["ES2022", "DOM"],
     "jsx": "react-jsx",
+    // Only explicitly imported typings — stray @types in parent directories
+    // would otherwise leak in and hide errors that only CI would catch.
+    "types": [],
     "noEmit": true
   },
   "include": ["src", "vitest.config.ts"]

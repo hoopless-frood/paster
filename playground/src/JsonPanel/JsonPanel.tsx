@@ -4,6 +4,7 @@ import { FileUploadButton } from "../FileUploadButton/FileUploadButton";
 import { JsonEditor } from "../JsonEditor/JsonEditor";
 import { MessageList } from "../MessageList/MessageList";
 import { importComposition } from "./import-composition";
+import { importZip } from "./import-zip";
 import type { JsonPanelProps } from "./JsonPanel.types";
 import styles from "./JsonPanel.module.css";
 
@@ -11,7 +12,7 @@ export type { JsonPanelProps } from "./JsonPanel.types";
 
 const VALIDATE_DEBOUNCE_MS = 400;
 
-export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonPanelProps) {
+export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsChange }: JsonPanelProps) {
   const [text, setText] = useState(() => JSON.stringify(sampleComposition, null, 2));
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -50,14 +51,45 @@ export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonP
     runImport(sampleText);
   }
 
-  async function handleFileSelected(file: File) {
-    setIsReadingFile(true);
+  function isZipFile(file: File): boolean {
+    return file.name.toLowerCase().endsWith(".zip") || /zip/.test(file.type);
+  }
+
+  async function handleJsonFileSelected(file: File) {
     try {
       const content = await file.text();
       setText(content);
       runImport(content);
     } catch {
       setErrors(["Couldn't read that file — try again or paste the JSON directly."]);
+    }
+  }
+
+  async function handleZipFileSelected(file: File) {
+    try {
+      const result = await importZip(file);
+      if (result.ok) {
+        setErrors([]);
+        setWarnings(result.warnings);
+        setText(JSON.stringify(result.composition, null, 2));
+        onImportZip(result.composition, result.assetUrls);
+      } else {
+        setErrors(result.errors);
+        setWarnings([]);
+      }
+    } catch {
+      setErrors(["Couldn't read that ZIP — try again or use a different export."]);
+    }
+  }
+
+  async function handleFileSelected(file: File) {
+    setIsReadingFile(true);
+    try {
+      if (isZipFile(file)) {
+        await handleZipFileSelected(file);
+      } else {
+        await handleJsonFileSelected(file);
+      }
     } finally {
       setIsReadingFile(false);
     }
@@ -70,11 +102,11 @@ export function JsonPanel({ sampleComposition, onImport, onErrorsChange }: JsonP
           Load sample JSON
         </Button>
         <FileUploadButton
-          accept=".json,application/json"
+          accept=".json,application/json,.zip,application/zip"
           disabled={isReadingFile}
           onFileSelected={handleFileSelected}
         >
-          Upload .json file
+          Upload .json or .zip
         </FileUploadButton>
       </div>
 

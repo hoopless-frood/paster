@@ -69,6 +69,26 @@ describe("PasterComposition", () => {
     expect(root.style.getPropertyValue("--paster-layout-background")).toBe("transparent");
   });
 
+  it("clips by default (Figma's own default), when a layout has no clipsContent at all", () => {
+    const composition = structuredClone(sampleComposition);
+    delete composition.layouts[0].clipsContent;
+    const { container } = render(
+      <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={320} />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.getPropertyValue("--paster-layout-overflow")).toBe("hidden");
+  });
+
+  it("stops clipping when a layout's clipsContent is explicitly false", () => {
+    const composition = structuredClone(sampleComposition);
+    composition.layouts[0].clipsContent = false;
+    const { container } = render(
+      <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={320} />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.getPropertyValue("--paster-layout-overflow")).toBe("visible");
+  });
+
   it("switches layout when the viewportWidth prop crosses a breakpoint", () => {
     const { container, rerender } = render(
       <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,

@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { sampleComposition } from "./sample.js";
 import { validateComposition } from "./validate.js";
 
+// A composition is plain JSON, so a JSON round-trip is an exact deep copy —
+// and unlike structuredClone, needs no Node or DOM typings (see tsconfig).
 function clone(): typeof sampleComposition {
-  return structuredClone(sampleComposition);
+  return JSON.parse(JSON.stringify(sampleComposition));
 }
 
 describe("validateComposition", () => {
@@ -74,6 +76,56 @@ describe("validateComposition", () => {
     delete composition.layouts[0].backgroundColor;
     const result = validateComposition(composition);
     expect(result.valid).toBe(true);
+  });
+
+  it("accepts a layout with clipsContent set to false", () => {
+    const composition = clone();
+    composition.layouts[0].clipsContent = false;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("accepts a layout with no clipsContent at all", () => {
+    const composition = clone();
+    delete composition.layouts[0].clipsContent;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects a non-boolean layout clipsContent", () => {
+    const composition = clone();
+    // @ts-expect-error intentionally invalid for the test
+    composition.layouts[0].clipsContent = "false";
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.errors.some((e) => e.includes("clipsContent"))).toBe(true);
+    }
+  });
+
+  it("accepts an item with a rotation", () => {
+    const composition = clone();
+    composition.layouts[0].items[0].rotation = 45;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("accepts an item with no rotation at all", () => {
+    const composition = clone();
+    delete composition.layouts[0].items[0].rotation;
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects a non-finite item rotation", () => {
+    const composition = clone();
+    // @ts-expect-error intentionally invalid for the test
+    composition.layouts[0].items[0].rotation = "45deg";
+    const result = validateComposition(composition);
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.errors.some((e) => e.includes("rotation"))).toBe(true);
+    }
   });
 
   it("rejects non-finite geometry", () => {

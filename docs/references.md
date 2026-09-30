@@ -14,12 +14,16 @@ Paster uses the **Figma Plugin API**, not the REST API. The plugin runs inside F
 ## Document structure and geometry
 
 - [Accessing the document](https://developers.figma.com/docs/plugins/accessing-document/) — Read selections and traverse document nodes.
-- [FrameNode](https://developers.figma.com/docs/plugins/api/FrameNode/) — Frame properties and dimensions.
-- [Node properties](https://developers.figma.com/docs/plugins/api/node-properties/) — Shared geometry, visibility, and transforms.
+- [FrameNode](https://developers.figma.com/docs/plugins/api/FrameNode/) — Frame properties, dimensions, and `clipsContent`.
+- [Node properties](https://developers.figma.com/docs/plugins/api/node-properties/) — Shared geometry, `rotation`, visibility, and transforms.
 - [Children](https://developers.figma.com/docs/plugins/api/properties/nodes-children/) — Traverse child nodes and determine stacking order.
 - [itemReverseZIndex](https://developers.figma.com/docs/plugins/api/properties/nodes-itemreversezindex/) — Reversed stacking in Auto Layout.
 
-Paster uses bounding boxes to calculate frame coordinates relative to each layout's origin. Child order determines the exported z-index.
+Paster uses bounding boxes to calculate frame coordinates relative to each
+layout's origin. Child order determines the exported z-index. An item's own
+`rotation` is read and converted to CSS's clockwise-positive convention (see
+[figma-guide.md](./figma-guide.md#rotation)) — Figma's own value is
+counterclockwise-positive.
 
 ## Images and SVG
 
@@ -39,6 +43,6 @@ Rendered-node exports preserve the visual appearance of a Figma frame. Original 
 
 - [Plugin data](https://developers.figma.com/docs/plugins/api/properties/nodes-setplugindata/) — Store persistent frame identifiers.
 - [GroupNode](https://developers.figma.com/docs/plugins/api/GroupNode/) — Support nested compositions and groups.
-- [Transform](https://developers.figma.com/docs/plugins/api/Transform/) — Handle rotation and transformation matrices.
+- [Transform](https://developers.figma.com/docs/plugins/api/Transform/) — Handle non-rotation transforms (skew, matrices); rotation itself is already handled (see above).
 
 Refer to [PLAN.md](../PLAN.md) for implementation milestones and the feature backlog.

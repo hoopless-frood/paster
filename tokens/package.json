@@ -1,0 +1,15 @@
+{
+  "name": "@paster/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./build.d.ts",
+      "default": "./build.mjs"
+    }
+  },
+  "dependencies": {
+    "style-dictionary": "^5.5.5"
+  }
+}

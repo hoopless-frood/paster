@@ -34,4 +34,18 @@ describe("importComposition", () => {
       expect(result.errors.some((e) => e.includes("version"))).toBe(true);
     }
   });
+
+  it("warns (without failing) when two assets share the same file", () => {
+    const composition = {
+      ...sampleComposition,
+      assets: sampleComposition.assets.map((asset, index) =>
+        index === 1 ? { ...asset, path: sampleComposition.assets[0].path } : asset,
+      ),
+    };
+    const result = importComposition(JSON.stringify(composition));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.warnings.some((w) => w.includes(sampleComposition.assets[0].path))).toBe(true);
+    }
+  });
 });

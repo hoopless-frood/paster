@@ -4,7 +4,14 @@ import {
   type Composition,
   type ValidationResult,
 } from "@paster/core";
-import { exportItemImage, IMAGE_EXTENSIONS, type ImageFormat, type ScanSuccess, type SupportedItemNode } from "./figma-export";
+import {
+  exportItemImage,
+  formatForNode,
+  IMAGE_EXTENSIONS,
+  type RasterFormat,
+  type ScanSuccess,
+  type SupportedItemNode,
+} from "./figma-export";
 
 /** Above this, a single export risks running too long / too large in the plugin sandbox — fail explicitly rather than let it hang or produce a partial ZIP. */
 const MAX_EXPORTABLE_ITEMS = 300;
@@ -48,6 +55,9 @@ export function assembleComposition(
       width: layout.width,
       height: layout.height,
       backgroundColor: layout.backgroundColor,
+      // Omitted rather than false, so a clipping (the common, Figma-default)
+      // layout's JSON stays exactly as it looked before this was captured.
+      clipsContent: layout.clipsContent === true ? undefined : layout.clipsContent,
       items: layout.items.map((item) => ({
         id: item.name,
         name: item.name,
@@ -56,6 +66,9 @@ export function assembleComposition(
         width: item.width,
         height: item.height,
         zIndex: item.zIndex,
+        // Omitted rather than 0, so an unrotated (the common case) item's
+        // JSON stays exactly as it looked before rotation was supported.
+        rotation: item.rotation === 0 ? undefined : item.rotation,
       })),
     })),
   };
@@ -92,6 +105,12 @@ function uniqueStem(layoutName: string, itemName: string, used: Set<string>): st
  * keeps per-layout image overrides simple to reason about, at the cost of
  * some possibly-redundant image bytes in the resulting ZIP.
  *
+ * Each item's actual export format is chosen individually by
+ * formatForNode — a mix of vector icons and photographic images in the
+ * same layout export as a mix of SVG and raster, rather than forcing one
+ * format on everything; rasterFormat is only the preference used where an
+ * item ends up rasterized at all.
+ *
  * Looks up each item's live Figma node from the original scan by
  * (layout id, item id) — assembleComposition sets those to the scanned
  * layout/item names, so every item it produced has a matching node here.
@@ -99,7 +118,7 @@ function uniqueStem(layoutName: string, itemName: string, used: Set<string>): st
 export async function attachImages(
   composition: Composition,
   scan: ScanSuccess,
-  format: ImageFormat,
+  rasterFormat: RasterFormat,
 ): Promise<ImageExportOutcome> {
   const totalItems = composition.layouts.reduce((sum, layout) => sum + layout.items.length, 0);
   if (totalItems > MAX_EXPORTABLE_ITEMS) {
@@ -136,6 +155,8 @@ export async function attachImages(
           errors: [`Couldn't find the live Figma layer for "${layout.id}/${item.id}" to export its image.`],
         };
       }
+
+      const format = await formatForNode(node, rasterFormat);
 
       let bytes: Uint8Array;
       try {

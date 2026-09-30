@@ -1,10 +1,12 @@
 import { build } from "esbuild";
 import { mkdirSync, readFileSync, watch as watchDir, writeFileSync } from "node:fs";
+import { buildTokens, TOKENS_DIR } from "@paster/tokens";
 
 const isWatch = process.argv.includes("--watch");
 
 async function buildOnce() {
   mkdirSync("dist", { recursive: true });
+  await buildTokens("src/tokens.css");
 
   // Figma's plugin UI is a single string passed to figma.showUI(__html__, ...);
   // there's no server to resolve a sibling <script src="ui.js">, so the UI's
@@ -19,7 +21,7 @@ async function buildOnce() {
   });
   const uiScript = uiBundle.outputFiles[0].text;
   // Shared design tokens come first so ui.css's own rules can reference them.
-  const uiStyle = readFileSync("../tokens/tokens.css", "utf8") + "\n" + readFileSync("src/ui.css", "utf8");
+  const uiStyle = readFileSync("src/tokens.css", "utf8") + "\n" + readFileSync("src/ui.css", "utf8");
 
   const template = readFileSync("src/ui.html", "utf8");
   const html = template
@@ -41,9 +43,9 @@ async function buildOnce() {
 await buildOnce();
 
 if (isWatch) {
-  console.log("Watching plugin/src for changes...");
+  console.log("Watching plugin/src and tokens/ for changes...");
   let pending = false;
-  watchDir("src", { recursive: true }, () => {
+  const rebuild = () => {
     if (pending) {
       return;
     }
@@ -54,5 +56,7 @@ if (isWatch) {
         .then(() => console.log("Rebuilt."))
         .catch((error) => console.error(error));
     }, 100);
-  });
+  };
+  watchDir("src", { recursive: true }, rebuild);
+  watchDir(TOKENS_DIR, rebuild);
 }

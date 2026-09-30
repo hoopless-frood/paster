@@ -131,6 +131,10 @@ function checkLayouts(
       errors.push(`${path}.backgroundColor: must be a string when present`);
     }
 
+    if (layout.clipsContent !== undefined && typeof layout.clipsContent !== "boolean") {
+      errors.push(`${path}.clipsContent: must be a boolean when present`);
+    }
+
     const itemIds = checkItems(layout.items, assetIds, path, errors);
     if (itemIds) {
       if (referenceItemIds === null) {
@@ -199,6 +203,10 @@ function checkItems(
       } else {
         zIndexes.add(zIndex);
       }
+    }
+
+    if (item.rotation !== undefined) {
+      checkFiniteNumber(item.rotation, `${path}.rotation`, errors);
     }
 
     if (item.assetId !== undefined) {

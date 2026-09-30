@@ -4,3 +4,7 @@ dist
 *.tsbuildinfo
 .atp
 .DS_Store
+
+# Generated from tokens/*.json by tokens/build.mjs
+playground/src/tokens.css
+plugin/src/tokens.css

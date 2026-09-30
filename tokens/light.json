@@ -1,0 +1,25 @@
+{
+  "color": {
+    "blossom": { "value": "#f1c3d4" },
+    "rosewood": { "value": "#da9db4" },
+    "ink": { "value": "#111" },
+    "magentaHaze": { "value": "#963458" },
+    "wisteria": { "value": "#675382" }
+  },
+  "font": {
+    "body": {
+      "value": "\"Atkinson Hyperlegible Next\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+    }
+  },
+  "surface": { "value": "#f7f4ef" },
+  "bg": { "value": "{surface}" },
+  "text": { "value": "#111" },
+  "border": { "value": "#ddd" },
+  "muted": { "value": "#555" },
+  "canvasBg": { "value": "#fff" },
+  "accentText": { "value": "{color.magentaHaze}" },
+  "errorText": { "value": "#b00020" },
+  "warningText": { "value": "#8a5300" },
+  "hover": { "value": "{color.magentaHaze}" },
+  "scrollbarHover": { "value": "{color.wisteria}" }
+}

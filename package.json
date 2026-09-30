@@ -10,7 +10,7 @@
     "build": "pnpm -r run build",
     "build:plugin": "pnpm --filter \"@paster/plugin...\" run build",
     "dev:plugin": "pnpm --filter @paster/plugin dev",
-    "dev": "pnpm --filter @paster/demo dev",
+    "dev": "pnpm --filter @paster/playground dev",
     "test": "pnpm -r run test",
     "typecheck": "pnpm -r run typecheck"
   },

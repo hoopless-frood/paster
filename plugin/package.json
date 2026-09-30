@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.138.0",
+    "@paster/tokens": "workspace:*",
     "esbuild": "^0.28.2",
     "typescript": "^5.9.0",
     "vitest": "^5.0.1"

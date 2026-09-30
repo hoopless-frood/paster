@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import type { ExportedImage, ImageFormat, LayoutSummary, MainToUiMessage, UiToMainMessage } from "./protocol";
+import type { ExportedImage, LayoutSummary, MainToUiMessage, RasterFormat, UiToMainMessage } from "./protocol";
 
 const statusEl = document.getElementById("status") as HTMLParagraphElement;
 const formEl = document.getElementById("layouts") as HTMLDivElement;
@@ -11,6 +11,7 @@ const warningsEl = document.getElementById("warnings") as HTMLUListElement;
 const modeInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="mode"]'));
 const formatRowEl = document.getElementById("format-row") as HTMLLabelElement;
 const formatSelectEl = document.getElementById("format") as HTMLSelectElement;
+const formatHintEl = document.getElementById("format-hint") as HTMLParagraphElement;
 
 function sendToMain(message: UiToMainMessage): void {
   parent.postMessage({ pluginMessage: message }, "*");
@@ -44,7 +45,9 @@ function slugify(name: string): string {
 
 modeInputs.forEach((input) => {
   input.addEventListener("change", () => {
-    formatRowEl.hidden = currentMode() !== "zip";
+    const isZip = currentMode() === "zip";
+    formatRowEl.hidden = !isZip;
+    formatHintEl.hidden = !isZip;
     updateExportButtonLabel();
   });
 });
@@ -169,9 +172,9 @@ exportButton.addEventListener("click", () => {
   exportButton.disabled = true;
 
   if (currentMode() === "zip") {
-    const format = formatSelectEl.value as ImageFormat;
+    const rasterFormat = formatSelectEl.value as RasterFormat;
     exportButton.textContent = "Exporting images…";
-    sendToMain({ type: "export", minWidths, mode: "zip", format });
+    sendToMain({ type: "export", minWidths, mode: "zip", rasterFormat });
   } else {
     sendToMain({ type: "export", minWidths, mode: "json" });
   }
