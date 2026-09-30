@@ -46,7 +46,7 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
 
       <div className={styles.widthGroup}>
         <label htmlFor={viewportInputId}>
-          <span>Preview width: {viewportWidth}px</span> <span>({activeLayout.name})</span>
+          <span>Viewport width: {viewportWidth}px</span> <span>({activeLayout.name})</span>
         </label>
 
         <Slider

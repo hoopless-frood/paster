@@ -122,7 +122,7 @@ export async function attachImages(
     return {
       ok: false,
       errors: [
-        `This composition has ${totalItems} items — more than the ${MAX_EXPORTABLE_ITEMS} a single image export supports. Use geometry-only JSON export instead, or export fewer layouts.`,
+        `This composition has ${totalItems} items — more than the ${MAX_EXPORTABLE_ITEMS} a single image export supports. Use Copy JSON instead, or export fewer layouts.`,
       ],
     };
   }

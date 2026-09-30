@@ -32,7 +32,9 @@ paster                    ← the composition: select this frame to export
   *same layer name* in every layout it appears in, so the plugin knows
   they're the same item positioned differently per breakpoint. A name only
   needs to be unique *within* its own layout; the same name naturally
-  recurs across layouts (that's the point).
+  recurs across layouts (that's the point). An item can also appear in
+  only some layouts: leave it out of (or hide it in) the others, and the
+  plugin just warns, in case that wasn't intentional.
 - Layouts and items just need to be **visible, direct children** — a layout
   nested inside another frame, or an item nested inside a group, won't be
   found. See [Groups](#groups-and-nesting) below for the common way this
@@ -49,19 +51,19 @@ warning rather than blocking the rest of the export.
 
 **Groups are not supported as items or as layouts.** If a layer is a Group,
 ungroup it (`Shift+Ctrl+G` / `Shift+Cmd+G`) or flatten it into a single
-layer, then re-run the scan. The plugin's warning for this
+layer, then click **Refresh**. The plugin's warning for this
 (`a group isn't supported yet (ungroup or flatten it)`) tells you exactly
 which layer needs it.
 
-Nested groups, and content nested more than one level inside a layout
-(e.g. an item inside a frame inside a frame), aren't read at all — only
-direct children of a layout frame become items. If you need visual
-grouping for organization in Figma, flatten it before exporting; each
-piece of visible content should be a single, direct child of its layout.
+Only direct children of a layout frame become items. To keep several
+layers together as one item, put them in a **frame** instead of a group
+(`Ctrl+Alt+G` / `Cmd+Option+G`): a frame item is exported as a single
+image of everything inside it. The layers inside it aren't separate
+items, so they can't be positioned independently per layout.
 
 ## Breakpoints and layout order
 
-Every layout frame you select becomes a breakpoint. There's no limit to
+Every layout frame inside the composition becomes a breakpoint. There's no limit to
 two — add as many layouts as you have distinct arrangements. The plugin
 sets each layout's min-width automatically from frame widths: the
 narrowest layout gets 0 (the base, mobile-first layout), and every other
@@ -73,10 +75,11 @@ your CMS.
 
 ## Rotation
 
-An item's own rotation is fully supported and exported as-is — rotate a
-layer in Figma exactly as you would normally, and the exported item
-carries that angle, matching what Figma's own rotation field shows you (a
-positive value tilts clockwise, same as Figma's UI and ordinary CSS).
+An item's own rotation is fully supported: rotate a layer in Figma as you
+normally would. Figma's Rotation field counts counterclockwise as
+positive, while the exported `rotation` counts clockwise as positive, like
+CSS. So the exported value is the negative of what Figma shows: a layer at
+151.43° in Figma exports as `-151.43`.
 
 What's *not* supported is rotating a **layout** frame or the **composition**
 frame itself — a rotated layout is skipped entirely with a warning; a
@@ -131,8 +134,8 @@ delivery format; a CMS or asset pipeline is expected to re-optimize them
 
 A single export supports up to 300 items across all its layouts combined.
 Past that, image export is refused outright (with a clear error) rather
-than silently producing a slow, partial ZIP — use geometry-only JSON
-export instead, or split into fewer layouts/items.
+than silently producing a slow, partial ZIP — use **Copy JSON** instead,
+or split into fewer layouts/items.
 
 ## Troubleshooting: common warnings
 
@@ -159,17 +162,14 @@ everything else above degrades gracefully.
 
 Not yet supported, tracked as backlog work (see [PLAN.md](../PLAN.md)):
 
-- **Groups**, nested compositions, and anything more than one level deep
-  inside a layout.
+- **Groups**, and nested compositions (layers inside an item positioned
+  independently per layout).
 - **Transforms other than rotation** — skew, non-uniform scale, and
   Figma's corner/edge constraints.
 - **Masks** and clipping paths (beyond a layout frame's own Clip content
   toggle).
-- **Auto Layout**, on a layout frame (blocked) or the composition frame
-  (untested, proceeds with a warning).
-- **Layout-specific item visibility** — every visible item in a layout is
-  exported; there's no way to include an item in one layout's arrangement
-  but omit it from another's while keeping the same identity.
+- **Auto Layout**, on a layout frame (that layout is skipped, with a
+  warning) or the composition frame (untested, proceeds with a warning).
 - **Effects that paint outside a layer's own box**, such as a drop
   shadow or an outside stroke, are cut off at the layer's edges in its
   exported image, which covers exactly the layer's own width × height.

@@ -6,14 +6,14 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 ## Decisions and invariants
 
-- Monorepo: pnpm workspaces, TypeScript; CSS Modules for the React renderer and demo. Vite for demo, esbuild for plugin bundle; use a test runner such as Vitest where appropriate.
+- Monorepo: pnpm workspaces, TypeScript; CSS Modules for the React renderer and playground. Vite for the playground, esbuild for plugin bundle; use a test runner such as Vitest where appropriate.
 - Folders: `plugin/`, `packages/core/`, `frontend/react/`, `playground/`.
 - Model: `Composition → Layout → Item`; `Item` is the public positioned-object term. In Figma, a Layout is a Frame node; an Item is not necessarily one. Keep Figma-specific node types at the adapter boundary.
 - A selected parent Figma frame holds named layout frames; do not require exactly two layouts. Layout selection uses explicit, validated viewport minimum widths, including one base layout at 0; design-space width is not implicitly the CSS breakpoint.
 - Coordinates and dimensions are relative to the layout frame. `zIndex` reflects each layout's Figma child stacking order, independently; the MVP accepts only visible, unrotated direct children of ordinary layout frames.
 - Item identity links layouts to shared content; assets and content remain separate from layout geometry. Support per-layout asset overrides for differing rendered crops. A production consumer may supply its own asset mapping.
 - Version exports (`version: 1`). Keep an explicit schema and validate all untrusted JSON before rendering. No automatic uploads, external image hosting, or Figma account authentication in the MVP.
-- Geometry-only JSON export and composition-with-images ZIP export are separate modes. ZIP contains `composition.json` plus relative-path images. The demo resolves imported images locally and releases object URLs during cleanup.
+- Geometry-only JSON (Copy JSON) and composition-with-images ZIP (Export ZIP) are separate exports. ZIP contains `composition.json` plus relative-path images. The playground resolves imported images locally and releases object URLs during cleanup.
 - For MVP image fidelity, export **rendered** images per item (including Figma crop/visual treatment); do not mistake them for original production images. Preserve image aspect ratio, avoid accidental double cropping, and document the flattened-image trade-off.
 - Use a README for people and `CLAUDE.md` for concise working conventions. Keep the public repository free of private assets, credentials, and client information. Choose a license explicitly before publishing.
 

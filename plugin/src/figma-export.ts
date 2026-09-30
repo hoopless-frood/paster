@@ -167,17 +167,13 @@ function isRotated(rotation: number): boolean {
 }
 
 /**
- * Figma's `node.rotation` is counterclockwise-positive (the plugin API's own
- * documented convention), while the composition schema (and CSS's
- * `rotate()`, which is what ultimately renders it) is clockwise-positive —
- * the same convention Figma's own UI displays to a designer. Converting
- * once here, at the export boundary, means everything downstream (the
- * schema, the renderer) can treat "rotation" as an ordinary clockwise
- * degrees value without re-deriving this each time.
- *
- * NOTE: this specific sign flip hasn't been confirmed against a real
- * rotated Figma layer in this environment (no way to launch Figma here) —
- * verify a rotated export visually matches its source before relying on it.
+ * Figma's `node.rotation` is counterclockwise-positive, and its Rotation
+ * field shows the same value (a layer at 151.43° there reads 151.43 here).
+ * The composition schema, like CSS's `rotate()` that ultimately renders
+ * it, is clockwise-positive, so the exported value is the negation of what
+ * a designer sees in Figma. Converting once here, at the export boundary,
+ * means everything downstream can treat `rotation` as ordinary clockwise
+ * degrees.
  */
 export function figmaRotationToCss(rotation: number): number {
   if (Math.abs(rotation) <= ROTATION_EPSILON) {

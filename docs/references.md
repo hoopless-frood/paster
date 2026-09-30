@@ -19,11 +19,12 @@ Paster uses the **Figma Plugin API**, not the REST API. The plugin runs inside F
 - [Children](https://developers.figma.com/docs/plugins/api/properties/nodes-children/) — Traverse child nodes and determine stacking order.
 - [itemReverseZIndex](https://developers.figma.com/docs/plugins/api/properties/nodes-itemreversezindex/) — Reversed stacking in Auto Layout.
 
-Paster uses bounding boxes to calculate frame coordinates relative to each
-layout's origin. Child order determines the exported z-index. An item's own
-`rotation` is read and converted to CSS's clockwise-positive convention (see
-[figma-guide.md](./figma-guide.md#rotation)) — Figma's own value is
-counterclockwise-positive.
+Paster reads each item's own `x`/`y`/`width`/`height`, which describe its
+unrotated frame relative to its layout's origin (not its bounding box,
+which grows when the item is rotated). Child order determines the exported
+z-index. An item's own `rotation` is read and converted to CSS's
+clockwise-positive convention (see [figma-guide.md](./figma-guide.md#rotation));
+Figma's own value is counterclockwise-positive.
 
 ## Images and SVG
 
