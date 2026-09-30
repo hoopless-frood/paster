@@ -24,8 +24,8 @@ conventions, see [figma-guide.md](./figma-guide.md).
        ▼
 ┌──────────────┐
 │ packages/    │  Versioned schema + validation (framework-independent,
-│ core/        │  no Figma or browser dependency). Every other package
-│ @paster/core │  depends on this; nothing depends on Figma except plugin/.
+│ core/        │  no Figma or browser dependency). The plugin, renderer
+│ @paster/core │  and playground depend on this; only plugin/ uses Figma.
 └──────┬───────┘
        │  validated Composition
        ▼
@@ -66,9 +66,9 @@ of the composition, in its own folder. For example,
 | Package | Depends on | Owns | Never touches |
 | --- | --- | --- | --- |
 | `packages/core` (`@paster/core`) | nothing (workspace-internal) | Schema types, `validateComposition`, `selectLayout` (breakpoint selection), the sample composition | Figma's plugin API, the DOM, React |
-| `plugin/` (`@paster/plugin`) | `@paster/core` | Reading Figma's live document (`figma.*`), converting Figma-specific concepts (rotation sign, node types, fills, image export) into the neutral schema, assembling the ZIP | Rendering anything — the plugin never shows a preview, only produces JSON/a ZIP |
+| `plugin/` (`@paster/plugin`) | `@paster/core`, `@paster/tokens` | Reading Figma's live document (`figma.*`), converting Figma-specific concepts (rotation sign, node types, fills, image export) into the neutral schema, deriving breakpoint min-widths from frame widths, and the panel that shows, copies and downloads the result | Rendering a composition — the panel shows the generated JSON, never a preview of the layout |
 | `frontend/react/` (`@paster/react`) | `@paster/core` | Turning a validated `Composition` into positioned, responsive DOM (`item-style.ts`'s geometry math, `Composition`/`Item` components) | Where content comes from (that's `resolveContent`, supplied by the consumer), any bundler-specific tooling |
-| `playground/` (`@paster/playground`) | `@paster/core`, `@paster/react` | Import UI (paste/upload JSON or ZIP), viewport preview, its own `resolveContent` that resolves ZIP-imported images to blob URLs | Anything reusable by *other* consumers — playground-only concerns (its own CSS, its own ZIP-parsing) stay local to it |
+| `playground/` (`@paster/playground`) | `@paster/core`, `@paster/react`, `@paster/tokens` | Import UI (paste/upload JSON or ZIP, load the examples), viewport preview, its own `resolveContent` that resolves ZIP-imported images to blob URLs, and the About page | Anything reusable by *other* consumers — playground-only concerns (its own CSS, its own ZIP-parsing) stay local to it |
 | `tokens/` (`@paster/tokens`) | `style-dictionary` | Design token sources (`light.json`, `dark.json`) and `build.mjs`, which generates each consumer's `tokens.css` | Component-specific styles — those live with each consumer |
 
 `tokens/light.json` is the complete default theme; `tokens/dark.json`
@@ -118,9 +118,11 @@ embedding image data directly. This is deliberate, not incidental:
 | Schema fields, validation rules | `packages/core/src/types.ts`, `validate.ts` |
 | Breakpoint (layout) selection | `packages/core/src/breakpoints.ts` |
 | Figma scanning, node type support, rotation sign conversion, image format auto-detection | `plugin/src/figma-export.ts` |
-| ZIP assembly, path/naming collision handling | `plugin/src/assemble.ts` |
+| Building the composition, breakpoint min-widths, image export, path/naming collision handling | `plugin/src/assemble.ts` |
+| Plugin panel, JSON view, ZIP download | `plugin/src/ui.ts`, `plugin/src/json-view.ts` |
 | Plugin ↔ UI thread messages | `plugin/src/protocol.ts` |
 | Item positioning/rotation math (the layout-relative % + rotation-pivot correction) | `frontend/react/src/item-style.ts` |
 | Composition-level rendering (background, clipping) | `frontend/react/src/Composition/Composition.tsx` |
 | ZIP import, blob URL lifecycle | `playground/src/components/JsonPanel/import-zip.ts` |
 | Shared color/font tokens, light/dark themes | `tokens/light.json`, `tokens/dark.json`, `tokens/build.mjs` |
+| Example compositions | `examples/` (the geometry example is kept identical to `sampleComposition` by `packages/core/src/sample.test.ts`) |
