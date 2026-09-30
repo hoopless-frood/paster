@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../Button/Button";
 import { FileUploadButton } from "../FileUploadButton/FileUploadButton";
 import { JsonEditor } from "../JsonEditor/JsonEditor";
 import { MessageList } from "../MessageList/MessageList";
 import { importComposition, jsonFileSizeError } from "./import-composition";
 import { importZip } from "./import-zip";
+import { loadSession, loadUploadedZip, saveSession, saveUploadedZip, type Example, type ZipSource } from "./session";
 // Bundled by Vite, so the example also works on the hosted playground.
 import collageZipUrl from "../../../../examples/collage/collage.zip?url";
 import type { JsonPanelProps } from "./JsonPanel.types";
@@ -14,10 +15,18 @@ export type { JsonPanelProps } from "./JsonPanel.types";
 
 const VALIDATE_DEBOUNCE_MS = 400;
 
-type Example = "collage" | "geometry";
+async function fetchCollageZip(): Promise<File> {
+  const response = await fetch(collageZipUrl);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return new File([await response.blob()], "collage.zip", { type: "application/zip" });
+}
 
 export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsChange }: JsonPanelProps) {
-  const [text, setText] = useState(() => JSON.stringify(sampleComposition, null, 2));
+  // What this tab last showed, if anything (see session.ts); read once.
+  const [saved] = useState(loadSession);
+  const [text, setText] = useState(() => saved?.text ?? JSON.stringify(sampleComposition, null, 2));
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   // Which button's action is in progress; all are disabled meanwhile.
@@ -25,7 +34,10 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   const isBusy = loadingAction !== null;
   // The example the editor currently shows, unchanged; its load button is
   // disabled. Starts as geometry, which is what the playground opens with.
-  const [loadedExample, setLoadedExample] = useState<Example | null>("geometry");
+  const [loadedExample, setLoadedExample] = useState<Example | null>(saved ? saved.loadedExample : "geometry");
+  // Where the current images came from, so they can be restored after a page load.
+  const [zipSource, setZipSource] = useState<ZipSource | null>(saved?.zipSource ?? null);
+  const restoredRef = useRef(false);
 
   // Every change to the editor's text goes through here (or the editor's own
   // onChange, which only fires for the user's edits), so loadedExample stays
@@ -55,6 +67,36 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
+
+  useEffect(() => {
+    saveSession({ text, loadedExample, zipSource });
+  }, [text, loadedExample, zipSource]);
+
+  // Restores a previous page load's composition, including any ZIP's images
+  // (which only lived in memory), then re-applies the saved text so edits
+  // made after that import are kept.
+  useEffect(() => {
+    if (!saved || restoredRef.current) {
+      return;
+    }
+    restoredRef.current = true;
+    runImport(saved.text);
+    if (!saved.zipSource) {
+      return;
+    }
+    const source = saved.zipSource;
+    void (async () => {
+      const file = source === "collage" ? await fetchCollageZip().catch(() => null) : await loadUploadedZip();
+      const result = file ? await importZip(file) : null;
+      if (result?.ok) {
+        onImportZip(result.composition, result.assetUrls);
+        runImport(saved.text);
+      } else if (source === "upload") {
+        setWarnings(["The uploaded ZIP's images couldn't be restored after the page reloaded. Upload it again to see them."]);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     onErrorsChange(errors.length > 0);
@@ -96,6 +138,10 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
         setWarnings(result.warnings);
         showText(JSON.stringify(result.composition, null, 2), example);
         onImportZip(result.composition, result.assetUrls);
+        setZipSource(example === "collage" ? "collage" : "upload");
+        if (example !== "collage") {
+          void saveUploadedZip(file);
+        }
       } else {
         setErrors(result.errors);
         setWarnings([]);
@@ -108,12 +154,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   async function handleLoadCollageExample() {
     setLoadingAction("collage");
     try {
-      const response = await fetch(collageZipUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const file = new File([await response.blob()], "collage.zip", { type: "application/zip" });
-      await handleZipFileSelected(file, "collage");
+      await handleZipFileSelected(await fetchCollageZip(), "collage");
     } catch {
       setErrors(["Couldn't load the collage example — try again, or upload a ZIP instead."]);
     } finally {
