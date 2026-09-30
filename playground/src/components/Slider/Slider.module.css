@@ -42,6 +42,25 @@
   border-radius: 100%;
 }
 
+/* The value label rides above the thumb, placed the same way as the marks. */
+.valueRow {
+  position: relative;
+  height: 1.3em;
+  margin-bottom: 6px;
+}
+
+.value {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--thumb-size) / 2 + var(--fraction) * (100% - var(--thumb-size)));
+  transform: translateX(calc(var(--fraction) * -100%));
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--paster-accent-text);
+}
+
 /* Marks sit where the thumb's center would be at their value. The thumb
    stays inside the input, so its center only travels from half a thumb in
    from each end, hence the thumb-size adjustment. */
@@ -57,8 +76,8 @@
 .mark {
   position: absolute;
   top: 0;
-  left: calc(var(--thumb-size) / 2 + var(--mark-fraction) * (100% - var(--thumb-size)));
-  transform: translateX(calc(var(--mark-fraction) * -100%));
+  left: calc(var(--thumb-size) / 2 + var(--fraction) * (100% - var(--thumb-size)));
+  transform: translateX(calc(var(--fraction) * -100%));
   appearance: none;
   background: none;
   border: none;
@@ -77,7 +96,7 @@
   content: "";
   position: absolute;
   top: 0;
-  left: calc(var(--mark-fraction) * 100% - 1px);
+  left: calc(var(--fraction) * 100% - 1px);
   width: 2px;
   height: 8px;
   background: currentColor;

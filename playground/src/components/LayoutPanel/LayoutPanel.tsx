@@ -43,8 +43,8 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
   return (
     <section className={styles.panel} aria-label="Layout">
       <div className={styles.widthGroup}>
-        <label htmlFor={viewportInputId}>
-          <span>Viewport width: {viewportWidth}px</span> <span>({activeLayout.name})</span>
+        <label htmlFor={viewportInputId} className="visually-hidden">
+          Viewport width
         </label>
 
         <Slider
@@ -52,6 +52,8 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
           min={MIN_VIEWPORT_WIDTH}
           max={maxViewportWidthFor(composition, widestWindowWidth)}
           value={viewportWidth}
+          valueLabel={`${viewportWidth}px`}
+          aria-valuetext={`${viewportWidth}px, ${activeLayout.name} layout`}
           onChange={(event) => setViewportWidth(Number(event.target.value))}
           marks={composition.layouts.map((layout) => ({
             value: layout.minWidth,

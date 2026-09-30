@@ -15,4 +15,6 @@ export type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & 
   onMarkSelect?: (value: number) => void;
   /** Accessible name for the group of marks. */
   marksLabel?: string;
+  /** Shown just above the thumb, following it. Visual only: use aria-valuetext for assistive tech. */
+  valueLabel?: ReactNode;
 };
