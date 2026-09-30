@@ -26,9 +26,27 @@ body {
 }
 
 h1 {
-  font-size: 13px;
   margin: 0 0 8px;
-  color: var(--paster-accent-text);
+}
+
+.wordmark {
+  display: block;
+  height: 20px;
+  width: auto;
+  aspect-ratio: 2235 / 626;
+  color: var(--paster-color-blossom);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 button {
