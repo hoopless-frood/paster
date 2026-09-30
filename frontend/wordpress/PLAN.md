@@ -138,11 +138,11 @@ Use CSS custom properties for geometry where appropriate.
 
 Generate or register breakpoint CSS safely, using validated numeric thresholds and composition-specific selectors.
 
-Ensure breakpoint behavior matches the React renderer.
+Ensure breakpoint behavior matches the React renderer: layouts are selected with CSS container queries against the block's own width (not the viewport), so a composition in a narrower column shows the layout for that width.
 
 **Acceptance criteria**
 
-A composition renders correctly on the public page at different viewport widths.
+A composition renders correctly on the public page at different widths, including inside narrower columns.
 
 Multiple Paster blocks work independently on the same page, including blocks with different breakpoint configurations.
 
@@ -315,7 +315,6 @@ These are not requirements for the initial WordPress integration.
 - [ ] Video assets.
 - [ ] Advanced SVG support and sanitization.
 - [ ] Crop and focal-point editing.
-- [ ] Container-query layout selection.
 
 ## WordPress integration
 

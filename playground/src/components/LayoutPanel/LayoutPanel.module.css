@@ -19,17 +19,24 @@
   margin: var(--section-space) 0;
 }
 
+.stage {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--section-space);
+  /* The unscaled preview can be wider than the stage; only its scaled
+     rendering should show, without a horizontal scrollbar. */
+  overflow-x: clip;
+}
+
+/* Exactly the slider's width (it never shrinks to fit), so the composition's
+   container queries see that width. An outline, not a border, so no width
+   is taken away from the composition. */
 .previewWrapper {
   position: relative;
-  box-sizing: border-box;
+  flex: none;
+  transform-origin: top center;
   background: var(--paster-canvas-bg);
-  border: 1px solid var(--paster-border);
-  /* Width is the simulated viewport, which may exceed the real one. Capping
-     it here scales the preview down to fit — safe because item geometry is
-     all layout-relative percentages, so the active layout (chosen from the
-     simulated width, not this rendered one) just shrinks proportionally. */
-  max-width: 100%;
-  margin: var(--section-space) auto 0;
+  outline: 1px solid var(--paster-border);
 }
 
 .itemPlaceholder {

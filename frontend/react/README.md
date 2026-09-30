@@ -29,6 +29,8 @@ const resolveContent: ItemContentResolver = (item, { asset }) => {
       alt={altTextByItemId[item.id] ?? ""}
       width={asset.width}
       height={asset.height}
+      // Every layout is in the page; lazy images in hidden layouts don't load.
+      loading="lazy"
       // Fill the item's box exactly. Exported images already match it, so
       // never crop with object-fit: cover (see docs/composition-format.md).
       style={{ display: "block", width: "100%", height: "100%", objectFit: "fill" }}
@@ -50,32 +52,34 @@ identity to accessible alt text (as in the example above,
 you've reviewed — never a silent default. If an item is purely decorative,
 render it with `alt=""` explicitly, not by omitting `alt`.
 
-## Breakpoint selection and viewport tracking
+## Breakpoint selection
 
-The active layout is chosen via `@paster/core`'s `selectLayout` — mobile-first,
-the layout with the largest `minWidth` not exceeding the current viewport
-width.
+Layouts are chosen by CSS, not JavaScript. `PasterComposition` renders every
+layout and makes itself a size container (`container-type: inline-size`); a
+small generated `<style>` then shows the layout with the largest `minWidth`
+that doesn't exceed **the composition's own width**, using `@container`
+rules. Only those breakpoint numbers are generated; the rest of the styling
+is in the component's CSS module.
 
-- **Uncontrolled (default):** omit `viewportWidth` and the component tracks
-  `window.innerWidth` reactively, updating on resize.
-- **Controlled:** pass `viewportWidth` explicitly to pin rendering to a known
-  width — for SSR determinism, tests, or a fixed-size embed. The window is
-  never touched in this mode.
+That means:
 
-## SSR behavior
+- **It follows the space the composition is given**, not the window. In a
+  700px column on a wide screen, or with padding around it, the composition
+  shows the layout designed for 700px. At full page width, the two are the
+  same.
+- **It works on the server and without JavaScript.** Server-rendered HTML
+  already contains every layout and the rules that choose between them, so
+  the right layout shows from the first paint, with no swap after hydration.
+- **Hidden layouts are still in the page.** Render images with
+  `loading="lazy"`, as above, so a layout's images only download once it's
+  shown.
 
-`PasterComposition` renders safely with no `window` global (e.g. under
-`react-dom/server`). Without an explicit `viewportWidth`, the very first
-render — server-side, and the client's first paint before hydration — always
-uses width `0`, which resolves to the composition's required base layout
-(`minWidth: 0`). After mount, an uncontrolled component switches to the real
-`window.innerWidth` and re-renders with the matching layout.
+Browser support: container queries work in Chrome and Edge 105+, Safari
+16+, and Firefox 110+.
 
-This means an uncontrolled composition server-rendered above the base
-layout's breakpoint will visibly swap layouts immediately after hydration —
-expected, not a bug. If that flash is undesirable, pass `viewportWidth`
-explicitly (e.g., from a server-side viewport hint) to render the correct
-layout deterministically from the start.
+If your site uses a Content Security Policy, the generated `<style>` element
+needs `style-src` to allow inline styles (a nonce or `'unsafe-inline'`), as
+the inline `style` attributes that position each item already do.
 
 ## Development
 

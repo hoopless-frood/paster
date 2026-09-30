@@ -19,7 +19,7 @@ troubleshooting, see [figma-guide.md](./figma-guide.md).
   sharing a pool of **Assets**.
 - A **Layout** is one breakpoint's arrangement: a design-space canvas
   (`width` × `height`) containing positioned **Items**, active starting at a
-  given viewport width (`minWidth`). In Figma, a Layout corresponds to an
+  given width of the composition itself (`minWidth`). In Figma, a Layout corresponds to an
   actual Figma Frame node.
 - An **Item** is a single positioned object within a layout — coordinates,
   size, stacking order, and (optionally) which asset it renders. Unlike a
@@ -59,7 +59,7 @@ interface Composition {
 interface Layout {
   id: string;
   name: string;
-  minWidth: number; // viewport width (CSS px) this layout activates at
+  minWidth: number; // the composition's own width (CSS px) this layout applies from
   width: number;    // design-space width of the layout
   height: number;   // design-space height of the layout
   backgroundColor?: string; // CSS color from the layout frame's own Figma fill
@@ -160,13 +160,20 @@ child order at export time).
 
 ## Breakpoint selection
 
-Layout selection is mobile-first, like a CSS `min-width` media query: given a
-viewport width, the active layout is the one with the **largest `minWidth`
-that does not exceed the viewport width**. This is deterministic regardless
-of the order layouts appear in the `layouts` array.
+Layout selection is mobile-first, like a CSS `min-width` query, measured
+against **the composition's own width**, not the window's: the active layout
+is the one with the **largest `minWidth` that does not exceed the width the
+composition is rendered at**. This is deterministic regardless of the order
+layouts appear in the `layouts` array.
+
+Measuring the composition rather than the window means one placed in a
+narrower column, or with padding around it, shows the layout designed for
+the space it actually has; at full page width, the two are the same. In CSS
+this is a container query, which is how `@paster/react` does it; code that
+needs the answer itself can use:
 
 ```ts
-function selectLayout(composition: Composition, viewportWidth: number): Layout;
+function selectLayout(composition: Composition, width: number): Layout;
 ```
 
 A composition's design-space `width` is **not** implicitly its CSS
@@ -324,11 +331,11 @@ Automated tests cover `importZip` against synthetic archives; the following
 needs a real Figma file and a real plugin export, and isn't automated:
 
 - [ ] Export a composition with at least two layouts as a ZIP; every layout's
-      images appear correctly when the playground's viewport slider crosses
+      images appear correctly when the playground's width slider crosses
       into that layout.
 - [ ] Each item's image matches the source Figma layer exactly — no
       unintended second crop, letterboxing, or stretch — at both a layout's
-      native size and other viewport widths.
+      native size and other widths.
 - [ ] A rotated item lands in the same position, at the same angle, as in
       Figma — including a heavily rotated one (close to 90°/180°), where a
       wrong rotation pivot is most visibly off. If it visibly drifts, the

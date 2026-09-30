@@ -1,6 +1,6 @@
 # Paster playground
 
-A Vite + React app for previewing Paster compositions: load JSON or a ZIP export from the Figma plugin, and see how it renders at any viewport width. It's a reference consumer of [`@paster/core`](../packages/core) and [`@paster/react`](../frontend/react), and this repository's own dev tool. A hosted copy runs at [paster.annapearson.dev](https://paster.annapearson.dev/).
+A Vite + React app for previewing Paster compositions: load JSON or a ZIP export from the Figma plugin, and see how it renders at any width. It's a reference consumer of [`@paster/core`](../packages/core) and [`@paster/react`](../frontend/react), and this repository's own dev tool. A hosted copy runs at [paster.annapearson.dev](https://paster.annapearson.dev/).
 
 For how to *use* it, see [Preview](../README.md#preview) in the main README. This file is for working on it.
 

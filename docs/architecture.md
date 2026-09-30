@@ -38,9 +38,9 @@ conventions, see [figma-guide.md](./figma-guide.md).
        ▼
 ┌──────────────┐
 │ playground/  │  Reference consumer (Vite + @paster/core + @paster/react).
-│ @paster/     │  Imports JSON or a ZIP, previews it live across viewport
-│ playground   │  widths. Not required to use Paster — just the fastest
-└──────────────┘  way to check an export, and this repo's own dev tool.
+│ @paster/     │  Imports JSON or a ZIP and previews it live at any width.
+│ playground   │  Not required to use Paster — just the fastest way to
+└──────────────┘  check an export, and this repo's own dev tool.
 ```
 
 A real production consumer replaces the playground's role: it imports
@@ -123,6 +123,7 @@ embedding image data directly. This is deliberate, not incidental:
 | Plugin ↔ UI thread messages | `plugin/src/protocol.ts` |
 | Item positioning/rotation math (the layout-relative % + rotation-pivot correction) | `frontend/react/src/item-style.ts` |
 | Composition-level rendering (background, clipping) | `frontend/react/src/Composition/Composition.tsx` |
+| Breakpoints (the generated container-query CSS that picks a layout) | `frontend/react/src/Composition/breakpoint-css.ts` |
 | ZIP import, blob URL lifecycle | `playground/src/components/JsonPanel/import-zip.ts` |
 | Shared color/font tokens, light/dark themes | `tokens/light.json`, `tokens/dark.json`, `tokens/build.mjs` |
 | Example compositions | `examples/` (the geometry example is kept identical to `sampleComposition` by `packages/core/src/sample.test.ts`) |

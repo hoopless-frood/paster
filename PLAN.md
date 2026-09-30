@@ -14,7 +14,7 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 - Item identity links layouts to shared content; assets and content remain separate from layout geometry. Support per-layout asset overrides for differing rendered crops. A production consumer may supply its own asset mapping.
 - Version exports (`version: 1`). Keep an explicit schema and validate all untrusted JSON before rendering. No automatic uploads, external image hosting, or Figma account authentication in the MVP.
 - Geometry-only JSON (Copy JSON) and composition-with-images ZIP (Export ZIP) are separate exports. ZIP contains `composition.json` plus relative-path images. The playground resolves imported images locally and releases object URLs during cleanup.
-- Editing happens after Figma: the plugin exports with fixed defaults and no settings, and positions, animation settings and alt text are adjusted in the direct-manipulation editor (M8). Its output is still a plain, validated composition, so storing it in a CMS or database (see the backlog) never changes what gets edited.
+- Editing happens after Figma: the plugin exports with fixed defaults and no settings, and positions, animation settings and alt text are adjusted in the direct-manipulation editor (M9). Its output is still a plain, validated composition, so storing it in a CMS or database (see the backlog) never changes what gets edited.
 - For MVP image fidelity, export **rendered** images per item (including Figma crop/visual treatment); do not mistake them for original production images. Preserve image aspect ratio, avoid accidental double cropping, and document the flattened-image trade-off.
 - Use a README for people and `CLAUDE.md` for concise working conventions. Keep the public repository free of private assets, credentials, and client information. Choose a license explicitly before publishing.
 
@@ -96,8 +96,18 @@ Since committed, also extended past its original scope (moved out of the backlog
 **Accept:** upload a genuine export and reproduce all supported layouts without hand-entering image URLs.  
 **Committed:** `feat(demo): import complete Paster exports`
 
-### M8 — Direct manipulation
-Proves the MVP's editing model: an item's position and size are adjusted visually and the result is still a valid, portable composition. It's also the editing surface later milestones extend: M9 adds animation settings and M11 adds alt text to the same editor. A custom database can host the same editor (see Postgres in the backlog); a CMS such as WordPress or Sanity only stores and renders the JSON it produces.
+### M8 — CSS-driven breakpoints
+Layout selection moves from JavaScript to CSS container queries, and `minWidth` comes to mean the composition's own width rather than the window's, so a composition in a narrower column, or with padding around it, picks the arrangement designed for the space it actually has.
+- [ ] Render every layout, and select the visible one with a small generated `<style>` of `@container` rules, scoped per composition instance. Only the breakpoint numbers are generated; everything else stays in the CSS module.
+- [ ] Remove JavaScript width tracking (`useViewportWidth`) and the `viewportWidth` prop, so there's no layout swap after the page loads and layouts work without JavaScript.
+- [ ] Playground: render the preview at exactly the simulated width, scaled down to fit with a transform, so the container query sees the width the slider shows.
+- [ ] Document the new meaning of `minWidth`, browser support (container queries: Chrome/Edge 105+, Safari 16+, Firefox 110+), lazy-loading images in hidden layouts, and the Content Security Policy note for the generated `<style>`.
+
+**Accept:** a composition shows the right layout from its first paint, with or without JavaScript; placed in a narrower column, it shows the layout for that column's width; the playground's slider still previews every breakpoint exactly.  
+**Suggested commit:** `feat(react): select layouts with CSS container queries`
+
+### M9 — Direct manipulation
+Proves the MVP's editing model: an item's position and size are adjusted visually and the result is still a valid, portable composition. It's also the editing surface later milestones extend: M10 adds animation settings and M12 adds alt text to the same editor. A custom database can host the same editor (see Postgres in the backlog); a CMS such as WordPress or Sanity only stores and renders the JSON it produces.
 - [ ] **Direct-manipulation editor:** drag to move and resize items per layout, with keyboard nudging for accessibility, built on `@paster/react` so it edits exactly what renders.
 - [ ] Use it in the playground: edits update the JSON, are validated with `validateComposition` as they happen, and can be copied or downloaded.
 - [ ] Keep the editor independent of storage: it works on a `Composition`, with loading, saving and asset URLs behind a small documented adapter that a storage backend, such as a custom database, can implement.
@@ -105,19 +115,19 @@ Proves the MVP's editing model: an item's position and size are adjusted visuall
 **Accept:** moving and resizing an item in the playground, by pointer or keyboard, updates the JSON; importing that JSON again reproduces the edit exactly; an edit that would make the composition invalid is rejected.  
 **Suggested commit:** `feat(playground): direct manipulation of item geometry`
 
-### M9 — Motion and interaction
+### M10 — Motion and interaction
 - [ ] **Motion for layers:** entrance/exit transitions, per-item timing/easing, stagger, depth/parallax, and breakpoint transitions. Define declarative data model only after prototyping.
 - [ ] **Animation settings:** a declarative model for per-item settings (effect, duration, delay/stagger, easing) with composition-level defaults, stored with the composition rather than set in the Figma plugin. Decide whether it extends the schema (a version bump) or lives alongside it as separate metadata keyed by item id.
-- [ ] Add animation settings to the direct-manipulation editor (M8), with a preview of each item's motion.
+- [ ] Add animation settings to the direct-manipulation editor (M9), with a preview of each item's motion.
 - [ ] Render animation settings in `@paster/react`, respecting `prefers-reduced-motion`.
 - [ ] Honor `prefers-reduced-motion` with meaningful static equivalents.
 - [ ] Interactive layers, pointer/focus behavior, and stacking for interactive controls.
 
-**Accept:** animation settings edited in the M8 editor animate a composition in `@paster/react`; with `prefers-reduced-motion`, the same composition shows a meaningful static state, and interactive layers are reachable and usable by keyboard.  
+**Accept:** animation settings edited in the M9 editor animate a composition in `@paster/react`; with `prefers-reduced-motion`, the same composition shows a meaningful static state, and interactive layers are reachable and usable by keyboard.  
 **Suggested commit:** `feat(react): declarative motion and interaction`
 
-### M10 — Use Paster on another site
-Makes the packages installable outside this repository, so a real site can render compositions; M11's production images are hooked up on that site.
+### M11 — Use Paster on another site
+Makes the packages installable outside this repository, so a real site can render compositions; M12's production images are hooked up on that site.
 - [ ] Choose how the packages are distributed (npm under a scope you own, or GitHub Packages) and what they're named.
 - [ ] Make them installable: `"sideEffects": ["*.css"]` so bundlers keep the CSS imports, repository/homepage metadata, a README for `@paster/core`, and publishing through pnpm so the internal `workspace:*` dependency becomes a real version range.
 - [ ] Decide how styles ship: document that the site's bundler needs CSS Modules support (as Vite and Next.js have), or compile the styles to plain CSS at build time.
@@ -128,11 +138,11 @@ Makes the packages installable outside this repository, so a real site can rende
 **Accept:** a separate site installs the published packages, with no links into this repository, and renders a composition with its styles applied, on both the server and the client.  
 **Suggested commit:** `build: publish @paster/core and @paster/react`
 
-### M11 — Production images and alt text
+### M12 — Production images and alt text
 The plugin's exported PNG/SVG files are a starting point. In production, a site serves its own images (from a CDN, CMS or static files) and maps them in its `resolveContent`; descriptions are written in the editor.
 - [ ] **Hook up production images:** map each `Asset` (by `id`/`path`) to its production URL in a consumer's `resolveContent`, and document a reference implementation. The WordPress, Sanity and Postgres integrations in the backlog are concrete cases.
 - [ ] Responsive image delivery: `srcset`/`sizes` derived from each item's rendered width per layout, plus re-encoding exported PNGs (e.g. WebP/AVIF/JPG) downstream without changing asset ids or geometry.
-- [ ] **Alt text workflow:** written and edited in the direct-manipulation editor (M8), never derived from Figma layer names. Decorative images are an explicit choice (`alt=""`), not a missing value.
+- [ ] **Alt text workflow:** written and edited in the direct-manipulation editor (M9), never derived from Figma layer names. Decorative images are an explicit choice (`alt=""`), not a missing value.
 - [ ] Decide where alt text lives in the schema: `Asset.alt` today, but an item can point at a different asset (crop) per layout while needing one consistent description, which argues for a per-item field.
 - [ ] Surface missing alt text: a validation warning, and a flag on the item in the editor.
 
@@ -147,12 +157,12 @@ Planned in detail in [frontend/wordpress/PLAN.md](./frontend/wordpress/PLAN.md),
 
 ### Sanity integration
 
-Sanity stores and renders compositions as JSON; editing geometry happens in the playground's editor (M8), not in Studio.
+Sanity stores and renders compositions as JSON; editing geometry happens in the playground's editor (M9), not in Studio.
 - [ ] Define a composition document schema, with images as Sanity image assets.
 - [ ] Decide how images and alt text attach to items in Sanity: through the composition's assets, or as Sanity fields keyed by item id.
 - [ ] Import a plugin ZIP into Sanity, uploading its images as assets.
 - [ ] Validate documents with `validateComposition`, showing the same messages the playground does.
-- [ ] Render compositions from Sanity with `@paster/react`, mapping assets to Sanity image URLs (see M11 for responsive images and alt text).
+- [ ] Render compositions from Sanity with `@paster/react`, mapping assets to Sanity image URLs (see M12 for responsive images and alt text).
 - [ ] Document project setup, using the collage example as seed content.
 
 ### Postgres integration
@@ -160,7 +170,7 @@ Sanity stores and renders compositions as JSON; editing geometry happens in the 
 - [ ] Define a table schema and migrations for versioned compositions and their assets.
 - [ ] Store asset files and map them to URLs.
 - [ ] Build a minimal API to load and save compositions, validating with `validateComposition` on save.
-- [ ] Use the direct-manipulation editor (M8) on a small admin page, saving through the API via the storage adapter.
+- [ ] Use the direct-manipulation editor (M9) on a small admin page, saving through the API via the storage adapter.
 - [ ] Render compositions from Postgres with `@paster/react`.
 - [ ] Document setup (connection and migrations), using the collage example as seed data.
 
@@ -173,7 +183,7 @@ Sanity stores and renders compositions as JSON; editing geometry happens in the 
 - [ ] Support layout-specific visibility and non-identical item sets.
 - [ ] Persistent item identity independent of layer names (e.g., Figma plugin data).
 - [ ] Recover original image bytes, identify formats, deduplicate fills, translate crop modes/focal points, and assess production image quality.
-- [ ] Animated GIF support: not covered by the planned PNG/JPG/SVG export — Figma's render API (`exportAsync`) can't produce an animated GIF, so this depends on recovering original uploaded image bytes (above) rather than re-rendering through Figma. Also implicates `prefers-reduced-motion` handling (see M9) once animated content can appear.
+- [ ] Animated GIF support: not covered by the planned PNG/JPG/SVG export — Figma's render API (`exportAsync`) can't produce an animated GIF, so this depends on recovering original uploaded image bytes (above) rather than re-rendering through Figma. Also implicates `prefers-reduced-motion` handling (see M10) once animated content can appear.
 - [x] Support per-asset export format selection (choosing PNG/JPG/SVG per item rather than one format for the whole export). Landed as part of M6/M7 (see above), not as a separate commit.
 - [x] Investigate automatic vector/raster format detection (e.g., default vector-only items to SVG export). Landed as part of M6/M7 (see above) — went beyond "investigate" into a real implementation: vector node types always export SVG, photos rasterize, and format choice also accounts for alpha (PNG-sourced/unreadable fills never silently downgrade to JPG).
 
@@ -182,7 +192,6 @@ Sanity stores and renders compositions as JSON; editing geometry happens in the 
 
 ### Authoring and integrations
 - [ ] Compare imported composition with current version and preview a diff.
-- [ ] Container-query mode alongside viewport breakpoint mode.
 
 ### Public release
 For if Paster is released publicly; for now it's a personal tool.

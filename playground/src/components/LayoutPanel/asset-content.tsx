@@ -25,7 +25,8 @@ export function createAssetContentResolver(assetUrls: Map<string, string>, image
     // An <img> never executes scripts or loads external references from its
     // source, so this is safe for SVG assets too. asset.alt is the only
     // trustworthy alt text; without it, empty (decorative) beats guessing
-    // from Figma layer names.
-    return <img src={imageUrl} alt={context.asset?.alt ?? ""} className={styles.itemImage} />;
+    // from Figma layer names. Lazy, so images in the layouts CSS is hiding
+    // don't load until their layout is shown.
+    return <img src={imageUrl} alt={context.asset?.alt ?? ""} loading="lazy" className={styles.itemImage} />;
   };
 }

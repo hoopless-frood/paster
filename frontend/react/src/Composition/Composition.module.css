@@ -1,6 +1,13 @@
+/* The container whose width picks the layout (see breakpoint-css.ts). */
 .root {
-  position: relative;
+  container-type: inline-size;
   width: 100%;
+}
+
+/* Hidden until the generated breakpoint CSS shows it. */
+.layout {
+  display: none;
+  position: relative;
   aspect-ratio: var(--paster-layout-width) / var(--paster-layout-height);
   background: var(--paster-layout-background);
   /* Local stacking context, so item z-indices never leak into the page's. */

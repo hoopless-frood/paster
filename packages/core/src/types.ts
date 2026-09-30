@@ -27,7 +27,7 @@ export interface Item {
 export interface Layout {
   id: string;
   name: string;
-  /** Viewport width (CSS px) at which this layout becomes active. Exactly one layout must be 0. */
+  /** The composition's own width (CSS px) from which this layout applies. Exactly one layout must be 0. */
   minWidth: number;
   /** Design-space width of the layout. */
   width: number;

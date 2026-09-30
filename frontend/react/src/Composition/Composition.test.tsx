@@ -1,5 +1,5 @@
 import { sampleComposition } from "@paster/core";
-import { act, cleanup, render } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { PasterComposition, type ItemContentResolver } from "./Composition";
 
@@ -9,52 +9,70 @@ const resolveContent: ItemContentResolver = (item) => (
   <span data-testid={`item-${item.id}`}>{item.id}</span>
 );
 
-function itemWrapper(container: HTMLElement, itemId: string): HTMLElement {
-  const marker = container.querySelector(`[data-testid="item-${itemId}"]`);
+function layoutElement(container: HTMLElement, layoutId: string): HTMLElement {
+  const layout = container.querySelector<HTMLElement>(`[data-paster-layout="${layoutId}"]`);
+  if (!layout) {
+    throw new Error(`layout "${layoutId}" not rendered`);
+  }
+  return layout;
+}
+
+function itemWrapper(layout: HTMLElement, itemId: string): HTMLElement {
+  const marker = layout.querySelector(`[data-testid="item-${itemId}"]`);
   if (!marker?.parentElement) {
     throw new Error(`item "${itemId}" not rendered`);
   }
   return marker.parentElement;
 }
 
-function setWindowInnerWidth(width: number): void {
-  Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: width });
-  act(() => {
-    window.dispatchEvent(new Event("resize"));
-  });
-}
-
 describe("PasterComposition", () => {
-  it("renders the layout matching an explicit viewportWidth prop, proportionally", () => {
-    const { container } = render(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,
-    );
+  it("renders every layout, each with its own proportional geometry", () => {
+    const { container } = render(<PasterComposition composition={sampleComposition} resolveContent={resolveContent} />);
 
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.dataset.pasterLayout).toBe("mobile");
-    expect(root.style.getPropertyValue("--paster-layout-width")).toBe("375");
-    expect(root.style.getPropertyValue("--paster-layout-height")).toBe("812");
+    const mobile = layoutElement(container, "mobile");
+    expect(layoutElement(container, "desktop")).toBeTruthy();
+    expect(mobile.style.getPropertyValue("--paster-layout-width")).toBe("375");
+    expect(mobile.style.getPropertyValue("--paster-layout-height")).toBe("812");
 
     // mobile layout: image-a at x20,y40,w335 within a 375-wide layout
-    const imageA = itemWrapper(container, "image-a");
+    const imageA = itemWrapper(mobile, "image-a");
     expect(parseFloat(imageA.style.getPropertyValue("--paster-item-left"))).toBeCloseTo((20 / 375) * 100);
     expect(parseFloat(imageA.style.getPropertyValue("--paster-item-width"))).toBeCloseTo((335 / 375) * 100);
   });
 
-  it("applies each layout's own backgroundColor as a CSS custom property", () => {
-    const { container, rerender } = render(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,
-    );
+  it("selects the layout with container queries scoped to this instance", () => {
+    const { container } = render(<PasterComposition composition={sampleComposition} resolveContent={resolveContent} />);
+
     const root = container.firstElementChild as HTMLElement;
-    expect(root.style.getPropertyValue("--paster-layout-background")).toBe(
-      sampleComposition.layouts[0].backgroundColor,
+    const scope = root.dataset.pasterScope;
+    const css = root.querySelector("style")?.textContent ?? "";
+    expect(scope).toBeTruthy();
+    expect(css).toContain(`[data-paster-scope="${scope}"] > [data-paster-layout-index="0"] { display: block; }`);
+    expect(css).toContain("@container (min-width: 1024px)");
+  });
+
+  it("gives two compositions on one page separate scopes", () => {
+    const { container } = render(
+      <>
+        <PasterComposition composition={sampleComposition} resolveContent={resolveContent} />
+        <PasterComposition composition={sampleComposition} resolveContent={resolveContent} />
+      </>,
     );
 
-    rerender(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={1440} />,
+    const scopes = Array.from(container.querySelectorAll<HTMLElement>("[data-paster-scope]")).map(
+      (root) => root.dataset.pasterScope,
     );
-    const desktopRoot = container.firstElementChild as HTMLElement;
-    expect(desktopRoot.style.getPropertyValue("--paster-layout-background")).toBe(
+    expect(scopes).toHaveLength(2);
+    expect(scopes[0]).not.toBe(scopes[1]);
+  });
+
+  it("applies each layout's own backgroundColor as a CSS custom property", () => {
+    const { container } = render(<PasterComposition composition={sampleComposition} resolveContent={resolveContent} />);
+
+    expect(layoutElement(container, "mobile").style.getPropertyValue("--paster-layout-background")).toBe(
+      sampleComposition.layouts[0].backgroundColor,
+    );
+    expect(layoutElement(container, "desktop").style.getPropertyValue("--paster-layout-background")).toBe(
       sampleComposition.layouts[1].backgroundColor,
     );
   });
@@ -62,74 +80,36 @@ describe("PasterComposition", () => {
   it("falls back to transparent when a layout has no backgroundColor", () => {
     const composition = structuredClone(sampleComposition);
     delete composition.layouts[0].backgroundColor;
-    const { container } = render(
-      <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={320} />,
+    const { container } = render(<PasterComposition composition={composition} resolveContent={resolveContent} />);
+    expect(layoutElement(container, "mobile").style.getPropertyValue("--paster-layout-background")).toBe(
+      "transparent",
     );
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.style.getPropertyValue("--paster-layout-background")).toBe("transparent");
   });
 
   it("clips by default (Figma's own default), when a layout has no clipsContent at all", () => {
     const composition = structuredClone(sampleComposition);
     delete composition.layouts[0].clipsContent;
-    const { container } = render(
-      <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={320} />,
-    );
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.style.getPropertyValue("--paster-layout-overflow")).toBe("hidden");
+    const { container } = render(<PasterComposition composition={composition} resolveContent={resolveContent} />);
+    expect(layoutElement(container, "mobile").style.getPropertyValue("--paster-layout-overflow")).toBe("hidden");
   });
 
   it("stops clipping when a layout's clipsContent is explicitly false", () => {
     const composition = structuredClone(sampleComposition);
     composition.layouts[0].clipsContent = false;
-    const { container } = render(
-      <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={320} />,
-    );
-    const root = container.firstElementChild as HTMLElement;
-    expect(root.style.getPropertyValue("--paster-layout-overflow")).toBe("visible");
+    const { container } = render(<PasterComposition composition={composition} resolveContent={resolveContent} />);
+    expect(layoutElement(container, "mobile").style.getPropertyValue("--paster-layout-overflow")).toBe("visible");
   });
 
-  it("switches layout when the viewportWidth prop crosses a breakpoint", () => {
-    const { container, rerender } = render(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,
-    );
-    expect((container.firstElementChild as HTMLElement).dataset.pasterLayout).toBe("mobile");
-
-    rerender(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={1440} />,
-    );
-    expect((container.firstElementChild as HTMLElement).dataset.pasterLayout).toBe("desktop");
-  });
-
-  it("tracks window.innerWidth reactively when viewportWidth isn't provided", () => {
-    setWindowInnerWidth(320);
-    const { container } = render(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} />,
-    );
-    expect((container.firstElementChild as HTMLElement).dataset.pasterLayout).toBe("mobile");
-
-    setWindowInnerWidth(1440);
-    expect((container.firstElementChild as HTMLElement).dataset.pasterLayout).toBe("desktop");
-  });
-
-  it("changes stacking order independently per layout for the same item id", () => {
-    const { container, rerender } = render(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={320} />,
-    );
+  it("keeps each layout's stacking order independent for the same item id", () => {
+    const { container } = render(<PasterComposition composition={sampleComposition} resolveContent={resolveContent} />);
     const zIndexOf = (el: HTMLElement) => Number(el.style.getPropertyValue("--paster-item-z"));
+    const mobile = layoutElement(container, "mobile");
+    const desktop = layoutElement(container, "desktop");
 
     // mobile: image-b (zIndex 0) sits behind image-a (zIndex 1)
-    expect(zIndexOf(itemWrapper(container, "image-a"))).toBeGreaterThan(
-      zIndexOf(itemWrapper(container, "image-b")),
-    );
-
-    rerender(
-      <PasterComposition composition={sampleComposition} resolveContent={resolveContent} viewportWidth={1440} />,
-    );
+    expect(zIndexOf(itemWrapper(mobile, "image-a"))).toBeGreaterThan(zIndexOf(itemWrapper(mobile, "image-b")));
     // desktop: image-a (zIndex 0) sits behind image-b (zIndex 1) — the order flipped
-    expect(zIndexOf(itemWrapper(container, "image-a"))).toBeLessThan(
-      zIndexOf(itemWrapper(container, "image-b")),
-    );
+    expect(zIndexOf(itemWrapper(desktop, "image-a"))).toBeLessThan(zIndexOf(itemWrapper(desktop, "image-b")));
   });
 
   it("resolves an item's asset from composition.assets via assetId", () => {
@@ -137,7 +117,6 @@ describe("PasterComposition", () => {
     render(
       <PasterComposition
         composition={sampleComposition}
-        viewportWidth={320}
         resolveContent={(item, { asset }) => {
           seen.push(asset?.path);
           return item.id;
@@ -164,25 +143,20 @@ describe("PasterComposition", () => {
     }
     desktopImageA.assetId = "image-a-desktop-crop";
 
-    const seenByWidth: Record<number, string | undefined> = {};
-    let currentWidth = 320;
-    const trackingResolver: ItemContentResolver = (item, { asset }) => {
-      if (item.id === "image-a") {
-        seenByWidth[currentWidth] = asset?.path;
-      }
-      return null;
-    };
-
-    const { rerender } = render(
-      <PasterComposition composition={composition} viewportWidth={currentWidth} resolveContent={trackingResolver} />,
+    const seenByLayout: Record<string, string | undefined> = {};
+    render(
+      <PasterComposition
+        composition={composition}
+        resolveContent={(item, { asset, layout }) => {
+          if (item.id === "image-a") {
+            seenByLayout[layout.id] = asset?.path;
+          }
+          return null;
+        }}
+      />,
     );
 
-    currentWidth = 1440;
-    rerender(
-      <PasterComposition composition={composition} viewportWidth={currentWidth} resolveContent={trackingResolver} />,
-    );
-
-    expect(seenByWidth[320]).toBe("images/image-a.png");
-    expect(seenByWidth[1440]).toBe("images/image-a-desktop.png");
+    expect(seenByLayout.mobile).toBe("images/image-a.png");
+    expect(seenByLayout.desktop).toBe("images/image-a-desktop.png");
   });
 });
