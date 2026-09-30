@@ -3,6 +3,7 @@ packages:
   - packages/*
   - frontend/*
   - playground
+  - tokens
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:

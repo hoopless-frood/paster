@@ -5,52 +5,11 @@ body,
 }
 
 :root {
-  /* Colors */
-  --paster-bg: var(--paster-surface);
-  --paster-text: #111;
-  --paster-border: #ddd;
-  --paster-muted: #555;
-  --paster-canvas-bg: #fff;
-  --paster-accent-text: var(--paster-color-magenta-haze);
-  --paster-error-text: #b00020;
-  --paster-hover: var(--paster-color-magenta-haze);
-  --paster-scrollbar-hover: var(--paster-color-wisteria);
-
   /* Spacing */
   --edge-space: 1.5rem;
   --section-space: 20px;
   /* Transitions */
   --paster-transition: 150ms ease;
-}
-
-/* Dark values apply on system preference (unless the toggle explicitly
-   chose light) and, separately, whenever the toggle explicitly chose dark —
-   the toggle only sets data-theme for the current session, nothing is
-   persisted, so a refresh always goes back to following the system. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paster-bg: #19141f;
-    --paster-text: #eee;
-    --paster-border: #433654;
-    --paster-muted: var(--paster-color-wisteria);
-    --paster-accent-text: var(--paster-color-blossom);
-    --paster-error-text: #ff6b6b;
-    --paster-hover: var(--paster-color-magenta-haze);
-    --paster-canvas-bg: #241c30;
-    --focus-outline: var(--paster-color-blossom);
-  }
-}
-
-:root[data-theme="dark"] {
-  --paster-bg: #19141f;
-  --paster-text: #eee;
-  --paster-border: #433654;
-  --paster-muted: var(--paster-color-wisteria);
-  --paster-accent-text: var(--paster-color-blossom);
-  --paster-error-text: #ff6b6b;
-  --paster-hover: var(--paster-color-magenta-haze);
-  --paster-canvas-bg: #241c30;
-  --focus-outline: var(--paster-color-magenta-haze) solid 2px;
 }
 
 body {

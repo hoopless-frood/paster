@@ -11,14 +11,14 @@ body {
   font-family: var(--paster-font-body);
   font-size: 12px;
   margin: 16px;
-  color: #111;
-  background: var(--paster-surface);
+  color: var(--paster-text);
+  background: var(--paster-bg);
 }
 
 h1 {
   font-size: 13px;
   margin: 0 0 8px;
-  color: var(--paster-color-magenta-haze);
+  color: var(--paster-accent-text);
 }
 
 .row {
@@ -68,7 +68,7 @@ textarea {
 }
 
 #errors {
-  color: #b00020;
+  color: var(--paster-error-text);
   padding-left: 18px;
   margin: 8px 0;
 }
@@ -78,7 +78,7 @@ textarea {
 }
 
 #warnings {
-  color: #8a5300;
+  color: var(--paster-warning-text);
   padding-left: 18px;
   margin: 8px 0;
 }
@@ -88,14 +88,14 @@ textarea {
 }
 
 #export-mode {
-  border: 1px solid #ddd;
+  border: 1px solid var(--paster-border);
   padding: 8px;
   margin: 8px 0;
 }
 
 #export-mode legend {
   font-size: 11px;
-  color: #555;
+  color: var(--paster-muted);
   padding: 0 4px;
 }
 
@@ -114,6 +114,6 @@ textarea {
 
 .hint {
   font-size: 11px;
-  color: #555;
+  color: var(--paster-muted);
   margin: 4px 0 0;
 }

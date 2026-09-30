@@ -1,0 +1,10 @@
+{
+  "bg": { "value": "#19141f" },
+  "text": { "value": "#eee" },
+  "border": { "value": "#433654" },
+  "muted": { "value": "{color.wisteria}" },
+  "canvasBg": { "value": "#241c30" },
+  "accentText": { "value": "{color.blossom}" },
+  "errorText": { "value": "#ff6b6b" },
+  "warningText": { "value": "#f0b45c" }
+}
