@@ -29,7 +29,7 @@ export function importComposition(rawText: string): ImportResult {
   if (trimmed.length === 0) {
     return {
       ok: false,
-      errors: ['Paste or upload composition JSON, or click "Load sample" to see an example.'],
+      errors: ['Paste or upload composition JSON, or load one of the examples.'],
     };
   }
 

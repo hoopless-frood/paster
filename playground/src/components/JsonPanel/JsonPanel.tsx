@@ -1,10 +1,12 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../Button/Button";
 import { FileUploadButton } from "../FileUploadButton/FileUploadButton";
 import { JsonEditor } from "../JsonEditor/JsonEditor";
 import { MessageList } from "../MessageList/MessageList";
 import { importComposition } from "./import-composition";
 import { importZip } from "./import-zip";
+// Bundled by Vite, so the example also works on the hosted playground.
+import collageZipUrl from "../../../../examples/collage/collage.zip?url";
 import type { JsonPanelProps } from "./JsonPanel.types";
 import styles from "./JsonPanel.module.css";
 
@@ -17,8 +19,6 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [isReadingFile, setIsReadingFile] = useState(false);
-  const textareaId = useId();
-
   function runImport(candidateText: string) {
     const result = importComposition(candidateText);
     if (result.ok) {
@@ -33,7 +33,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   }
 
   // Debounced so free-form typing/pasting doesn't validate on every
-  // keystroke — Load sample and file upload still validate immediately.
+  // keystroke — the example buttons and file upload validate immediately.
   useEffect(() => {
     const handle = setTimeout(() => runImport(text), VALIDATE_DEBOUNCE_MS);
     return () => clearTimeout(handle);
@@ -45,7 +45,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errors]);
 
-  function handleLoadSample() {
+  function handleLoadGeometryExample() {
     const sampleText = JSON.stringify(sampleComposition, null, 2);
     setText(sampleText);
     runImport(sampleText);
@@ -82,6 +82,22 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
     }
   }
 
+  async function handleLoadCollageExample() {
+    setIsReadingFile(true);
+    try {
+      const response = await fetch(collageZipUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const file = new File([await response.blob()], "collage.zip", { type: "application/zip" });
+      await handleZipFileSelected(file);
+    } catch {
+      setErrors(["Couldn't load the collage example — try again, or upload a ZIP instead."]);
+    } finally {
+      setIsReadingFile(false);
+    }
+  }
+
   async function handleFileSelected(file: File) {
     setIsReadingFile(true);
     try {
@@ -98,9 +114,6 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   return (
     <section className={styles.panel} aria-label="Composition JSON">
       <div className={styles.actions}>
-        <Button onClick={handleLoadSample} disabled={isReadingFile}>
-          Load sample JSON
-        </Button>
         <FileUploadButton
           accept=".json,application/json,.zip,application/zip"
           disabled={isReadingFile}
@@ -108,6 +121,12 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
         >
           Upload .json or .zip
         </FileUploadButton>
+        <Button variant="secondary" onClick={handleLoadCollageExample} disabled={isReadingFile}>
+          Load collage example
+        </Button>
+        <Button variant="secondary" onClick={handleLoadGeometryExample} disabled={isReadingFile}>
+          Load geometry example
+        </Button>
       </div>
 
       {isReadingFile && (
@@ -120,8 +139,8 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
       <MessageList messages={warnings} tone="warning" />
 
       <div className={styles.jsonGroup}>
-        <label htmlFor={textareaId}>Current JSON:</label>
-        <JsonEditor id={textareaId} value={text} onChange={setText} spellCheck={false} />
+        {/* Named by JsonEditor's own aria-label, so no visible label. */}
+        <JsonEditor value={text} onChange={setText} spellCheck={false} />
       </div>
     </section>
   );

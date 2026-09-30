@@ -18,12 +18,30 @@
   color: #fff;
 }
 
+/* Quieter: outlined, in normal text color, picking up the accent on hover. */
+.secondary {
+  background: transparent;
+  border-color: var(--paster-muted);
+  color: var(--paster-text);
+  transition:
+    border-color var(--paster-transition),
+    color var(--paster-transition),
+    opacity var(--paster-transition);
+}
+
+.secondary:hover:not(:disabled) {
+  background: transparent;
+  border-color: var(--paster-accent-text);
+  color: var(--paster-accent-text);
+}
+
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* The accent, not ink, so the outline stays visible on the dark background. */
 .button:focus-visible {
-  outline: 2px solid var(--paster-color-ink);
+  outline: 2px solid var(--paster-accent-text);
   outline-offset: 1px;
 }
