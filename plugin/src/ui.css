@@ -23,6 +23,28 @@ body {
   padding: 16px;
   color: var(--paster-text);
   background: var(--paster-bg);
+  /* Same scrollbar styling as the playground's global.css. */
+  scrollbar-color: var(--paster-muted) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--paster-muted);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--paster-scrollbar-hover);
 }
 
 h1 {
