@@ -102,7 +102,6 @@ A hosted copy of the playground is live at [paster.annapearson.dev](https://past
 To run it yourself, run `pnpm run dev` and open the playground in a browser. [`examples/`](./examples) has ready-made files to try: a real exported collage, and a small geometry example. The playground loads either with its **Load collage example** and **Load geometry example** buttons, and starts with the geometry example — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export ZIP** button), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, a file over the size limits (5 MB for JSON, 50 MB for a ZIP), or a composition that fails schema validation shows every problem found, without losing your last valid preview.
 
 - **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width, up to desktop widths even on a phone (a preview wider than your screen is scaled down to fit); the active layout's name is shown next to the width.
-- **Show item outlines and IDs** — overlay each item's bounds and identity, useful for checking geometry against the source Figma file.
 
 An item without a real image (uploaded via JSON alone, without a matching ZIP) renders as a labeled placeholder box instead.
 

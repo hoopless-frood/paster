@@ -54,7 +54,7 @@ export function About() {
           </li>
           <li>
             On the <strong>Layout</strong> tab, drag the width slider to preview any screen size, up to desktop
-            widths on a phone. Turn on outlines to check each item&apos;s position against Figma.
+            widths on a phone.
           </li>
           <li>
             Everything stays in your browser. Nothing you upload is sent anywhere.
