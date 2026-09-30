@@ -33,14 +33,17 @@ paster/
 │       ├── .wp-env.json
 │       ├── package.json
 │       └── PLAN.md
-└── demo/                    # Existing Vite playground
+├── playground/              # Existing Vite playground
+├── examples/                # Ready-made compositions
+├── tokens/                  # Shared design tokens
+└── docs/                    # Architecture, composition format, Figma guide
 ```
 
 The WordPress implementation owns Gutenberg integration, Media Library references, server-side rendering, and PHP validation.
 
 ### Architectural rules
 
-- Preserve the portable `Composition → Layout → Frame` model.
+- Preserve the portable `Composition → Layout → Item` model.
 - Do not introduce WordPress dependencies into `@paster/core`.
 - Reuse `@paster/react` for editor previews where practical.
 - Render published compositions server-side with PHP and CSS.
@@ -58,9 +61,7 @@ Use the WordPress build system unless existing tooling offers a demonstrably sim
 
 # Milestones
 
-Each milestone represents one review checkpoint and one maintainer-made commit.
-
-Claude must stop after completing the requested milestone. Do not stage, commit, push, or proceed automatically.
+Each milestone is a reviewable unit of work, with a checklist and acceptance criteria, and ends with a suggested commit. Boxes are checked once the work has been reviewed.
 
 ## W0 — WordPress workspace scaffold
 
@@ -101,7 +102,7 @@ Define how a Gutenberg block stores a Paster composition.
 - [ ] Register a dynamic block with appropriate attributes.
 - [ ] Store the composition's versioned JSON data.
 - [ ] Define a separate mapping between asset IDs and WordPress attachment IDs.
-- [ ] Establish a schema for image metadata and alternative text.
+- [ ] Decide how images and alt text attach to items: through the composition's assets, or as WordPress attachment metadata keyed by item id (see the root plan's production images milestone).
 - [ ] Implement PHP validation for the composition format.
 - [ ] Validate breakpoint values, geometry, stacking order, and asset references.
 - [ ] Reject unsupported schema versions with a useful error.
@@ -123,7 +124,7 @@ A valid composition can be saved and retrieved through block attributes. Invalid
 Implement the public frontend using PHP and CSS.
 
 - [ ] Render the composition through a dynamic block.
-- [ ] Generate semantic HTML for positioned frames.
+- [ ] Generate semantic HTML for positioned items.
 - [ ] Preserve proportional scaling and layout aspect ratios.
 - [ ] Support data-driven breakpoints.
 - [ ] Preserve independent geometry and z-index per layout.
@@ -166,7 +167,7 @@ Create the block editing experience.
 
 Do not introduce an entirely separate rendering engine for the editor.
 
-Keep the initial interface focused on importing, previewing, and configuring compositions rather than direct manipulation of geometry.
+The block imports, previews, and configures compositions; it doesn't edit geometry. Geometry is edited in the playground's direct-manipulation editor (see the root plan), and the block imports the resulting JSON.
 
 **Acceptance criteria**
 
@@ -212,6 +213,7 @@ Implement the complete Figma-to-WordPress asset workflow.
 - [ ] Reject path traversal and duplicate archive entries.
 - [ ] Read and validate `composition.json`.
 - [ ] Identify referenced image assets.
+- [ ] Sanitize SVG assets before adding them to the Media Library: strip scripts, event handlers, and external references, using a maintained sanitizer rather than hand-written filtering.
 - [ ] Upload supported images to the WordPress Media Library.
 - [ ] Store attachment IDs in the WordPress asset mapping.
 - [ ] Preserve layout-specific image overrides.
@@ -220,7 +222,7 @@ Implement the complete Figma-to-WordPress asset workflow.
 
 Supported raster formats should follow Paster's existing export contract.
 
-**SVG security:** Do not enable arbitrary SVG uploads merely to support Paster ZIPs. Use an explicitly validated and sanitized SVG import pathway before accepting SVG assets. Until that pathway is implemented, reject SVG imports with a clear explanation.
+**SVG security:** The Figma plugin exports vector items as SVG, so real ZIPs usually contain them. An SVG in the Media Library has its own URL, and opened directly, any script inside it runs on the site, which is why WordPress blocks SVG uploads by default. Don't enable arbitrary SVG uploads to work around this; accept only SVGs from the ZIP, and only after sanitizing them (above).
 
 Asset upload operations must check permissions and use WordPress's supported media APIs.
 
@@ -241,7 +243,7 @@ Allow editors to manage image content independently of the layout.
 - [ ] List assets referenced by the composition.
 - [ ] Display their associated Media Library attachments.
 - [ ] Allow replacing an asset with an existing attachment.
-- [ ] Preserve frame geometry when an asset changes.
+- [ ] Preserve item geometry when an asset changes.
 - [ ] Support independent desktop/mobile asset references.
 - [ ] Provide an alternative-text workflow.
 - [ ] Distinguish informative and decorative images.
@@ -269,7 +271,7 @@ Prepare an independently installable WordPress plugin.
 - [ ] Test breakpoints, geometry, stacking, and asset overrides.
 - [ ] Test malformed compositions and unsafe asset references.
 - [ ] Test multiple blocks on one page.
-- [ ] Test invalid ZIPs, unsupported SVGs, and partial import failures.
+- [ ] Test invalid ZIPs, SVGs with scripts or external references (sanitized away), and partial import failures.
 - [ ] Run build, typechecking, PHP linting, and applicable automated tests.
 - [ ] Complete manual editor and frontend accessibility checks.
 - [ ] Document local development and installation.
@@ -282,7 +284,7 @@ Document any untested functionality explicitly.
 
 **Acceptance criteria**
 
-A developer can clone the monorepo and run the WordPress demo.
+A developer can clone the monorepo and run the plugin locally with wp-env.
 
 A WordPress user can install the release ZIP without pnpm, Node.js, or the source repository.
 
@@ -298,8 +300,6 @@ These are not requirements for the initial WordPress integration.
 
 ## Editing and authoring
 
-- [ ] Directly manipulate frame positions in Gutenberg.
-- [ ] Edit geometry numerically.
 - [ ] Reimport geometry without replacing asset associations.
 - [ ] Compare an existing composition with a new import.
 - [ ] Preview differences before applying updates.
@@ -308,7 +308,7 @@ These are not requirements for the initial WordPress integration.
 
 ## Visual capabilities
 
-- [ ] Nested Figma groups and compositions.
+- [ ] Nested compositions (layers inside a group or frame item positioned independently per layout).
 - [ ] Layer motion and transitions.
 - [ ] Reduced-motion alternatives.
 - [ ] Interactive layers.
@@ -329,25 +329,10 @@ These are not requirements for the initial WordPress integration.
 
 ---
 
-# Working agreement
+# Working on a milestone
 
-Follow the root `CLAUDE.md` and this plan.
+Follow the repository's conventions (see the root `CLAUDE.md`).
 
-Before starting a milestone:
+Before starting, check the relevant Paster packages, confirm that earlier milestones are done, and note any architectural conflicts.
 
-1. Inspect the existing repository and relevant Paster packages.
-2. Confirm that required dependencies and earlier milestones exist.
-3. Identify any architectural conflicts before editing.
-
-After completing a milestone, report:
-
-- Files changed.
-- Implementation details and significant decisions.
-- Commands executed and their results.
-- Tests and manual checks completed.
-- Known limitations or blockers.
-- Suggested conventional-commit message.
-
-Update checkboxes only for verified work.
-
-**Stop for manual review and commit. Never automatically advance to the next milestone.**
+When finishing, record the files changed, significant decisions, commands run and their results, tests and manual checks completed, known limitations, and a suggested commit message. Check boxes only for verified work.

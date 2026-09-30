@@ -97,10 +97,10 @@ Since committed, also extended past its original scope (moved out of the backlog
 **Committed:** `feat(demo): import complete Paster exports`
 
 ### M8 — Direct manipulation
-Proves the MVP's editing model: an item's position and size are adjusted visually and the result is still a valid, portable composition. It's also the editing surface later milestones extend: M9 adds animation settings and M11 adds alt text to the same editor. Storage in a CMS or database builds on this too (see Sanity and Postgres in the backlog).
+Proves the MVP's editing model: an item's position and size are adjusted visually and the result is still a valid, portable composition. It's also the editing surface later milestones extend: M9 adds animation settings and M11 adds alt text to the same editor. A custom database can host the same editor (see Postgres in the backlog); a CMS such as WordPress or Sanity only stores and renders the JSON it produces.
 - [ ] **Direct-manipulation editor:** drag to move and resize items per layout, with keyboard nudging for accessibility, built on `@paster/react` so it edits exactly what renders.
 - [ ] Use it in the playground: edits update the JSON, are validated with `validateComposition` as they happen, and can be copied or downloaded.
-- [ ] Keep the editor independent of storage: it works on a `Composition`, with loading, saving and asset URLs behind a small documented adapter that CMS integrations can implement.
+- [ ] Keep the editor independent of storage: it works on a `Composition`, with loading, saving and asset URLs behind a small documented adapter that a storage backend, such as a custom database, can implement.
 
 **Accept:** moving and resizing an item in the playground, by pointer or keyboard, updates the JSON; importing that JSON again reproduces the edit exactly; an edit that would make the composition invalid is rejected.  
 **Suggested commit:** `feat(playground): direct manipulation of item geometry`
@@ -143,21 +143,14 @@ The plugin's exported PNG/SVG files are a starting point. In production, a site 
 
 ### WordPress integration
 
-- [ ] Create an installable plugin in `frontend/wordpress/`.
-- [ ] Configure Gutenberg build tooling and local wp-env development.
-- [ ] Implement a block with composition ZIP import and preview.
-- [ ] Import assets into the WordPress Media Library.
-- [ ] Support replacing assets with existing media attachments.
-- [ ] Render compositions server-side using PHP and CSS.
-- [ ] Validate composition data and asset references server-side.
-- [ ] Test rendering parity against shared core fixtures.
-- [ ] Package a self-contained WordPress plugin ZIP for releases.
+Planned in detail in [frontend/wordpress/PLAN.md](./frontend/wordpress/PLAN.md), which is the source of truth for it.
 
 ### Sanity integration
 
+Sanity stores and renders compositions as JSON; editing geometry happens in the playground's editor (M8), not in Studio.
 - [ ] Define a composition document schema, with images as Sanity image assets.
+- [ ] Decide how images and alt text attach to items in Sanity: through the composition's assets, or as Sanity fields keyed by item id.
 - [ ] Import a plugin ZIP into Sanity, uploading its images as assets.
-- [ ] Use the direct-manipulation editor (M8) as a custom Studio input, through the storage adapter.
 - [ ] Validate documents with `validateComposition`, showing the same messages the playground does.
 - [ ] Render compositions from Sanity with `@paster/react`, mapping assets to Sanity image URLs (see M11 for responsive images and alt text).
 - [ ] Document project setup, using the collage example as seed content.
