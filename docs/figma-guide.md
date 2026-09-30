@@ -179,6 +179,11 @@ Not yet supported, tracked as backlog work (see [PLAN.md](../PLAN.md)):
 - **Layout-specific item visibility** — every visible item in a layout is
   exported; there's no way to include an item in one layout's arrangement
   but omit it from another's while keeping the same identity.
+- **Effects that paint outside a layer's own box**, such as a drop
+  shadow or an outside stroke, are cut off at the layer's edges in its
+  exported image, which covers exactly the layer's own width × height.
+  To keep one, put the layer inside a frame big enough to contain the
+  effect, and use that frame as the item.
 - Recovering **original, full-resolution image bytes** — exported images
   are Figma's own rendered crop/scale of each item, not the source file,
   so very large source photos are re-encoded down to what's actually

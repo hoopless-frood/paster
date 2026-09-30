@@ -14,6 +14,7 @@ const JPEG_BYTES = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
 function stubFigma(imagesByHash: Record<string, Uint8Array> = {}) {
   (globalThis as unknown as { figma: unknown }).figma = {
     mixed: Symbol("figma-mixed"),
+    currentPage: { appendChild: () => {} },
     getImageByHash: (hash: string) => {
       const bytes = imagesByHash[hash];
       if (!bytes) return null;
@@ -37,13 +38,16 @@ function fakeNode(
   bytes: Uint8Array = new Uint8Array([1, 2, 3]),
   overrides: { type?: string; fills?: unknown[] } = {},
 ): SupportedItemNode {
-  return {
+  const node = {
     width,
     height,
     type: overrides.type ?? "RECTANGLE",
     fills: overrides.fills ?? [{ type: "IMAGE", visible: true, imageHash: "jpeg-hash" }],
     exportAsync: async () => bytes,
-  } as unknown as SupportedItemNode;
+    // exportItemImage exports a temporary copy, never the node itself.
+    clone: () => ({ ...node, rotation: 0, remove: () => {} }),
+  };
+  return node as unknown as SupportedItemNode;
 }
 
 function fakeItem(overrides: Partial<ScannedItem> & Pick<ScannedItem, "name" | "width" | "height">): ScannedItem {
@@ -201,7 +205,7 @@ describe("attachImages", () => {
               name: "icon",
               width: 24,
               height: 24,
-              node: { type: "VECTOR", width: 24, height: 24, exportAsync: async () => new Uint8Array([1]) } as unknown as ScannedItem["node"],
+              node: fakeNode(24, 24, new Uint8Array([1]), { type: "VECTOR" }),
             }),
           ],
         },
@@ -300,7 +304,7 @@ describe("attachImages", () => {
               name: "label",
               width: 100,
               height: 20,
-              node: { type: "TEXT", width: 100, height: 20, exportAsync: async () => new Uint8Array([1]) } as unknown as ScannedItem["node"],
+              node: fakeNode(100, 20, new Uint8Array([1]), { type: "TEXT" }),
             }),
           ],
         },

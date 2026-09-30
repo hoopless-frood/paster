@@ -48,12 +48,36 @@ export const IMAGE_EXTENSIONS: Record<ImageFormat, string> = {
   SVG: "svg",
 };
 
-/** Renders a single item node to image bytes in the given format. Runs on the main thread (only nodes have exportAsync); rejects if Figma's own export fails. */
-export function exportItemImage(node: SupportedItemNode, format: ImageFormat): Promise<Uint8Array> {
-  if (format === "SVG") {
-    return node.exportAsync({ format: "SVG" });
+/**
+ * Renders a single item to image bytes covering exactly its own unrotated
+ * width × height — the box the schema (and so every renderer) places and
+ * rotates the image in. Runs on the main thread (only nodes have
+ * exportAsync); rejects if Figma's own export fails.
+ *
+ * exportAsync renders a node as it appears on the canvas, which breaks that
+ * contract twice: a rotated node comes out already rotated (inside its
+ * larger bounding box), and any part hanging past a clipping layout frame
+ * is cropped off. A renderer then rotates the image a second time and
+ * stretches whatever survived the crop across the full box. So this exports
+ * a temporary copy instead: moved to the page (out of reach of the layout's
+ * clipping), unrotated, and exported at its full bounds rather than its
+ * visible render bounds.
+ *
+ * Trade-off: useAbsoluteBounds also crops effects that paint outside the
+ * layer's own box (e.g. a drop shadow), since the image must match the box.
+ */
+export async function exportItemImage(node: SupportedItemNode, format: ImageFormat): Promise<Uint8Array> {
+  const copy = node.clone();
+  figma.currentPage.appendChild(copy);
+  try {
+    copy.rotation = 0;
+    if (format === "SVG") {
+      return await copy.exportAsync({ format: "SVG", useAbsoluteBounds: true });
+    }
+    return await copy.exportAsync({ format, useAbsoluteBounds: true, constraint: { type: "SCALE", value: 1 } });
+  } finally {
+    copy.remove();
   }
-  return node.exportAsync({ format, constraint: { type: "SCALE", value: 1 } });
 }
 
 /** Node types that are inherently drawn vector shapes — always worth keeping as SVG, since rasterizing them is a pure loss of scalability. */
