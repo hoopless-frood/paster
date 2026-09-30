@@ -10,6 +10,7 @@
     "src/figma-export.ts",
     "src/assemble.ts",
     "src/assemble.test.ts",
+    "src/figma-export.test.ts",
     "src/protocol.ts"
   ]
 }
