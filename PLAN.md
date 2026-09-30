@@ -97,7 +97,7 @@ Since committed, also extended past its original scope (moved out of the backlog
 **Committed:** `feat(demo): import complete Paster exports`
 
 ### M8 — Direct manipulation
-Proves the MVP's editing model: an item's position and size are adjusted visually and the result is still a valid, portable composition. It's also the editing surface later milestones extend: M9 adds animation settings and M10 adds alt text to the same editor. Storage in a CMS or database builds on this too (see Sanity and Postgres in the backlog).
+Proves the MVP's editing model: an item's position and size are adjusted visually and the result is still a valid, portable composition. It's also the editing surface later milestones extend: M9 adds animation settings and M11 adds alt text to the same editor. Storage in a CMS or database builds on this too (see Sanity and Postgres in the backlog).
 - [ ] **Direct-manipulation editor:** drag to move and resize items per layout, with keyboard nudging for accessibility, built on `@paster/react` so it edits exactly what renders.
 - [ ] Use it in the playground: edits update the JSON, are validated with `validateComposition` as they happen, and can be copied or downloaded.
 - [ ] Keep the editor independent of storage: it works on a `Composition`, with loading, saving and asset URLs behind a small documented adapter that CMS integrations can implement.
@@ -116,7 +116,19 @@ Proves the MVP's editing model: an item's position and size are adjusted visuall
 **Accept:** animation settings edited in the M8 editor animate a composition in `@paster/react`; with `prefers-reduced-motion`, the same composition shows a meaningful static state, and interactive layers are reachable and usable by keyboard.  
 **Suggested commit:** `feat(react): declarative motion and interaction`
 
-### M10 — Production images and alt text
+### M10 — Use Paster on another site
+Makes the packages installable outside this repository, so a real site can render compositions; M11's production images are hooked up on that site.
+- [ ] Choose how the packages are distributed (npm under a scope you own, or GitHub Packages) and what they're named.
+- [ ] Make them installable: `"sideEffects": ["*.css"]` so bundlers keep the CSS imports, repository/homepage metadata, a README for `@paster/core`, and publishing through pnpm so the internal `workspace:*` dependency becomes a real version range.
+- [ ] Decide how styles ship: document that the site's bundler needs CSS Modules support (as Vite and Next.js have), or compile the styles to plain CSS at build time.
+- [ ] A release process: versioning, tags, and publishing from CI on a tag.
+- [ ] Install the published packages into a real site, outside this repository, and render a composition there, including server-side rendering.
+- [ ] Write a short "Using Paster on your site" guide.
+
+**Accept:** a separate site installs the published packages, with no links into this repository, and renders a composition with its styles applied, on both the server and the client.  
+**Suggested commit:** `build: publish @paster/core and @paster/react`
+
+### M11 — Production images and alt text
 The plugin's exported PNG/SVG files are a starting point. In production, a site serves its own images (from a CDN, CMS or static files) and maps them in its `resolveContent`; descriptions are written in the editor.
 - [ ] **Hook up production images:** map each `Asset` (by `id`/`path`) to its production URL in a consumer's `resolveContent`, and document a reference implementation. The WordPress, Sanity and Postgres integrations in the backlog are concrete cases.
 - [ ] Responsive image delivery: `srcset`/`sizes` derived from each item's rendered width per layout, plus re-encoding exported PNGs (e.g. WebP/AVIF/JPG) downstream without changing asset ids or geometry.
@@ -147,7 +159,7 @@ The plugin's exported PNG/SVG files are a starting point. In production, a site 
 - [ ] Import a plugin ZIP into Sanity, uploading its images as assets.
 - [ ] Use the direct-manipulation editor (M8) as a custom Studio input, through the storage adapter.
 - [ ] Validate documents with `validateComposition`, showing the same messages the playground does.
-- [ ] Render compositions from Sanity with `@paster/react`, mapping assets to Sanity image URLs (see M10 for responsive images and alt text).
+- [ ] Render compositions from Sanity with `@paster/react`, mapping assets to Sanity image URLs (see M11 for responsive images and alt text).
 - [ ] Document project setup, using the collage example as seed content.
 
 ### Postgres integration
@@ -178,7 +190,6 @@ The plugin's exported PNG/SVG files are a starting point. In production, a site 
 ### Authoring and integrations
 - [ ] Compare imported composition with current version and preview a diff.
 - [ ] Container-query mode alongside viewport breakpoint mode.
-- [ ] Releases, package publication, and optional Figma Community plugin publication. (CI already builds, typechecks and tests every push and pull request.)
 
 ### Public release
 For if Paster is released publicly; for now it's a personal tool.
@@ -187,3 +198,4 @@ For if Paster is released publicly; for now it's a personal tool.
 - [ ] Finalize license, contribution guidance, supported/unsupported Figma features, architecture and schema docs, examples, and screenshots with cleared rights.
 - [ ] Run all tests, builds, typechecking and accessibility checks; address actual findings.
 - [ ] Review repository contents for private/client files, credentials, and generated build artifacts; document plugin installation and known limitations.
+- [ ] Publish the Figma plugin to the Figma Community.
