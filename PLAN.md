@@ -90,10 +90,10 @@ Since committed, also extended past its original scope (moved out of the backlog
 - [x] Create/revoke object URLs safely and show errors for missing/corrupt assets.
 - [x] Preserve SVG assets on ZIP import alongside raster assets.
 - [x] Safely handle SVG assets from imported compositions (validate/sanitize before rendering; never execute embedded scripts or external references).
-- [ ] Verify exported imagery has no unintended second crop and matches relative geometry and stacking across breakpoints. *(Image sizes confirmed against a real Figma export, `examples/collage/`: every exported image matches its item's box exactly, with no second crop. Still to check by hand: geometry and stacking in the playground across breakpoints.)*
+- [x] Verify exported imagery has no unintended second crop and matches relative geometry and stacking across breakpoints. *(Verified against a real Figma export, `examples/collage/`: every exported image matches its item's box exactly, and geometry and stacking match Figma across breakpoints in the playground.)*
 - [x] Document complete Figma → ZIP → playground workflow; add automated tests and a manual visual QA checklist.
 
-**Accept:** drag/drop a genuine export and reproduce all supported layouts without hand-entering image URLs.  
+**Accept:** upload a genuine export and reproduce all supported layouts without hand-entering image URLs.  
 **Committed:** `feat(demo): import complete Paster exports`
 
 ### M8 — Direct manipulation
