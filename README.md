@@ -6,7 +6,7 @@ A designer arranges a collage of images in Figma once per breakpoint. Paster exp
 
 **Try it:** [paster.annapearson.dev](https://paster.annapearson.dev/) runs the playground in your browser, with example compositions ready to load.
 
-<img width="1055" height="859" alt="Screenshot of the Paster playground" src="https://github.com/user-attachments/assets/dcd071db-6814-4c7c-a453-30c3b58c2b95" />
+<img width="1149" height="567" alt="image" src="https://github.com/user-attachments/assets/3b714c6e-c295-426d-aa30-04e2cc54c089" />
 
 ## What works today
 
