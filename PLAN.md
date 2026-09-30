@@ -98,10 +98,10 @@ Since committed, also extended past its original scope (moved out of the backlog
 
 ### M8 — CSS-driven breakpoints
 Layout selection moves from JavaScript to CSS container queries, and `minWidth` comes to mean the composition's own width rather than the window's, so a composition in a narrower column, or with padding around it, picks the arrangement designed for the space it actually has.
-- [ ] Render every layout, and select the visible one with a small generated `<style>` of `@container` rules, scoped per composition instance. Only the breakpoint numbers are generated; everything else stays in the CSS module.
-- [ ] Remove JavaScript width tracking (`useViewportWidth`) and the `viewportWidth` prop, so there's no layout swap after the page loads and layouts work without JavaScript.
-- [ ] Playground: render the preview at exactly the simulated width, scaled down to fit with a transform, so the container query sees the width the slider shows.
-- [ ] Document the new meaning of `minWidth`, browser support (container queries: Chrome/Edge 105+, Safari 16+, Firefox 110+), lazy-loading images in hidden layouts, and the Content Security Policy note for the generated `<style>`.
+- [x] Render every layout, and select the visible one with a small generated `<style>` of `@container` rules, scoped per composition instance. Only the breakpoint numbers are generated; everything else stays in the CSS module.
+- [x] Remove JavaScript width tracking (`useViewportWidth`) and the `viewportWidth` prop, so there's no layout swap after the page loads and layouts work without JavaScript.
+- [x] Playground: render the preview at exactly the simulated width, scaled down to fit with a transform, so the container query sees the width the slider shows.
+- [x] Document the new meaning of `minWidth`, browser support (container queries: Chrome/Edge 105+, Safari 16+, Firefox 110+), lazy-loading images in hidden layouts, and the Content Security Policy note for the generated `<style>`.
 
 **Accept:** a composition shows the right layout from its first paint, with or without JavaScript; placed in a narrower column, it shows the layout for that column's width; the playground's slider still previews every breakpoint exactly.  
 **Suggested commit:** `feat(react): select layouts with CSS container queries`
