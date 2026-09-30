@@ -13,9 +13,29 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "layout", label: "Layout" },
 ];
 
-function readTabFromUrl(): TabId {
+const TAB_STORAGE_KEY = "paster:tab";
+
+function isTabId(value: string | null): value is TabId {
+  return TABS.some((tab) => tab.id === value);
+}
+
+// The URL's ?view= wins, so shared links open the right tab. Otherwise the
+// tab last used in this browser tab, since links home (e.g. from the About
+// page) don't carry ?view=.
+function initialTab(): TabId {
   const view = new URLSearchParams(window.location.search).get("view");
-  return TABS.some((tab) => tab.id === view) ? (view as TabId) : "json";
+  if (isTabId(view)) {
+    return view;
+  }
+  try {
+    const saved = sessionStorage.getItem(TAB_STORAGE_KEY);
+    if (isTabId(saved)) {
+      return saved;
+    }
+  } catch {
+    // Storage unavailable: start on the JSON tab.
+  }
+  return "json";
 }
 
 export function App() {
@@ -30,7 +50,7 @@ export function App() {
   // the state from its first render).
   const assetUrlsRef = useRef(assetUrls);
   assetUrlsRef.current = assetUrls;
-  const [activeTab, setActiveTab] = useState<TabId>(readTabFromUrl);
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [jsonHasErrors, setJsonHasErrors] = useState(false);
 
   // Reflects the active tab as ?view= so it's shareable. replaceState, not
@@ -39,6 +59,11 @@ export function App() {
     const url = new URL(window.location.href);
     url.searchParams.set("view", activeTab);
     window.history.replaceState(null, "", url);
+    try {
+      sessionStorage.setItem(TAB_STORAGE_KEY, activeTab);
+    } catch {
+      // The tab just won't be remembered across pages.
+    }
   }, [activeTab]);
 
   // Revokes every object URL currently held, on unmount only — a fresh ZIP

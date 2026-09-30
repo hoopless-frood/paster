@@ -117,7 +117,7 @@ To run it yourself, run `pnpm run dev` and open http://localhost:5173. [`example
 
 An item without a real image (uploaded via JSON alone, without a matching ZIP) renders as a labeled placeholder box instead.
 
-Your JSON, and the images from any ZIP you imported, are kept for the current browser tab, so opening the About page or reloading doesn't lose them. Nothing leaves your browser: the JSON is cleared when the tab closes, and the most recent uploaded ZIP is kept until you upload another.
+Your JSON, the images from any ZIP you imported, the active tab, and your light/dark choice are kept for the current browser tab, so opening the About page or reloading doesn't lose them. Nothing leaves your browser: the JSON is cleared when the tab closes, and the most recent uploaded ZIP is kept until you upload another.
 
 The **?** in the header opens an About page (`/about/`) with a short overview of Paster for people arriving at the playground.
 
