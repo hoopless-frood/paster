@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
@@ -44,26 +43,20 @@ const chromeTheme = EditorView.theme({
   },
 });
 
-export function JsonEditor({ id, value, onChange, className, spellCheck = true }: JsonEditorProps) {
-  const extensions = useMemo(
-    () => [
-      json(),
-      syntaxHighlighting(highlightStyle),
-      chromeTheme,
-      // Sets the id/aria-label on the actual contenteditable region, so a
-      // <label htmlFor={id}> focuses the editor the way it would a textarea.
-      EditorView.contentAttributes.of({
-        ...(id ? { id } : {}),
-        "aria-label": "Composition JSON",
-        spellcheck: String(spellCheck),
-      }),
-    ],
-    [id, spellCheck],
-  );
+// Module-level, so CodeMirror never sees a new extensions array on re-render.
+const extensions = [
+  json(),
+  syntaxHighlighting(highlightStyle),
+  chromeTheme,
+  // On the editable region itself, so assistive tech names the editor
+  // (there's no visible label); JSON is never spellchecked.
+  EditorView.contentAttributes.of({ "aria-label": "Composition JSON", spellcheck: "false" }),
+];
 
+export function JsonEditor({ value, onChange }: JsonEditorProps) {
   return (
     <CodeMirror
-      className={className ? `${styles.editor} ${className}` : styles.editor}
+      className={styles.editor}
       value={value}
       height="100%"
       basicSetup={{ foldGutter: false }}

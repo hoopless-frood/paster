@@ -40,7 +40,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--paster-color-text);
   margin-top: -3px;
 }
 

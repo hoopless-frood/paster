@@ -177,7 +177,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
 
       <div className={styles.jsonGroup}>
         {/* Named by JsonEditor's own aria-label, so no visible label. */}
-        <JsonEditor value={text} onChange={(edited) => showText(edited)} spellCheck={false} />
+        <JsonEditor value={text} onChange={(edited) => showText(edited)} />
       </div>
     </section>
   );
