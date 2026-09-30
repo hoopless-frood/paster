@@ -169,7 +169,7 @@ importers:
 
   .: {}
 
-  demo:
+  playground:
     dependencies:
       '@codemirror/lang-json':
         specifier: ^6.0.2

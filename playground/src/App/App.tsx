@@ -61,7 +61,7 @@ export function App() {
       <Header />
 
       <Tabs
-        label="Paster demo views"
+        label="Paster playground views"
         tabs={TABS.map((tab) => ({ ...tab, hasError: tab.id === "json" && jsonHasErrors }))}
         activeTab={activeTab}
         onTabChange={setActiveTab}

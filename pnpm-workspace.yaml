@@ -2,7 +2,7 @@ packages:
   - plugin
   - packages/*
   - frontend/*
-  - demo
+  - playground
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:

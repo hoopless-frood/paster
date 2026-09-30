@@ -262,7 +262,7 @@ export.zip
 
 ### Importing a ZIP
 
-The demo playground's **Upload .json or .zip** button detects a ZIP by its
+The playground's **Upload .json or .zip** button detects a ZIP by its
 file extension/MIME type and parses the archive entirely in the browser (via
 [JSZip](https://stuk.github.io/jszip/), no upload to a server):
 

@@ -6,7 +6,7 @@ It extracts item geometry and stacking order from Figma, eliminating manual coor
 
 ## Status
 
-Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated composition JSON, either alone or packaged as a ZIP with real exported images (PNG, JPG, or SVG); [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the demo is a working playground — paste or upload composition JSON, upload a complete ZIP export, adjust a viewport-width control, and preview it live. Items without a real image (e.g. the built-in sample composition) still render as labeled placeholder boxes. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
+Paster is a new, public, work-in-progress project. The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated composition JSON, either alone or packaged as a ZIP with real exported images (PNG, JPG, or SVG); [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the playground lets you paste or upload composition JSON, upload a complete ZIP export, adjust a viewport-width control, and preview it live. Items without a real image (e.g. the built-in sample composition) still render as labeled placeholder boxes. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
 
 ## How it works
 
@@ -27,12 +27,12 @@ pnpm install
 
 ### Workspace commands
 
-These work today — `build` compiles `packages/core` and `frontend/react` before the plugin and demo, since both depend on them:
+These work today — `build` compiles `packages/core` and `frontend/react` before the plugin and playground, since both depend on them:
 
 ```bash
 pnpm run build       # build every package, in dependency order
 pnpm run typecheck   # typecheck every package (run after build, so cross-package types resolve)
-pnpm run dev          # start the demo's Vite dev server (run `build` at least once first)
+pnpm run dev          # start the playground's Vite dev server (run `build` at least once first)
 pnpm run build:plugin # build just the plugin and its @paster/core dependency
 pnpm run dev:plugin   # rebuild the plugin on change (run `build` at least once first)
 ```
@@ -90,13 +90,13 @@ paster
 
 An item's own rotation is preserved. Individual layers the plugin doesn't support yet (Auto Layout, groups, duplicate names, or a rotated *layout* frame) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only a genuinely unusable selection (nothing selected, the wrong node type, or mismatched layer names across layouts that leave the schema invalid) blocks export outright; fix that in Figma and click **Refresh selection** to re-scan.
 
-Paste JSON, or drop a ZIP, straight into the demo playground (`pnpm run dev`) to preview it, or use [`@paster/react`](./frontend/react) directly, given content you supply yourself — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means and how a ZIP export is packaged.
+Paste JSON, or drop a ZIP, straight into the playground (`pnpm run dev`) to preview it, or use [`@paster/react`](./frontend/react) directly, given content you supply yourself — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means and how a ZIP export is packaged.
 
 ### Preview
 
-A hosted copy of the demo is live at [paster.annapearson.dev](https://paster.annapearson.dev/) — no local setup needed to try it.
+A hosted copy of the playground is live at [paster.annapearson.dev](https://paster.annapearson.dev/) — no local setup needed to try it.
 
-To run it yourself, run `pnpm run dev` and open the demo in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export** step), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, or a composition that fails schema validation shows every problem found, without losing your last valid preview.
+To run it yourself, run `pnpm run dev` and open the playground in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export** step), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, or a composition that fails schema validation shows every problem found, without losing your last valid preview.
 
 - **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width; the exact breakpoint and design-space dimensions are shown alongside the preview.
 - **Show item outlines and IDs** — overlay each item's bounds and identity, useful for checking geometry against the source Figma file.
@@ -110,7 +110,7 @@ paster/
 ├── plugin/          # Figma exporter
 ├── packages/core/   # Schema, geometry, validation
 ├── frontend/react/  # React renderer
-└── demo/            # Interactive playground
+└── playground/      # Interactive playground
 ```
 
 Paster uses pnpm workspaces, TypeScript, React, Vite, and CSS Modules. Its composition format is framework-independent, allowing additional renderers without changing the exporter.

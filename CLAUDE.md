@@ -7,7 +7,7 @@ Paster converts art-directed Figma compositions into portable, responsive layout
 - `plugin/`: Figma exporter and UI, bundled with esbuild.
 - `packages/core/`: Versioned schema, validation, and geometry. Framework-independent; no Figma or browser dependencies.
 - `frontend/react/`: Reusable React renderer using TypeScript and CSS Modules. No Vite dependency.
-- `demo/`: Vite playground for JSON/ZIP imports and preview.
+- `playground/`: Vite playground for JSON/ZIP imports and preview.
 - Use pnpm workspaces and TypeScript throughout.
 
 Terminology: **Composition → Layout (breakpoint) → Item**. In Figma, a Layout is a Frame node; an Item is not necessarily one (it's whatever visual content — currently an image or SVG — sits inside a layout).
