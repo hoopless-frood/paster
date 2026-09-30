@@ -1,6 +1,6 @@
 import { selectLayout } from "@paster/core";
 import { PasterComposition } from "@paster/react";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Checkbox } from "../Checkbox/Checkbox";
 import { ItemOutlines } from "../ItemOutlines/ItemOutlines";
 import { Slider } from "../Slider/Slider";
@@ -11,28 +11,23 @@ import styles from "./PreviewPanel.module.css";
 export type { PreviewPanelProps } from "./PreviewPanel.types";
 
 const MIN_VIEWPORT_WIDTH = 280;
+const DESKTOP_VIEWPORT_WIDTH = 1920;
 
-function currentMaxViewportWidth() {
-  return Math.max(window.innerWidth, MIN_VIEWPORT_WIDTH);
+// Every breakpoint must stay reachable, even one set above a typical desktop.
+function maxViewportWidthFor(composition: PreviewPanelProps["composition"]): number {
+  return Math.max(DESKTOP_VIEWPORT_WIDTH, ...composition.layouts.map((layout) => layout.minWidth));
+}
+
+// Read once, as a starting point only: the simulated width is independent of
+// the real window, and CSS scales the preview down whenever it doesn't fit.
+function initialViewportWidth(): number {
+  return Math.min(Math.max(window.innerWidth, MIN_VIEWPORT_WIDTH), DESKTOP_VIEWPORT_WIDTH);
 }
 
 export function PreviewPanel({ composition, assetUrls }: PreviewPanelProps) {
-  // Both default to (and keep tracking) the window's current width, so the
-  // preview fills the screen and the slider can't go past it.
-  const [maxViewportWidth, setMaxViewportWidth] = useState(currentMaxViewportWidth);
-  const [viewportWidth, setViewportWidth] = useState(currentMaxViewportWidth);
+  const [viewportWidth, setViewportWidth] = useState(initialViewportWidth);
   const [showOutlines, setShowOutlines] = useState(false);
   const viewportInputId = useId();
-
-  useEffect(() => {
-    function handleResize() {
-      const width = currentMaxViewportWidth();
-      setMaxViewportWidth(width);
-      setViewportWidth(width);
-    }
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Independently re-derives the active layout with the same function the
   // renderer uses internally, so this info can never drift from what's shown.
@@ -57,7 +52,7 @@ export function PreviewPanel({ composition, assetUrls }: PreviewPanelProps) {
         <Slider
           id={viewportInputId}
           min={MIN_VIEWPORT_WIDTH}
-          max={maxViewportWidth}
+          max={maxViewportWidthFor(composition)}
           value={viewportWidth}
           ticks={composition.layouts.map((layout) => layout.minWidth)}
           onChange={(event) => setViewportWidth(Number(event.target.value))}

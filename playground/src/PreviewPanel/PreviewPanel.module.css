@@ -28,6 +28,10 @@
   box-sizing: border-box;
   background: var(--paster-canvas-bg);
   border: 1px solid var(--paster-border);
+  /* Width is the simulated viewport, which may exceed the real one. Capping
+     it here scales the preview down to fit — safe because item geometry is
+     all layout-relative percentages, so the active layout (chosen from the
+     simulated width, not this rendered one) just shrinks proportionally. */
   max-width: 100%;
   margin: var(--section-space) auto 0;
 }
