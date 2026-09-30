@@ -19,15 +19,16 @@ const highlightStyle = HighlightStyle.define([
 ]);
 
 const chromeTheme = EditorView.theme({
+  // The frame (border, background, focus color) is on the wrapper in
+  // JsonEditor.module.css: CodeMirror attaches these styles after its element
+  // appears, so a border set here briefly showed, then faded from, its
+  // default color on load.
   "&": {
     height: "100%",
-    backgroundColor: "var(--paster-bg)",
     color: "var(--paster-text)",
-    border: "2px solid var(--paster-border)",
   },
   "&.cm-focused": {
     outline: "none",
-    borderColor: "var(--paster-accent-text)",
   },
   ".cm-content, .cm-gutters": {
     backgroundColor: "var(--paster-bg)",
@@ -39,6 +40,19 @@ const chromeTheme = EditorView.theme({
   ".cm-scroller": {
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
     fontSize: "0.8rem",
+  },
+  // CodeMirror's own defaults for these assume a light background.
+  ".cm-activeLine, .cm-activeLineGutter": {
+    backgroundColor: "color-mix(in srgb, var(--paster-text) 6%, transparent)",
+  },
+  ".cm-activeLineGutter": {
+    color: "var(--paster-text)",
+  },
+  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+    backgroundColor: "color-mix(in srgb, var(--paster-accent-text) 25%, transparent)",
+  },
+  ".cm-cursor": {
+    borderLeftColor: "var(--paster-text)",
   },
 });
 
@@ -58,6 +72,9 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
       className={styles.editor}
       value={value}
       height="100%"
+      // No built-in theme: its white background showed (and, with the shared
+      // transition, faded) before our own colors applied.
+      theme="none"
       basicSetup={{ foldGutter: false }}
       extensions={extensions}
       onChange={onChange}

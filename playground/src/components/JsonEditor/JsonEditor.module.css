@@ -12,4 +12,10 @@
      clip (required for resize to apply) rather than scroll itself. */
   overflow: hidden;
   resize: vertical;
+  background: var(--paster-bg);
+  border: 2px solid var(--paster-border);
+}
+
+.editor:focus-within {
+  border-color: var(--paster-accent-text);
 }
