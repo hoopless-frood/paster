@@ -2,11 +2,14 @@
   "bg": { "value": "#19141f" },
   "text": { "value": "#eee" },
   "border": { "value": "#433654" },
-  "muted": { "value": "#9f8eb7" },
+  "muted": { "value": "{color.wisteriaLight}" },
   "canvasBg": { "value": "#241c30" },
   "accentText": { "value": "{color.blossom}" },
   "errorText": { "value": "#ff6b6b" },
   "warningText": { "value": "#f0b45c" },
-  "syntaxKey": { "value": "#d17b9a" },
-  "syntaxNumber": { "value": "#9f8eb7" }
+  "hover": { "value": "{color.magentaHazeLight}" },
+  "scrollbarThumb": { "value": "{color.wisteriaLight}" },
+  "scrollbarHover": { "value": "{color.wisteria}" },
+  "syntaxKey": { "value": "{color.magentaHazeLight}" },
+  "syntaxNumber": { "value": "{color.wisteriaLight}" }
 }

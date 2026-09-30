@@ -11,9 +11,10 @@
     opacity var(--paster-transition);
 }
 
-/* Ink on the hover color is only 2.6:1; white is 7.2:1. */
+/* Always the dark pink, in both themes, so white text on it stays 7.2:1.
+   (--paster-hover lightens in dark mode for text, which white can't sit on.) */
 .button:hover:not(:disabled) {
-  background: var(--paster-hover);
+  background: var(--paster-color-magenta-haze);
   color: #fff;
 }
 

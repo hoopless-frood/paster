@@ -4,7 +4,9 @@
     "rosewood": { "value": "#da9db4" },
     "ink": { "value": "#111" },
     "magentaHaze": { "value": "#963458" },
-    "wisteria": { "value": "#675382" }
+    "magentaHazeLight": { "value": "#d17b9a" },
+    "wisteria": { "value": "#675382" },
+    "wisteriaLight": { "value": "#9f8eb7" }
   },
   "font": {
     "body": {
@@ -21,7 +23,8 @@
   "errorText": { "value": "#b00020" },
   "warningText": { "value": "#8a5300" },
   "hover": { "value": "{color.magentaHaze}" },
-  "scrollbarHover": { "value": "{color.wisteria}" },
+  "scrollbarThumb": { "value": "{color.rosewood}" },
+  "scrollbarHover": { "value": "{color.magentaHaze}" },
   "syntaxKey": { "value": "{color.magentaHaze}" },
   "syntaxNumber": { "value": "{color.wisteria}" }
 }

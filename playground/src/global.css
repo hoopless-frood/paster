@@ -17,7 +17,7 @@ body {
   background: var(--paster-bg);
   color: var(--paster-text);
   box-sizing: border-box;
-  scrollbar-color: var(--paster-muted) transparent;
+  scrollbar-color: var(--paster-scrollbar-thumb) transparent;
   scrollbar-width: thin;
   font-size: 16px;
 }
@@ -44,7 +44,7 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--paster-muted);
+  background: var(--paster-scrollbar-thumb);
   border-radius: 0;
 }
 

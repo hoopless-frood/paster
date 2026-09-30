@@ -24,7 +24,7 @@ body {
   color: var(--paster-text);
   background: var(--paster-bg);
   /* Same scrollbar styling as the playground's global.css. */
-  scrollbar-color: var(--paster-muted) transparent;
+  scrollbar-color: var(--paster-scrollbar-thumb) transparent;
   scrollbar-width: thin;
 }
 
@@ -39,7 +39,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--paster-muted);
+  background: var(--paster-scrollbar-thumb);
   border-radius: 0;
 }
 
