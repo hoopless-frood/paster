@@ -55,11 +55,8 @@
   display: block;
   width: 100%;
   height: 100%;
-  /* fill, not cover: the exported image is already Figma's own rendered
-     crop/scale of this exact item, sized to match it almost exactly (up to
-     float rounding) — cover would crop a further, unintended sliver off an
-     edge to force an exact aspect-ratio match; fill only ever stretches by
-     that same negligible rounding error, never discarding pixels Figma
-     already framed intentionally. */
+  /* fill, not cover: each exported image already matches its item's box,
+     apart from rounding to whole pixels, which cover would absorb by
+     cropping a sliver off an edge. */
   object-fit: fill;
 }

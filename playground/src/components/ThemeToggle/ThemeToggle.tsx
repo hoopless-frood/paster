@@ -8,8 +8,7 @@ function systemPrefersDark() {
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">(() => (systemPrefersDark() ? "dark" : "light"));
 
-  // Only ever set for this session (no persistence — see global.css), so a
-  // refresh always goes back to following the system preference.
+  // Not persisted, so a refresh always goes back to following the system preference.
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);

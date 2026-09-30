@@ -21,12 +21,10 @@ export type ImageExportOutcome =
   | { ok: false; errors: string[] };
 
 /**
- * Derives each layout's minWidth purely from its own design-space width.
- * The plugin has no setting for this: it's a sensible default, adjusted
- * later in the JSON or CMS if needed. Sorted by width, the smallest layout
- * gets 0 (the required base layout) and each other layout gets the
- * midpoint between itself and the next-smaller layout, so each layout's
- * range extends outward toward its neighbors in both directions.
+ * Derives each layout's minWidth from frame widths alone: the narrowest
+ * layout gets 0 (the required base layout), and each other layout the
+ * midpoint between its width and the next-narrower one. There's no plugin
+ * setting; it's adjusted later in the JSON or editor if needed.
  */
 export function deriveMinWidths(layouts: { name: string; width: number }[]): Record<string, number> {
   const sorted = [...layouts].sort((a, b) => a.width - b.width);
@@ -56,8 +54,7 @@ export function assembleComposition(scan: ScanSuccess): ValidationResult {
       width: layout.width,
       height: layout.height,
       backgroundColor: layout.backgroundColor,
-      // Omitted rather than false, so a clipping (the common, Figma-default)
-      // layout's JSON stays exactly as it looked before this was captured.
+      // Defaults (clipped, unrotated) are omitted to keep the JSON minimal.
       clipsContent: layout.clipsContent === true ? undefined : layout.clipsContent,
       items: layout.items.map((item) => ({
         id: item.name,
@@ -67,8 +64,6 @@ export function assembleComposition(scan: ScanSuccess): ValidationResult {
         width: item.width,
         height: item.height,
         zIndex: item.zIndex,
-        // Omitted rather than 0, so an unrotated (the common case) item's
-        // JSON stays exactly as it looked before rotation was supported.
         rotation: item.rotation === 0 ? undefined : item.rotation,
       })),
     })),
@@ -105,9 +100,6 @@ function uniqueStem(layoutName: string, itemName: string, used: Set<string>): st
  * even when the same item id is visually identical across layouts — this
  * keeps per-layout image overrides simple to reason about, at the cost of
  * some possibly-redundant image bytes in the resulting ZIP.
- *
- * Each item's export format (SVG or PNG) is chosen individually by
- * formatForNode.
  *
  * Looks up each item's live Figma node from the original scan by
  * (layout id, item id) — assembleComposition sets those to the scanned

@@ -37,8 +37,8 @@
   cursor: default;
 }
 
-/* Signals unapplied JSON edits (invalid/unsaved) from any tab, since the
-   error list itself is only visible while the JSON tab is active. */
+/* Shows the JSON has errors from any tab, since the error list itself is
+   only visible on the JSON tab. */
 .tabBadge {
   margin-left: 0.35rem;
   color: var(--paster-error-text);

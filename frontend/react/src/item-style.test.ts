@@ -59,10 +59,9 @@ describe("computeItemStyle", () => {
 
   it("regression: a heavily-rotated item's true center stays within its layout (a real reported bug)", () => {
     // From a real plugin export: a 337x228 item at x:317.95,y:294.7 inside a
-    // 393-wide mobile layout, rotated -151.43° — before the position
-    // adjustment above, this rendered with its center far outside the
-    // 393px-wide canvas (using x/y as CSS's left/top ignores that Figma's
-    // x/y already has the center-rotation baked in).
+    // 393-wide mobile layout, rotated -151.43°. Using x/y directly as CSS's
+    // left/top would put its center far outside the 393px-wide canvas, since
+    // Figma's x/y already has the center rotation baked in.
     const mobileLayout: Layout = { id: "m", name: "Mobile", minWidth: 0, width: 393, height: 982, items: [] };
     const item: Item = {
       id: "red",

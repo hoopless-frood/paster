@@ -33,9 +33,9 @@ export interface Layout {
   width: number;
   /** Design-space height of the layout. */
   height: number;
-  /** CSS color (e.g. a hex or rgba() string) from the layout frame's own Figma fill. Independent per layout, like everything else here. Omitted when the source frame has no solid fill. */
+  /** CSS color (hex or rgba()) from the layout frame's solid fill. Omitted when the frame has no solid fill. */
   backgroundColor?: string;
-  /** Whether content extending past this layout's own bounds (a bleed image, or a rotated item whose corners swing outside its unrotated box) is clipped — matches the source Figma frame's own "Clip content" setting. Omitted (or true) means clipped, matching Figma's own default. */
+  /** Whether content past the layout's bounds (a bleed image, a rotated item's corners) is clipped, matching the frame's "Clip content" setting. Omitted means clipped, Figma's default. */
   clipsContent?: boolean;
   items: Item[];
 }

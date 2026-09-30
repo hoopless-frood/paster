@@ -7,7 +7,7 @@ export interface ScannedItem {
   zIndex: number;
   /** Clockwise degrees (already converted from Figma's own counterclockwise-positive convention — see figmaRotationToCss), 0 for unrotated. */
   rotation: number;
-  /** The live Figma node this item was scanned from, for image export. Never sent to the UI thread (not cloneable) — internal to the main thread only. Optional so test fixtures can omit it. */
+  /** The live Figma node, for image export. Main thread only: nodes can't be sent to the UI. Optional so test fixtures can omit it. */
   node?: SupportedItemNode;
 }
 
@@ -142,7 +142,6 @@ const SUPPORTED_ITEM_TYPES = new Set<SceneNode["type"]>([
   "STAR",
   "POLYGON",
   "BOOLEAN_OPERATION",
-  // A group is exported as one image of everything in it, like a frame.
   "GROUP",
 ]);
 
@@ -191,12 +190,10 @@ export function figmaRotationToCss(rotation: number): number {
  * fresh rather than cache the result, so moving/resizing/reordering layers
  * before export is reflected in the output.
  *
- * Only an invalid/missing selection is a hard failure. Everything else we
- * don't support yet (a rotated *layout* or composition frame, Auto Layout,
- * unsupported node types, duplicate names) is skipped
- * individually and reported as a warning, so one problem layer doesn't
- * block exporting the rest of an otherwise-valid composition. An item's own
- * rotation is fully supported — see figmaRotationToCss.
+ * Only an invalid or missing selection is a hard failure. Anything else
+ * that isn't supported yet (a rotated layout, Auto Layout, an unsupported
+ * node type, a duplicate name) is skipped with a warning, so one problem
+ * layer doesn't block exporting the rest of the composition.
  */
 export function scanSelection(): ScanOutcome {
   const selection = figma.currentPage.selection;

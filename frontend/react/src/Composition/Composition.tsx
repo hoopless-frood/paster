@@ -30,11 +30,9 @@ export function PasterComposition({
           "--paster-layout-width": layout.width,
           "--paster-layout-height": layout.height,
           "--paster-layout-background": layout.backgroundColor ?? "transparent",
-          // Defaults to clipping (Figma's own default for a frame) — only an
-          // explicit false, matching the source frame's own "Clip content"
-          // setting, turns it off. Content that intentionally bleeds past
-          // the frame (a wide image, or a rotated item whose corners swing
-          // outside its unrotated box) needs this to render un-clipped.
+          // Clipped unless the frame's "Clip content" was off (Figma's default
+          // is on), so deliberate bleed, or a rotated item's swung-out
+          // corners, can show past the edges.
           "--paster-layout-overflow": layout.clipsContent === false ? "visible" : "hidden",
         } as CSSProperties
       }
