@@ -86,14 +86,21 @@ const VECTOR_ITEM_TYPES = new Set<SupportedItemNode["type"]>([
   "LINE",
 ]);
 
-/** Node types whose `fills` decide raster vs. vector: an image fill means real photographic content (rasterize); anything else (solid, gradient, none) is still flat vector content. */
-type FillCheckableNode = Extract<SupportedItemNode, { fills: unknown }>;
-
-function isFillCheckable(node: SupportedItemNode): node is FillCheckableNode {
-  return "fills" in node;
-}
-
-function hasVisibleImageFill(fills: readonly Paint[]): boolean {
+/**
+ * Content that only a raster image represents faithfully: a photo fill, or
+ * text (which SVG export would turn into heavy vector outlines).
+ */
+function needsRaster(node: SceneNode): boolean {
+  if (node.type === "TEXT") {
+    return true;
+  }
+  if (!("fills" in node)) {
+    return false;
+  }
+  const fills = node.fills;
+  if (fills === figma.mixed || !Array.isArray(fills)) {
+    return true;
+  }
   return fills.some((fill) => fill.visible !== false && fill.type === "IMAGE");
 }
 
@@ -109,15 +116,16 @@ export function formatForNode(node: SupportedItemNode): ImageFormat {
   if (VECTOR_ITEM_TYPES.has(node.type)) {
     return "SVG";
   }
-  if (node.type === "TEXT" || !isFillCheckable(node)) {
+  if (needsRaster(node)) {
     return "PNG";
   }
-
-  const fills = node.fills;
-  if (fills === figma.mixed || !Array.isArray(fills)) {
+  // A frame, component or instance exports as one image of everything
+  // inside it, so its contents decide too: a photo inside a plain-colored
+  // frame would otherwise end up base64-embedded in an SVG.
+  if ("findOne" in node && node.findOne((child) => child.visible && needsRaster(child))) {
     return "PNG";
   }
-  return hasVisibleImageFill(fills) ? "PNG" : "SVG";
+  return "SVG";
 }
 
 const ROTATION_EPSILON = 0.01;

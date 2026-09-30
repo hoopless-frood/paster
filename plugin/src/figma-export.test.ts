@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { exportItemImage, figmaRotationToCss, type SupportedItemNode } from "./figma-export";
+import { beforeEach, describe, expect, it } from "vitest";
+import { exportItemImage, figmaRotationToCss, formatForNode, type SupportedItemNode } from "./figma-export";
 
 describe("figmaRotationToCss", () => {
   it("flips the sign — Figma's rotation is counterclockwise-positive, the schema/CSS is clockwise-positive", () => {
@@ -87,5 +87,39 @@ describe("exportItemImage", () => {
     const { node, copies } = setup({ failExport: true });
     await expect(exportItemImage(node, "PNG")).rejects.toThrow("export failed");
     expect(copies[0].removed).toBe(true);
+  });
+});
+
+describe("formatForNode", () => {
+  const solid = [{ type: "SOLID", visible: true }];
+  const photo = [{ type: "IMAGE", visible: true }];
+
+  function frame(children: { type: string; visible?: boolean; fills?: unknown[] }[]): SupportedItemNode {
+    const descendants = children.map((child) => ({ visible: true, ...child }));
+    return {
+      type: "FRAME",
+      fills: solid,
+      findOne: (predicate: (node: unknown) => boolean) => descendants.find(predicate) ?? null,
+    } as unknown as SupportedItemNode;
+  }
+
+  beforeEach(() => {
+    (globalThis as unknown as { figma: unknown }).figma = { mixed: Symbol("figma-mixed") };
+  });
+
+  it("rasterizes a plain frame that contains a photo", () => {
+    expect(formatForNode(frame([{ type: "RECTANGLE", fills: photo }]))).toBe("PNG");
+  });
+
+  it("rasterizes a plain frame that contains text", () => {
+    expect(formatForNode(frame([{ type: "TEXT" }]))).toBe("PNG");
+  });
+
+  it("keeps a frame of only vector content as SVG", () => {
+    expect(formatForNode(frame([{ type: "VECTOR", fills: solid }, { type: "ELLIPSE", fills: solid }]))).toBe("SVG");
+  });
+
+  it("ignores hidden content inside a frame", () => {
+    expect(formatForNode(frame([{ type: "RECTANGLE", fills: photo, visible: false }]))).toBe("SVG");
   });
 });

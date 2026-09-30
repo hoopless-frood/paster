@@ -118,7 +118,9 @@ When exporting a ZIP, each item's format is chosen automatically:
   whatever its node type: a Rectangle or Frame with just a color fill
   exports as SVG, not a raster image.
 - Anything else, meaning a layer with a **photo/image fill**, or **text**,
-  rasterizes to **PNG**.
+  rasterizes to **PNG**. A frame, component or instance also rasterizes
+  if anything visible *inside* it is a photo or text; one containing only
+  vector content stays SVG.
 
 PNG is always used for rasters, never JPG: it's lossless and keeps
 transparency. Exported images are a starting point, not the final
