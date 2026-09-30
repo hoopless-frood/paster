@@ -210,8 +210,8 @@ rather than just the first one.
 ```json
 {
   "version": 1,
-  "id": "asymmetric-grid",
-  "name": "Asymmetric Grid",
+  "id": "geometry-example",
+  "name": "Geometry Example",
   "assets": [
     { "id": "image-a-asset", "path": "images/image-a.png", "width": 1600, "height": 1100 },
     { "id": "image-b-asset", "path": "images/image-b.png", "width": 1200, "height": 900 },
@@ -254,7 +254,8 @@ space between them — not a grid of equal cells — but with different geometry
 *and* different relative stacking per layout: `image-b` is behind `image-a`
 on mobile (`zIndex: 0` vs. `1`) and in front of it on desktop. This exact
 composition is exported as `sampleComposition` from
-`@paster/core` and used in its test suite.
+`@paster/core` and used in its test suite, and is also available as a plain
+file in [`examples/geometry/composition.json`](../examples/geometry/composition.json).
 
 ## ZIP packaging
 

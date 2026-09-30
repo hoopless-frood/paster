@@ -4,8 +4,8 @@ import { COMPOSITION_SCHEMA_VERSION, type Composition } from "./types.js";
 // generous negative space, not a conventional website's hero/content layout.
 export const sampleComposition: Composition = {
   version: COMPOSITION_SCHEMA_VERSION,
-  id: "asymmetric-grid",
-  name: "Asymmetric Grid",
+  id: "geometry-example",
+  name: "Geometry Example",
   assets: [
     { id: "image-a-asset", path: "images/image-a.png", width: 1600, height: 1100 },
     { id: "image-b-asset", path: "images/image-b.png", width: 1200, height: 900 },

@@ -99,7 +99,7 @@ Paste JSON, or drop a ZIP, straight into the playground (`pnpm run dev`) to prev
 
 A hosted copy of the playground is live at [paster.annapearson.dev](https://paster.annapearson.dev/) — no local setup needed to try it.
 
-To run it yourself, run `pnpm run dev` and open the playground in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export ZIP** button), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, or a composition that fails schema validation shows every problem found, without losing your last valid preview.
+To run it yourself, run `pnpm run dev` and open the playground in a browser. [`examples/`](./examples) has ready-made files to try, including a real exported collage. The playground starts with a built-in sample composition — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export ZIP** button), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, or a composition that fails schema validation shows every problem found, without losing your last valid preview.
 
 - **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width, up to desktop widths even on a phone (a preview wider than your screen is scaled down to fit); the active layout's name is shown next to the width.
 - **Show item outlines and IDs** — overlay each item's bounds and identity, useful for checking geometry against the source Figma file.
@@ -114,6 +114,7 @@ paster/
 ├── packages/core/   # Schema, geometry, validation
 ├── frontend/react/  # React renderer
 ├── playground/      # Interactive playground
+├── examples/        # Ready-made compositions and a Figma source file
 └── tokens/          # Shared design tokens (colors, fonts, light/dark)
 ```
 

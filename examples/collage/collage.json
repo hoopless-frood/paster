@@ -1,0 +1,414 @@
+{
+  "version": 1,
+  "id": "collage-example",
+  "name": "Collage Example",
+  "assets": [
+    {
+      "id": "mobile-old",
+      "path": "images/mobile-old.png",
+      "width": 687,
+      "height": 315
+    },
+    {
+      "id": "mobile-first-friday",
+      "path": "images/mobile-first-friday.png",
+      "width": 175,
+      "height": 138
+    },
+    {
+      "id": "mobile-lil-plate-me",
+      "path": "images/mobile-lil-plate-me.png",
+      "width": 470,
+      "height": 337
+    },
+    {
+      "id": "mobile-pointer5",
+      "path": "images/mobile-pointer5.png",
+      "width": 45,
+      "height": 52
+    },
+    {
+      "id": "mobile-pointer4",
+      "path": "images/mobile-pointer4.png",
+      "width": 45,
+      "height": 53
+    },
+    {
+      "id": "mobile-pointer3",
+      "path": "images/mobile-pointer3.png",
+      "width": 45,
+      "height": 53
+    },
+    {
+      "id": "mobile-pointer2",
+      "path": "images/mobile-pointer2.png",
+      "width": 45,
+      "height": 53
+    },
+    {
+      "id": "mobile-pointer1",
+      "path": "images/mobile-pointer1.png",
+      "width": 46,
+      "height": 53
+    },
+    {
+      "id": "mobile-pointer0",
+      "path": "images/mobile-pointer0.png",
+      "width": 45,
+      "height": 52
+    },
+    {
+      "id": "mobile-red",
+      "path": "images/mobile-red.png",
+      "width": 337,
+      "height": 228
+    },
+    {
+      "id": "mobile-n-squig",
+      "path": "images/mobile-n-squig.svg",
+      "width": 66,
+      "height": 179
+    },
+    {
+      "id": "mobile-paster",
+      "path": "images/mobile-paster.svg",
+      "width": 49,
+      "height": 14
+    },
+    {
+      "id": "desktop-old",
+      "path": "images/desktop-old.png",
+      "width": 1512,
+      "height": 694
+    },
+    {
+      "id": "desktop-first-friday",
+      "path": "images/desktop-first-friday.png",
+      "width": 466,
+      "height": 267
+    },
+    {
+      "id": "desktop-lil-plate-me",
+      "path": "images/desktop-lil-plate-me.png",
+      "width": 685,
+      "height": 491
+    },
+    {
+      "id": "desktop-pointer5",
+      "path": "images/desktop-pointer5.png",
+      "width": 62,
+      "height": 72
+    },
+    {
+      "id": "desktop-pointer4",
+      "path": "images/desktop-pointer4.png",
+      "width": 63,
+      "height": 72
+    },
+    {
+      "id": "desktop-pointer3",
+      "path": "images/desktop-pointer3.png",
+      "width": 62,
+      "height": 72
+    },
+    {
+      "id": "desktop-pointer2",
+      "path": "images/desktop-pointer2.png",
+      "width": 62,
+      "height": 72
+    },
+    {
+      "id": "desktop-pointer1",
+      "path": "images/desktop-pointer1.png",
+      "width": 71,
+      "height": 82
+    },
+    {
+      "id": "desktop-pointer0",
+      "path": "images/desktop-pointer0.png",
+      "width": 62,
+      "height": 72
+    },
+    {
+      "id": "desktop-red",
+      "path": "images/desktop-red.png",
+      "width": 337,
+      "height": 228
+    },
+    {
+      "id": "desktop-n-squig",
+      "path": "images/desktop-n-squig.svg",
+      "width": 41,
+      "height": 112
+    },
+    {
+      "id": "desktop-paster",
+      "path": "images/desktop-paster.svg",
+      "width": 81,
+      "height": 23
+    }
+  ],
+  "layouts": [
+    {
+      "id": "mobile",
+      "name": "mobile",
+      "minWidth": 0,
+      "width": 393,
+      "height": 982,
+      "backgroundColor": "#ffffff",
+      "items": [
+        {
+          "id": "old",
+          "name": "old",
+          "x": -33,
+          "y": 506,
+          "width": 687,
+          "height": 315,
+          "zIndex": 0,
+          "assetId": "mobile-old"
+        },
+        {
+          "id": "first-friday",
+          "name": "first-friday",
+          "x": 147,
+          "y": 788,
+          "width": 175,
+          "height": 138,
+          "zIndex": 1,
+          "assetId": "mobile-first-friday"
+        },
+        {
+          "id": "lil-plate-me",
+          "name": "lil-plate-me",
+          "x": -77,
+          "y": 645,
+          "width": 470,
+          "height": 337,
+          "zIndex": 2,
+          "assetId": "mobile-lil-plate-me"
+        },
+        {
+          "id": "pointer5",
+          "name": "pointer5",
+          "x": 331,
+          "y": 915,
+          "width": 45,
+          "height": 52,
+          "zIndex": 3,
+          "assetId": "mobile-pointer5"
+        },
+        {
+          "id": "pointer4",
+          "name": "pointer4",
+          "x": 288,
+          "y": 906,
+          "width": 45,
+          "height": 53,
+          "zIndex": 4,
+          "assetId": "mobile-pointer4"
+        },
+        {
+          "id": "pointer3",
+          "name": "pointer3",
+          "x": 240,
+          "y": 906,
+          "width": 45,
+          "height": 53,
+          "zIndex": 5,
+          "assetId": "mobile-pointer3"
+        },
+        {
+          "id": "pointer2",
+          "name": "pointer2",
+          "x": 166,
+          "y": 906,
+          "width": 45,
+          "height": 53,
+          "zIndex": 6,
+          "assetId": "mobile-pointer2"
+        },
+        {
+          "id": "pointer1",
+          "name": "pointer1",
+          "x": 109,
+          "y": 906,
+          "width": 46,
+          "height": 53,
+          "zIndex": 7,
+          "assetId": "mobile-pointer1"
+        },
+        {
+          "id": "pointer0",
+          "name": "pointer0",
+          "x": 43,
+          "y": 898,
+          "width": 45,
+          "height": 52,
+          "zIndex": 8,
+          "assetId": "mobile-pointer0"
+        },
+        {
+          "id": "red",
+          "name": "red",
+          "x": 317.9520263671875,
+          "y": 294.7068786621094,
+          "width": 337,
+          "height": 228,
+          "zIndex": 9,
+          "rotation": -151.43,
+          "assetId": "mobile-red"
+        },
+        {
+          "id": "n-squig",
+          "name": "n-squig",
+          "x": 92,
+          "y": 290,
+          "width": 66,
+          "height": 179,
+          "zIndex": 10,
+          "assetId": "mobile-n-squig"
+        },
+        {
+          "id": "paster",
+          "name": "paster",
+          "x": 285,
+          "y": 876,
+          "width": 49.000003814697266,
+          "height": 13.718506813049316,
+          "zIndex": 11,
+          "assetId": "mobile-paster"
+        }
+      ]
+    },
+    {
+      "id": "desktop",
+      "name": "desktop",
+      "minWidth": 953,
+      "width": 1512,
+      "height": 982,
+      "backgroundColor": "#ffffff",
+      "items": [
+        {
+          "id": "old",
+          "name": "old",
+          "x": 0,
+          "y": 159,
+          "width": 1512,
+          "height": 694,
+          "zIndex": 0,
+          "assetId": "desktop-old"
+        },
+        {
+          "id": "first-friday",
+          "name": "first-friday",
+          "x": 1056,
+          "y": 636,
+          "width": 466,
+          "height": 267,
+          "zIndex": 1,
+          "assetId": "desktop-first-friday"
+        },
+        {
+          "id": "lil-plate-me",
+          "name": "lil-plate-me",
+          "x": 827,
+          "y": 491,
+          "width": 685,
+          "height": 491,
+          "zIndex": 2,
+          "assetId": "desktop-lil-plate-me"
+        },
+        {
+          "id": "pointer5",
+          "name": "pointer5",
+          "x": 1408.5,
+          "y": 876,
+          "width": 62,
+          "height": 72,
+          "zIndex": 3,
+          "assetId": "desktop-pointer5"
+        },
+        {
+          "id": "pointer4",
+          "name": "pointer4",
+          "x": 1320,
+          "y": 876,
+          "width": 63,
+          "height": 72,
+          "zIndex": 4,
+          "assetId": "desktop-pointer4"
+        },
+        {
+          "id": "pointer3",
+          "name": "pointer3",
+          "x": 1233,
+          "y": 876,
+          "width": 62,
+          "height": 72,
+          "zIndex": 5,
+          "assetId": "desktop-pointer3"
+        },
+        {
+          "id": "pointer2",
+          "name": "pointer2",
+          "x": 1100.5,
+          "y": 876,
+          "width": 62,
+          "height": 72,
+          "zIndex": 6,
+          "assetId": "desktop-pointer2"
+        },
+        {
+          "id": "pointer1",
+          "name": "pointer1",
+          "x": 999,
+          "y": 866,
+          "width": 71,
+          "height": 82,
+          "zIndex": 7,
+          "assetId": "desktop-pointer1"
+        },
+        {
+          "id": "pointer0",
+          "name": "pointer0",
+          "x": 870,
+          "y": 876,
+          "width": 62,
+          "height": 72,
+          "zIndex": 8,
+          "assetId": "desktop-pointer0"
+        },
+        {
+          "id": "red",
+          "name": "red",
+          "x": 34,
+          "y": 720,
+          "width": 337,
+          "height": 228,
+          "zIndex": 9,
+          "assetId": "desktop-red"
+        },
+        {
+          "id": "n-squig",
+          "name": "n-squig",
+          "x": 1399,
+          "y": 56,
+          "width": 41,
+          "height": 112,
+          "zIndex": 10,
+          "assetId": "desktop-n-squig"
+        },
+        {
+          "id": "paster",
+          "name": "paster",
+          "x": 1346,
+          "y": 825,
+          "width": 80.84486389160156,
+          "height": 22.63408660888672,
+          "zIndex": 11,
+          "assetId": "desktop-paster"
+        }
+      ]
+    }
+  ]
+}
