@@ -53,8 +53,8 @@ export function About() {
             one of the examples. You can also edit the JSON directly.
           </li>
           <li>
-            On the <strong>Layout</strong> tab, drag the width slider to preview any screen size, up to desktop
-            widths on a phone.
+            On the <strong>Layout</strong> tab, drag the width slider, or click a breakpoint under it, to see each
+            layout take over, even on a phone.
           </li>
           <li>
             Everything stays in your browser. Nothing you upload is sent anywhere.
