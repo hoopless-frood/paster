@@ -51,7 +51,7 @@ of that contract, not a dependency of it.
 
 Because of that, the playground's rendered composition must stay
 production-shaped: its `resolveContent`
-(`playground/src/PreviewPanel/asset-content.tsx`) returns only the markup
+(`playground/src/LayoutPanel/asset-content.tsx`) returns only the markup
 a real consumer would, such as a bare `<img>`. Debug tooling (outlines,
 item inspection) must never wrap or restyle that content. Wrapping it
 changes the DOM and can visibly change rendering: a `<button>` around an

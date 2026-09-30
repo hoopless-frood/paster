@@ -5,16 +5,16 @@ import { Checkbox } from "../Checkbox/Checkbox";
 import { ItemOutlines } from "../ItemOutlines/ItemOutlines";
 import { Slider } from "../Slider/Slider";
 import { createAssetContentResolver } from "./asset-content";
-import type { PreviewPanelProps } from "./PreviewPanel.types";
-import styles from "./PreviewPanel.module.css";
+import type { LayoutPanelProps } from "./LayoutPanel.types";
+import styles from "./LayoutPanel.module.css";
 
-export type { PreviewPanelProps } from "./PreviewPanel.types";
+export type { LayoutPanelProps } from "./LayoutPanel.types";
 
 const MIN_VIEWPORT_WIDTH = 280;
 const DESKTOP_VIEWPORT_WIDTH = 1920;
 
 // Every breakpoint must stay reachable, even one set above a typical desktop.
-function maxViewportWidthFor(composition: PreviewPanelProps["composition"]): number {
+function maxViewportWidthFor(composition: LayoutPanelProps["composition"]): number {
   return Math.max(DESKTOP_VIEWPORT_WIDTH, ...composition.layouts.map((layout) => layout.minWidth));
 }
 
@@ -24,7 +24,7 @@ function initialViewportWidth(): number {
   return Math.min(Math.max(window.innerWidth, MIN_VIEWPORT_WIDTH), DESKTOP_VIEWPORT_WIDTH);
 }
 
-export function PreviewPanel({ composition, assetUrls }: PreviewPanelProps) {
+export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
   const [viewportWidth, setViewportWidth] = useState(initialViewportWidth);
   const [showOutlines, setShowOutlines] = useState(false);
   const viewportInputId = useId();
@@ -36,7 +36,7 @@ export function PreviewPanel({ composition, assetUrls }: PreviewPanelProps) {
   const resolveContent = useMemo(() => createAssetContentResolver(assetUrls), [assetUrls]);
 
   return (
-    <section className={styles.panel} aria-label="Preview">
+    <section className={styles.panel} aria-label="Layout">
       <Checkbox
         className={styles.checkbox}
         label="Show item outlines and IDs"

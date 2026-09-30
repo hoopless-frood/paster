@@ -1,5 +1,5 @@
 import type { ItemContentResolver } from "@paster/react";
-import styles from "./PreviewPanel.module.css";
+import styles from "./LayoutPanel.module.css";
 
 /**
  * The playground's resolveContent, kept to exactly the markup a production

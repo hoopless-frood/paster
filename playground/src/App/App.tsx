@@ -2,15 +2,15 @@ import { sampleComposition, type Composition } from "@paster/core";
 import { useEffect, useRef, useState } from "react";
 import { Header } from "../Header/Header";
 import { JsonPanel } from "../JsonPanel/JsonPanel";
-import { PreviewPanel } from "../PreviewPanel/PreviewPanel";
+import { LayoutPanel } from "../LayoutPanel/LayoutPanel";
 import { Tabs } from "../Tabs/Tabs";
 import styles from "./App.module.css";
 
-type TabId = "json" | "preview";
+type TabId = "json" | "layout";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "json", label: "JSON" },
-  { id: "preview", label: "Preview" },
+  { id: "layout", label: "Layout" },
 ];
 
 function readTabFromUrl(): TabId {
@@ -83,13 +83,13 @@ export function App() {
       </div>
 
       <div
-        id="panel-preview"
+        id="panel-layout"
         role="tabpanel"
-        aria-labelledby="tab-preview"
-        hidden={activeTab !== "preview"}
+        aria-labelledby="tab-layout"
+        hidden={activeTab !== "layout"}
         className={styles.tabPanel}
       >
-        <PreviewPanel composition={composition} assetUrls={assetUrls} />
+        <LayoutPanel composition={composition} assetUrls={assetUrls} />
       </div>
     </main>
   );
