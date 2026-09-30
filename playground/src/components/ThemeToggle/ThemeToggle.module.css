@@ -1,5 +1,12 @@
+/* A fixed box, the same size as the header's other icons, so switching
+   between the sun and moon glyphs (different widths) never shifts them. */
 .toggle {
   appearance: none;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: content-box;
+  width: 1.3rem;
+  height: 1.3rem;
   background: none;
   border: none;
   padding: 0.25rem;
