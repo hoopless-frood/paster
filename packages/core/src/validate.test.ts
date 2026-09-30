@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { sampleComposition } from "./sample.js";
 import { validateComposition } from "./validate.js";
 
+// A composition is plain JSON, so a JSON round-trip is an exact deep copy —
+// and unlike structuredClone, needs no Node or DOM typings (see tsconfig).
 function clone(): typeof sampleComposition {
-  return structuredClone(sampleComposition);
+  return JSON.parse(JSON.stringify(sampleComposition));
 }
 
 describe("validateComposition", () => {

@@ -7,6 +7,10 @@
     // on relative imports, and NodeNext is what enforces/expects that.
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    // No ambient Node/DOM typings: core must stay environment-independent,
+    // and without this, stray @types in parent directories leak in and hide
+    // errors that only CI would catch.
+    "types": [],
     "noEmit": true
   },
   "include": ["src"]
