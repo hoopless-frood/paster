@@ -57,9 +57,9 @@ item inspection) must never wrap or restyle that content. Wrapping it
 changes the DOM and can visibly change rendering: a `<button>` around an
 image, for example, paints its default background through the image's
 transparent pixels. Debug UI belongs in a separate layer beside or on top
-of the composition, in its own folder. For example,
-`playground/src/components/ItemOutlines/` draws outlines by overlaying a second
-`PasterComposition` rather than touching the preview's content.
+of the composition, in its own folder. Outlines, for example, can be drawn
+by overlaying a second `PasterComposition` with the same geometry, rather
+than by touching the preview's content.
 
 ## Package boundaries and responsibilities
 

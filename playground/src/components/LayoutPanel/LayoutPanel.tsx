@@ -1,9 +1,6 @@
 import { selectLayout } from "@paster/core";
 import { PasterComposition } from "@paster/react";
 import { useId, useMemo, useState } from "react";
-// Hidden for now: restore with the outlines checkbox below.
-// import { Checkbox } from "../Checkbox/Checkbox";
-import { ItemOutlines } from "../ItemOutlines/ItemOutlines";
 import { Slider } from "../Slider/Slider";
 import { createAssetContentResolver } from "./asset-content";
 import type { LayoutPanelProps } from "./LayoutPanel.types";
@@ -27,8 +24,6 @@ function initialViewportWidth(): number {
 
 export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
   const [viewportWidth, setViewportWidth] = useState(initialViewportWidth);
-  // Outlines are hidden for now; restore setShowOutlines with the checkbox below.
-  const [showOutlines /* , setShowOutlines */] = useState(false);
   const viewportInputId = useId();
 
   // Independently re-derives the active layout with the same function the
@@ -39,15 +34,6 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
 
   return (
     <section className={styles.panel} aria-label="Layout">
-      {/* Hidden for now.
-      <Checkbox
-        className={styles.checkbox}
-        label="Show item outlines and IDs"
-        checked={showOutlines}
-        onChange={(event) => setShowOutlines(event.target.checked)}
-      />
-      */}
-
       <div className={styles.widthGroup}>
         <label htmlFor={viewportInputId}>
           <span>Viewport width: {viewportWidth}px</span> <span>({activeLayout.name})</span>
@@ -71,7 +57,6 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
 
       <div className={styles.previewWrapper} style={{ width: viewportWidth }}>
         <PasterComposition composition={composition} resolveContent={resolveContent} viewportWidth={viewportWidth} />
-        {showOutlines && <ItemOutlines composition={composition} viewportWidth={viewportWidth} />}
       </div>
     </section>
   );

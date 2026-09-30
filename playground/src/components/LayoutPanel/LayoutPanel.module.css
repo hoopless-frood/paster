@@ -10,11 +10,6 @@
   }
 }
 
-.checkbox {
-  padding: 0 var(--edge-space);
-  margin: var(--section-space) 0;
-}
-
 .widthGroup {
   display: flex;
   flex-direction: column;
