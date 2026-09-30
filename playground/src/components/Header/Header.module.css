@@ -78,7 +78,6 @@
   font-weight: 700;
   line-height: 1;
   text-decoration: none;
-  transition: color var(--paster-transition);
 }
 
 .about:hover {
@@ -93,7 +92,6 @@
 .github {
   display: flex;
   color: var(--paster-text);
-  transition: color var(--paster-transition);
 }
 
 .github:hover {

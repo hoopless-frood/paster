@@ -5,10 +5,6 @@
   color: var(--paster-color-ink);
   font: inherit;
   cursor: pointer;
-  transition:
-    background-color var(--paster-transition),
-    color var(--paster-transition),
-    opacity var(--paster-transition);
 }
 
 /* Always the dark pink, in both themes, so white text on it stays 7.2:1.
@@ -23,10 +19,6 @@
   background: transparent;
   border-color: var(--paster-muted);
   color: var(--paster-text);
-  transition:
-    border-color var(--paster-transition),
-    color var(--paster-transition),
-    opacity var(--paster-transition);
 }
 
 .secondary:hover:not(:disabled) {
@@ -35,9 +27,12 @@
   color: var(--paster-accent-text);
 }
 
+/* No transition while disabled: it would visibly lag behind the rest of the
+   page on a theme switch, since it fades from half opacity. */
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transition: none;
 }
 
 /* The busy button stays fully visible, since its label says what's happening. */

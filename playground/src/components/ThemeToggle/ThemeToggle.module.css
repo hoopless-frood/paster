@@ -7,7 +7,6 @@
   line-height: 1;
   color: var(--paster-text);
   cursor: pointer;
-  transition: color var(--paster-transition);
 }
 
 .toggle:hover {

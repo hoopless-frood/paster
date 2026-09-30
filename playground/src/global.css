@@ -12,6 +12,22 @@ body,
   --paster-transition: 150ms ease;
 }
 
+/* Every color change uses this one transition, so a theme switch fades the
+   whole page together instead of only the elements that happen to have
+   hover effects, and every hover shares the same timing. Only color-type
+   properties and opacity, so nothing moves or reflows. */
+*,
+*::before,
+*::after {
+  transition:
+    color var(--paster-transition),
+    background-color var(--paster-transition),
+    border-color var(--paster-transition),
+    fill var(--paster-transition),
+    stroke var(--paster-transition),
+    opacity var(--paster-transition);
+}
+
 body {
   margin: 0;
   background: var(--paster-bg);
@@ -26,7 +42,6 @@ a {
   color: var(--paster-text);
   text-decoration-thickness: from-font;
   text-underline-offset: 0.2em;
-  transition: color var(--paster-transition);
 
   &:hover {
     color: var(--paster-hover);

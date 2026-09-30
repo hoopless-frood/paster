@@ -69,7 +69,6 @@
   white-space: nowrap;
   color: var(--paster-muted);
   cursor: pointer;
-  transition: color var(--paster-transition);
 }
 
 /* The tick itself, at the exact point: the same fraction across the button

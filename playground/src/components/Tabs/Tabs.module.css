@@ -17,8 +17,6 @@
   font-weight: 600;
   color: var(--paster-muted);
   cursor: pointer;
-  transition: color var(--paster-transition),
-    border-bottom-color var(--paster-transition);
 }
 
 .tab:hover:not([aria-selected="true"]) {

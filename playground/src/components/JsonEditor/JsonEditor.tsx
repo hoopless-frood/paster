@@ -24,7 +24,6 @@ const chromeTheme = EditorView.theme({
     backgroundColor: "var(--paster-bg)",
     color: "var(--paster-text)",
     border: "2px solid var(--paster-border)",
-    transition: "border-color var(--paster-transition)",
   },
   "&.cm-focused": {
     outline: "none",
