@@ -21,5 +21,7 @@
   "errorText": { "value": "#b00020" },
   "warningText": { "value": "#8a5300" },
   "hover": { "value": "{color.magentaHaze}" },
-  "scrollbarHover": { "value": "{color.wisteria}" }
+  "scrollbarHover": { "value": "{color.wisteria}" },
+  "syntaxKey": { "value": "{color.magentaHaze}" },
+  "syntaxNumber": { "value": "{color.wisteria}" }
 }

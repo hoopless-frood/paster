@@ -12,10 +12,10 @@ export type { JsonEditorProps } from "./JsonEditor.types";
 // editor's highlighting adapts to light/dark automatically, same as every
 // other themed element.
 const highlightStyle = HighlightStyle.define([
-  { tag: tags.propertyName, color: "var(--paster-color-magenta-haze)" },
+  { tag: tags.propertyName, color: "var(--paster-syntax-key)" },
   { tag: tags.string, color: "var(--paster-text)" },
-  { tag: tags.number, color: "var(--paster-color-wisteria)" },
-  { tag: [tags.bool, tags.null], color: "var(--paster-color-magenta-haze)", fontWeight: 600 },
+  { tag: tags.number, color: "var(--paster-syntax-number)" },
+  { tag: [tags.bool, tags.null], color: "var(--paster-syntax-key)", fontWeight: 600 },
   { tag: [tags.punctuation, tags.separator, tags.squareBracket, tags.brace], color: "var(--paster-muted)" },
 ]);
 

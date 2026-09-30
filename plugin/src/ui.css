@@ -98,8 +98,10 @@ button.active .label:not(.label-active) {
   visibility: hidden;
 }
 
+/* Ink on magenta-haze is only 2.6:1; white is 7.2:1. */
 button:hover:not(:disabled) {
   background: var(--paster-color-magenta-haze);
+  color: #fff;
 }
 
 button:disabled {
