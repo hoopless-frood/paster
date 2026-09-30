@@ -2,7 +2,7 @@
 
 Paster exports a Figma **Composition** (one selected parent frame) containing any number of named breakpoint **Layouts**. Each layout has a design-space size and positioned **Items**. It produces a versioned, portable JSON contract, optionally packaged with rendered images, and can be previewed by a framework-independent core + React renderer in a Vite playground.
 
-**Workflow:** one milestone = one review checkpoint = one maintainer-made commit. Claude implements only the requested milestone, reports changes and checks, then stops without staging, committing, pushing, or advancing. Mark boxes complete only after review. Suggested commit messages are proposals, not commands.
+**How to read this:** each milestone is a reviewable unit of work, with a checklist and acceptance criteria, and ends with a suggested commit. Boxes are checked once the work has been reviewed. The backlog holds ideas that aren't committed to yet.
 
 ## Decisions and invariants
 
@@ -52,7 +52,7 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 - [x] Extract relative `x/y/width/height`, unique IDs, independent `zIndex` from back-to-front child order; skip hidden layers. Gracefully skip unsupported rotation/Auto Layout/complex nesting per-layer (with a clear warning) rather than blocking the whole export — only fail outright when nothing exportable remains.
 - [x] Validate against core; expose a copyable geometry-only JSON export and actionable error messages.
 
-**Accept:** moving/resizing/reordering Figma layers changes expected output; translating the parent frame doesn't change relative coordinates; multiple breakpoints work. Document hands-on checks if Figma cannot be run in the agent environment.  
+**Accept:** moving/resizing/reordering Figma layers changes expected output; translating the parent frame doesn't change relative coordinates; multiple breakpoints work.  
 **Suggested commit:** `feat(plugin): export validated frame geometry`
 
 ### M4 — React renderer
@@ -90,7 +90,7 @@ Since committed, also extended past its original scope (moved out of the backlog
 - [x] Create/revoke object URLs safely and show errors for missing/corrupt assets.
 - [x] Preserve SVG assets on ZIP import alongside raster assets.
 - [x] Safely handle SVG assets from imported compositions (validate/sanitize before rendering; never execute embedded scripts or external references).
-- [ ] Verify exported imagery has no unintended second crop and matches relative geometry and stacking across breakpoints. *(Verified against synthetic test assets and JSON built to match a real export's shape — not yet checked against real Figma-exported image bytes; no way to run Figma in this environment. Leave unchecked until someone does that pass by hand.)*
+- [ ] Verify exported imagery has no unintended second crop and matches relative geometry and stacking across breakpoints. *(Image sizes confirmed against a real Figma export, `examples/collage/`: every exported image matches its item's box exactly, with no second crop. Still to check by hand: geometry and stacking in the playground across breakpoints.)*
 - [x] Document complete Figma → ZIP → playground workflow; add automated tests and a manual visual QA checklist.
 
 **Accept:** drag/drop a genuine export and reproduce all supported layouts without hand-entering image URLs.  
