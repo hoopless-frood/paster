@@ -1,0 +1,7 @@
+/*
+ * The playground's own named breakpoints, for its interface only (a
+ * composition's breakpoints come from its data). Lightning CSS replaces
+ * each name with its query at build time; @import this file wherever one
+ * is used.
+ */
+@custom-media --phone (max-width: 480px);

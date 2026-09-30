@@ -37,6 +37,7 @@ playground/
     ├── App/                # the playground: JSON and Layout tabs
     ├── About/              # the About page
     ├── global.css          # page-wide styles; tokens.css is generated, not committed
+    ├── breakpoints.css     # named breakpoints (@custom-media), resolved by Lightning CSS at build time
     └── components/         # one folder per component: .tsx, .types.ts, .module.css, tests
 ```
 

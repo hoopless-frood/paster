@@ -31,6 +31,12 @@ function tokensPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tokensPlugin()],
+  css: {
+    // Lightning CSS, so the playground's named breakpoints (@custom-media in
+    // src/breakpoints.css) are replaced with real queries at build time.
+    transformer: "lightningcss",
+    lightningcss: { drafts: { customMedia: true } },
+  },
   build: {
     // Two pages: the playground itself, and /about/ (a folder with its own
     // index.html, so the URL works on any static host without rewrites).

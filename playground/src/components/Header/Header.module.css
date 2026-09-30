@@ -1,3 +1,5 @@
+@import "../../breakpoints.css";
+
 .header {
   display: flex;
   align-items: stretch;
@@ -7,6 +9,10 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
+
+  @media (--phone) {
+    align-items: center;
+  }
 }
 
 .heading {
@@ -22,7 +28,8 @@
 }
 
 .home:focus-visible,
-.about:focus-visible {
+.about:focus-visible,
+.github:focus-visible {
   outline: 2px solid var(--paster-accent-text);
   outline-offset: 2px;
 }
@@ -34,6 +41,10 @@
   display: block;
   color: var(--paster-color-blossom);
   max-height: 42px;
+
+  @media (--phone) {
+    max-height: 28px;
+  }
 }
 
 .right {
@@ -77,4 +88,20 @@
 /* Persistent, so it uses the accent, which stays legible in dark mode. */
 .about[aria-current="page"] {
   color: var(--paster-accent-text);
+}
+
+.github {
+  display: flex;
+  color: var(--paster-text);
+  transition: color var(--paster-transition);
+}
+
+.github:hover {
+  color: var(--paster-hover);
+}
+
+.githubIcon {
+  display: block;
+  width: 1.3rem;
+  height: 1.3rem;
 }
