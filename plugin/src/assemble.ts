@@ -11,37 +11,39 @@ import {
   type ScanSuccess,
   type SupportedItemNode,
 } from "./figma-export";
+import type { ExportedImage } from "./protocol";
 
 /** Above this, a single export risks running too long / too large in the plugin sandbox — fail explicitly rather than let it hang or produce a partial ZIP. */
 const MAX_EXPORTABLE_ITEMS = 300;
-
-export interface ExportedImage {
-  path: string;
-  bytes: Uint8Array;
-}
 
 export type ImageExportOutcome =
   | { ok: true; composition: Composition; images: ExportedImage[] }
   | { ok: false; errors: string[] };
 
 /**
- * Merges a fresh scan with the min-width values collected from the UI,
- * builds a Composition, and validates it against @paster/core. Geometry-only
- * — no assets/assetIds; call attachImages() on the result for a ZIP export
- * with images.
+ * Derives each layout's minWidth purely from its own design-space width.
+ * The plugin has no setting for this: it's a sensible default, adjusted
+ * later in the JSON or CMS if needed. Sorted by width, the smallest layout
+ * gets 0 (the required base layout) and each other layout gets the
+ * midpoint between itself and the next-smaller layout, so each layout's
+ * range extends outward toward its neighbors in both directions.
  */
-export function assembleComposition(
-  scan: ScanSuccess,
-  minWidths: Record<string, number>,
-): ValidationResult {
-  const missing = scan.layouts.filter((layout) => !(layout.name in minWidths));
-  if (missing.length > 0) {
-    return {
-      valid: false,
-      errors: missing.map((layout) => `No min-width entered for layout "${layout.name}".`),
-    };
-  }
+export function deriveMinWidths(layouts: { name: string; width: number }[]): Record<string, number> {
+  const sorted = [...layouts].sort((a, b) => a.width - b.width);
+  const minWidths: Record<string, number> = {};
+  sorted.forEach((layout, index) => {
+    minWidths[layout.name] = index === 0 ? 0 : Math.round((sorted[index - 1].width + layout.width) / 2);
+  });
+  return minWidths;
+}
 
+/**
+ * Builds a Composition from a fresh scan and validates it against
+ * @paster/core. Geometry-only — no assets/assetIds; call attachImages() on
+ * the result for a ZIP export with images.
+ */
+export function assembleComposition(scan: ScanSuccess): ValidationResult {
+  const minWidths = deriveMinWidths(scan.layouts);
   const composition: Composition = {
     version: COMPOSITION_SCHEMA_VERSION,
     id: scan.compositionName,

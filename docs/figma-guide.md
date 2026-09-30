@@ -63,16 +63,13 @@ piece of visible content should be a single, direct child of its layout.
 
 Every layout frame you select becomes a breakpoint. There's no limit to
 two — add as many layouts as you have distinct arrangements. The plugin
-suggests a starting min-width for each, based on frame width (the
-narrowest layout suggests 0; every other layout suggests the midpoint
-between its own width and the next-narrower layout's) — always review and
-adjust these, especially if your frames aren't ordered narrow-to-wide by
-width. The suggestion is just a starting point: whatever's in the field
-when you click Export is what ships, never silently substituted.
-
-Exactly one layout must end up at min-width 0 (the base/mobile-first
-layout) — the plugin will tell you if none, or more than one, ends up
-there.
+sets each layout's min-width automatically from frame widths: the
+narrowest layout gets 0 (the base, mobile-first layout), and every other
+layout gets the midpoint between its own width and the next-narrower
+layout's. For example, a 393px mobile frame and a 1512px desktop frame
+give min-widths of 0 and 953. The plugin has no setting for this; to use
+different breakpoints, edit `minWidth` in the exported JSON, or later in
+your CMS.
 
 ## Rotation
 
@@ -138,8 +135,8 @@ export instead, or split into fewer layouts/items.
 ## Troubleshooting: common warnings
 
 Warnings don't block export — the rest of the composition still exports
-around the flagged layer. Fix what you want and click **Refresh
-selection** to re-scan without losing your other settings.
+around the flagged layer. Fix what you want in Figma, then click
+**Refresh** to re-read the selection.
 
 | Warning | What it means |
 | --- | --- |

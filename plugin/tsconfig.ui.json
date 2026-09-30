@@ -4,5 +4,5 @@
     "lib": ["ES2020", "DOM"],
     "noEmit": true
   },
-  "include": ["src/ui.ts", "src/protocol.ts"]
+  "include": ["src/ui.ts", "src/json-view.ts", "src/protocol.ts"]
 }

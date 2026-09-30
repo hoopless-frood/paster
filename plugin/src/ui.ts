@@ -1,14 +1,18 @@
 import JSZip from "jszip";
-import type { ExportedImage, LayoutSummary, MainToUiMessage, UiToMainMessage } from "./protocol";
+import { createJsonView } from "./json-view";
+import type { ExportedImage, MainToUiMessage, UiToMainMessage } from "./protocol";
 
 const statusEl = document.getElementById("status") as HTMLParagraphElement;
-const formEl = document.getElementById("layouts") as HTMLDivElement;
-const exportButton = document.getElementById("export") as HTMLButtonElement;
 const refreshButton = document.getElementById("refresh") as HTMLButtonElement;
-const outputEl = document.getElementById("output") as HTMLTextAreaElement;
+const copyButton = document.getElementById("copy-json") as HTMLButtonElement;
+const exportZipButton = document.getElementById("export-zip") as HTMLButtonElement;
 const errorsEl = document.getElementById("errors") as HTMLUListElement;
 const warningsEl = document.getElementById("warnings") as HTMLUListElement;
-const modeInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="mode"]'));
+
+const jsonView = createJsonView(document.getElementById("output") as HTMLDivElement);
+
+// What Copy JSON copies: always exactly what the view is showing.
+let currentJson = "";
 
 function sendToMain(message: UiToMainMessage): void {
   parent.postMessage({ pluginMessage: message }, "*");
@@ -23,14 +27,6 @@ function renderList(el: HTMLUListElement, items: string[]): void {
   });
 }
 
-function currentMode(): "json" | "zip" {
-  return (modeInputs.find((input) => input.checked)?.value as "json" | "zip" | undefined) ?? "json";
-}
-
-function updateExportButtonLabel(): void {
-  exportButton.textContent = currentMode() === "zip" ? "Export ZIP" : "Export JSON";
-}
-
 function slugify(name: string): string {
   const slug = name
     .toLowerCase()
@@ -38,37 +34,6 @@ function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
   return slug.length > 0 ? slug : "paster-export";
-}
-
-modeInputs.forEach((input) => {
-  input.addEventListener("change", updateExportButtonLabel);
-});
-
-function renderLayoutForm(compositionName: string, layouts: LayoutSummary[]): void {
-  statusEl.textContent = `"${compositionName}" — ${layouts.length} layout${layouts.length === 1 ? "" : "s"} found. Min-width is suggested from each layout's frame width — review and edit before exporting.`;
-  formEl.innerHTML = "";
-  outputEl.value = "";
-
-  layouts.forEach((layout) => {
-    const row = document.createElement("label");
-    row.className = "row";
-    row.textContent = `${layout.name} — min width (px)`;
-
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = "0";
-    input.step = "1";
-    input.value = String(layout.suggestedMinWidth);
-    input.dataset.layout = layout.name;
-
-    row.appendChild(input);
-    formEl.appendChild(row);
-  });
-
-  // A successful scan always has at least one layout (scanSelection fails
-  // rather than returning an empty list), so export is safe to enable here.
-  exportButton.disabled = false;
-  updateExportButtonLabel();
 }
 
 /** Assembles composition.json + every exported image into a downloadable ZIP, entirely in the UI iframe — the main thread can export images but has no DOM/Blob to build or download a ZIP with. */
@@ -90,83 +55,91 @@ async function downloadZip(compositionName: string, json: string, images: Export
   URL.revokeObjectURL(url);
 }
 
+/** Switches a button between its two stacked labels (see ui.css). */
+function setActive(button: HTMLButtonElement, active: boolean): void {
+  button.classList.toggle("active", active);
+}
+
+function showOutput(json: string): void {
+  currentJson = json;
+  jsonView.setText(json);
+  copyButton.disabled = json === "";
+}
+
+/**
+ * Figma's plugin iframe blocks navigator.clipboard, so this copies through
+ * a temporary textarea and execCommand("copy"). It runs directly in the
+ * click handler, which is when browsers allow it.
+ */
+function copyToClipboard(text: string): boolean {
+  const scratch = document.createElement("textarea");
+  scratch.value = text;
+  scratch.setAttribute("readonly", "");
+  scratch.style.position = "fixed";
+  scratch.style.opacity = "0";
+  document.body.appendChild(scratch);
+  scratch.select();
+  const copied = document.execCommand("copy");
+  scratch.remove();
+  return copied;
+}
+
 window.onmessage = (event: MessageEvent<{ pluginMessage: MainToUiMessage }>) => {
   const message = event.data.pluginMessage;
 
-  if (message.type === "scan-result") {
-    if (message.ok) {
-      renderList(errorsEl, []);
-      renderList(warningsEl, message.warnings);
-      renderLayoutForm(message.compositionName, message.layouts);
-    } else {
-      formEl.innerHTML = "";
-      exportButton.disabled = true;
-      statusEl.textContent = "Selection isn't ready to export yet.";
+  if (message.type === "generate-result") {
+    exportZipButton.disabled = !message.ok;
+    if (!message.ok) {
+      statusEl.textContent = "Select one composition frame.";
+      showOutput("");
       renderList(warningsEl, []);
       renderList(errorsEl, message.errors);
+      return;
     }
+
+    const { compositionName, layoutCount } = message;
+    statusEl.textContent = `"${compositionName}" — ${layoutCount} layout${layoutCount === 1 ? "" : "s"} found.`;
+    renderList(errorsEl, []);
+    renderList(warningsEl, message.warnings);
+    showOutput(message.json);
     return;
   }
 
-  if (message.type === "export-result") {
-    refreshButton.disabled = false;
-    exportButton.disabled = false;
-    updateExportButtonLabel();
+  refreshButton.disabled = false;
+  exportZipButton.disabled = false;
+  setActive(exportZipButton, false);
 
-    if (message.ok) {
-      renderList(errorsEl, []);
-      renderList(warningsEl, message.warnings);
-      outputEl.value = message.json;
-      outputEl.focus();
-      outputEl.select();
-
-      if (message.mode === "zip") {
-        downloadZip(message.compositionName, message.json, message.images).catch((error) => {
-          renderList(errorsEl, [
-            `Built the composition but couldn't assemble the ZIP: ${error instanceof Error ? error.message : String(error)}`,
-          ]);
-        });
-      }
-    } else {
-      outputEl.value = "";
-      renderList(errorsEl, message.errors);
-    }
+  if (!message.ok) {
+    renderList(errorsEl, message.errors);
+    return;
   }
+
+  renderList(errorsEl, []);
+  showOutput(message.json);
+  downloadZip(message.compositionName, message.json, message.images).catch((error) => {
+    renderList(errorsEl, [
+      `Built the composition but couldn't assemble the ZIP: ${error instanceof Error ? error.message : String(error)}`,
+    ]);
+  });
 };
 
 refreshButton.addEventListener("click", () => {
-  sendToMain({ type: "scan" });
+  sendToMain({ type: "generate" });
 });
 
-exportButton.addEventListener("click", () => {
-  const inputs = Array.from(formEl.querySelectorAll<HTMLInputElement>("input[data-layout]"));
-  const emptyLayouts = inputs
-    .filter((input) => input.value.trim() === "")
-    .map((input) => input.dataset.layout);
-
-  if (emptyLayouts.length > 0) {
-    renderList(
-      errorsEl,
-      emptyLayouts.map((name) => `Enter a min-width for layout "${name}" before exporting.`),
-    );
-    return;
-  }
-
-  const minWidths: Record<string, number> = {};
-  inputs.forEach((input) => {
-    const layoutName = input.dataset.layout;
-    if (layoutName) {
-      minWidths[layoutName] = Number(input.value);
-    }
-  });
-
-  refreshButton.disabled = true;
-  exportButton.disabled = true;
-
-  if (currentMode() === "zip") {
-    exportButton.textContent = "Exporting images…";
-    sendToMain({ type: "export", minWidths, mode: "zip" });
+copyButton.addEventListener("click", () => {
+  if (copyToClipboard(currentJson)) {
+    renderList(errorsEl, []);
+    setActive(copyButton, true);
+    setTimeout(() => setActive(copyButton, false), 1500);
   } else {
-    sendToMain({ type: "export", minWidths, mode: "json" });
+    renderList(errorsEl, ["Couldn't copy to the clipboard. Select the JSON and press ⌘C / Ctrl+C."]);
   }
+});
+
+exportZipButton.addEventListener("click", () => {
+  refreshButton.disabled = true;
+  exportZipButton.disabled = true;
+  setActive(exportZipButton, true);
+  sendToMain({ type: "export-zip" });
 });

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { assembleComposition, attachImages } from "./assemble";
+import { assembleComposition, attachImages, deriveMinWidths } from "./assemble";
 import type { ScannedItem, ScanSuccess, SupportedItemNode } from "./figma-export";
 
 // Just enough of Figma's global for formatForNode and exportItemImage.
@@ -63,36 +63,40 @@ function scan(): ScanSuccess {
   };
 }
 
+describe("deriveMinWidths", () => {
+  it("gives 0 to the only layout", () => {
+    expect(deriveMinWidths([{ name: "Only", width: 800 }])).toEqual({ Only: 0 });
+  });
+
+  it("gives 0 to the narrowest and the midpoint to the rest, regardless of input order", () => {
+    const layouts = [
+      { name: "Desktop", width: 1440 },
+      { name: "Mobile", width: 375 },
+      { name: "Tablet", width: 768 },
+    ];
+
+    expect(deriveMinWidths(layouts)).toEqual({
+      Mobile: 0,
+      Tablet: Math.round((375 + 768) / 2),
+      Desktop: Math.round((768 + 1440) / 2),
+    });
+  });
+});
+
 describe("assembleComposition", () => {
-  it("builds a valid composition from a scan and min-widths", () => {
-    const result = assembleComposition(scan(), { Mobile: 0, Desktop: 1024 });
+  it("builds a valid composition, with min-widths derived from frame widths", () => {
+    const result = assembleComposition(scan());
     expect(result.valid).toBe(true);
     if (result.valid) {
-      expect(result.composition.layouts.map((l) => l.minWidth)).toEqual([0, 1024]);
+      expect(result.composition.layouts.map((l) => l.minWidth)).toEqual([0, Math.round((375 + 1440) / 2)]);
       expect(result.composition.layouts[0].items[0].zIndex).toBe(0);
-    }
-  });
-
-  it("reports which layout is missing a min-width, without calling into core", () => {
-    const result = assembleComposition(scan(), { Mobile: 0 });
-    expect(result.valid).toBe(false);
-    if (!result.valid) {
-      expect(result.errors).toEqual(['No min-width entered for layout "Desktop".']);
-    }
-  });
-
-  it("surfaces core validation errors (e.g. no base layout at minWidth 0)", () => {
-    const result = assembleComposition(scan(), { Mobile: 320, Desktop: 1024 });
-    expect(result.valid).toBe(false);
-    if (!result.valid) {
-      expect(result.errors.some((e) => e.includes("minWidth 0"))).toBe(true);
     }
   });
 
   it("propagates a layout's backgroundColor into the assembled composition", () => {
     const withBackground = scan();
     withBackground.layouts[0].backgroundColor = "#f5f1ea";
-    const result = assembleComposition(withBackground, { Mobile: 0, Desktop: 1024 });
+    const result = assembleComposition(withBackground);
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.composition.layouts[0].backgroundColor).toBe("#f5f1ea");
@@ -103,7 +107,7 @@ describe("assembleComposition", () => {
   it("omits clipsContent when true (Figma's own default), but propagates it when false", () => {
     const withNonClipping = scan();
     withNonClipping.layouts[0].clipsContent = false;
-    const result = assembleComposition(withNonClipping, { Mobile: 0, Desktop: 1024 });
+    const result = assembleComposition(withNonClipping);
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.composition.layouts[0].clipsContent).toBe(false);
@@ -116,7 +120,7 @@ describe("assembleComposition", () => {
     withMismatch.layouts[1].items = withMismatch.layouts[1].items.filter(
       (item) => item.name !== "image-b",
     );
-    const result = assembleComposition(withMismatch, { Mobile: 0, Desktop: 1024 });
+    const result = assembleComposition(withMismatch);
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.warnings.some((w) => w.includes("item ids differ"))).toBe(true);
@@ -125,8 +129,8 @@ describe("assembleComposition", () => {
 });
 
 describe("attachImages", () => {
-  function assembled(scanResult: ScanSuccess, minWidths: Record<string, number>) {
-    const result = assembleComposition(scanResult, minWidths);
+  function assembled(scanResult: ScanSuccess) {
+    const result = assembleComposition(scanResult);
     if (!result.valid) {
       throw new Error(`fixture composition failed to validate: ${result.errors.join(", ")}`);
     }
@@ -135,7 +139,7 @@ describe("attachImages", () => {
 
   it("exports one asset per (layout, item), wires assetId, and returns matching image bytes", async () => {
     const scanResult = scan();
-    const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
+    const composition = assembled(scanResult);
 
     const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
@@ -177,7 +181,7 @@ describe("attachImages", () => {
         },
       ],
     };
-    const composition = assembled(scanResult, { Mobile: 0 });
+    const composition = assembled(scanResult);
 
     const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
@@ -211,7 +215,7 @@ describe("attachImages", () => {
         },
       ],
     };
-    const composition = assembled(scanResult, { Mobile: 0 });
+    const composition = assembled(scanResult);
 
     const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
@@ -242,7 +246,7 @@ describe("attachImages", () => {
         },
       ],
     };
-    const composition = assembled(scanResult, { Mobile: 0 });
+    const composition = assembled(scanResult);
 
     const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
@@ -269,7 +273,7 @@ describe("attachImages", () => {
         },
       ],
     };
-    const composition = assembled(scanResult, { Mobile: 0 });
+    const composition = assembled(scanResult);
 
     const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
@@ -281,7 +285,7 @@ describe("attachImages", () => {
 
   it("fails explicitly, without partial output, when a node's image export rejects", async () => {
     const scanResult = scan();
-    const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
+    const composition = assembled(scanResult);
     const failingNode = scanResult.layouts[0].items[0].node as SupportedItemNode;
     failingNode.exportAsync = async () => {
       throw new Error("Figma export failed");
@@ -295,7 +299,7 @@ describe("attachImages", () => {
 
   it("fails explicitly when a scanned item's node reference is missing", async () => {
     const scanResult = scan();
-    const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
+    const composition = assembled(scanResult);
     delete scanResult.layouts[0].items[0].node;
 
     const outcome = await attachImages(composition, scanResult);
@@ -312,7 +316,7 @@ describe("attachImages", () => {
       warnings: [],
       layouts: [{ name: "Mobile", width: 375, height: 812, clipsContent: true, items: manyItems }],
     };
-    const composition = assembled(scanResult, { Mobile: 0 });
+    const composition = assembled(scanResult);
 
     const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(false);
