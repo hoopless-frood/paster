@@ -40,6 +40,27 @@
   cursor: not-allowed;
 }
 
+/* The busy button stays fully visible, since its label says what's happening. */
+.button[aria-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+
+/* Both labels share one grid cell, and the inactive one is only made
+   invisible, so the button keeps the width of its wider label. */
+.stacked {
+  display: inline-grid;
+}
+
+.label,
+.hiddenLabel {
+  grid-area: 1 / 1;
+}
+
+.hiddenLabel {
+  visibility: hidden;
+}
+
 /* The accent, not ink, so the outline stays visible on the dark background. */
 .button:focus-visible {
   outline: 2px solid var(--paster-accent-text);

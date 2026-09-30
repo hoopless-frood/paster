@@ -18,7 +18,9 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   const [text, setText] = useState(() => JSON.stringify(sampleComposition, null, 2));
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [isReadingFile, setIsReadingFile] = useState(false);
+  // Which button's action is in progress; all are disabled meanwhile.
+  const [loadingAction, setLoadingAction] = useState<"upload" | "collage" | null>(null);
+  const isBusy = loadingAction !== null;
   function runImport(candidateText: string) {
     const result = importComposition(candidateText);
     if (result.ok) {
@@ -83,7 +85,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   }
 
   async function handleLoadCollageExample() {
-    setIsReadingFile(true);
+    setLoadingAction("collage");
     try {
       const response = await fetch(collageZipUrl);
       if (!response.ok) {
@@ -94,12 +96,12 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
     } catch {
       setErrors(["Couldn't load the collage example — try again, or upload a ZIP instead."]);
     } finally {
-      setIsReadingFile(false);
+      setLoadingAction(null);
     }
   }
 
   async function handleFileSelected(file: File) {
-    setIsReadingFile(true);
+    setLoadingAction("upload");
     try {
       if (isZipFile(file)) {
         await handleZipFileSelected(file);
@@ -107,7 +109,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
         await handleJsonFileSelected(file);
       }
     } finally {
-      setIsReadingFile(false);
+      setLoadingAction(null);
     }
   }
 
@@ -116,24 +118,32 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
       <div className={styles.actions}>
         <FileUploadButton
           accept=".json,application/json,.zip,application/zip"
-          disabled={isReadingFile}
+          disabled={isBusy}
+          loading={loadingAction === "upload"}
+          loadingLabel="Reading file…"
           onFileSelected={handleFileSelected}
         >
           Upload .json or .zip
         </FileUploadButton>
-        <Button variant="secondary" onClick={handleLoadCollageExample} disabled={isReadingFile}>
+        <Button
+          variant="secondary"
+          onClick={handleLoadCollageExample}
+          disabled={isBusy}
+          loading={loadingAction === "collage"}
+          loadingLabel="Loading example…"
+        >
           Load collage example
         </Button>
-        <Button variant="secondary" onClick={handleLoadGeometryExample} disabled={isReadingFile}>
+        <Button variant="secondary" onClick={handleLoadGeometryExample} disabled={isBusy}>
           Load geometry example
         </Button>
       </div>
 
-      {isReadingFile && (
-        <p role="status" className={styles.status}>
-          Reading file…
-        </p>
-      )}
+      {/* The busy button shows this visually; this announces it to screen readers. */}
+      <p role="status" className="visually-hidden">
+        {loadingAction === "upload" && "Reading file…"}
+        {loadingAction === "collage" && "Loading collage example…"}
+      </p>
 
       <MessageList messages={errors} tone="error" />
       <MessageList messages={warnings} tone="warning" />
