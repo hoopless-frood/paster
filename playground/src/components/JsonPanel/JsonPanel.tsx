@@ -23,7 +23,13 @@ async function fetchCollageZip(): Promise<File> {
   return new File([await response.blob()], "collage.zip", { type: "application/zip" });
 }
 
-export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsChange }: JsonPanelProps) {
+export function JsonPanel({
+  sampleComposition,
+  onImport,
+  onImportZip,
+  onErrorsChange,
+  onRestoreComplete,
+}: JsonPanelProps) {
   // What this tab last showed, if anything (see session.ts); read once.
   const [saved] = useState(loadSession);
   const [text, setText] = useState(() => saved?.text ?? JSON.stringify(sampleComposition, null, 2));
@@ -94,6 +100,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
       } else if (source === "upload") {
         setWarnings(["The uploaded ZIP's images couldn't be restored after the page reloaded. Upload it again to see them."]);
       }
+      onRestoreComplete();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

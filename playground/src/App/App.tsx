@@ -1,7 +1,9 @@
 import { sampleComposition, type Composition } from "@paster/core";
 import { useEffect, useRef, useState } from "react";
 import { Header } from "../components/Header/Header";
+import { importComposition } from "../components/JsonPanel/import-composition";
 import { JsonPanel } from "../components/JsonPanel/JsonPanel";
+import { loadSession } from "../components/JsonPanel/session";
 import { LayoutPanel } from "../components/LayoutPanel/LayoutPanel";
 import { Tabs } from "../components/Tabs/Tabs";
 import styles from "./App.module.css";
@@ -39,7 +41,14 @@ function initialTab(): TabId {
 }
 
 export function App() {
-  const [composition, setComposition] = useState<Composition>(sampleComposition);
+  // Start from what this tab showed before a page load (see session.ts), so
+  // the first render already has the right items, not the sample.
+  const [saved] = useState(loadSession);
+  const [composition, setComposition] = useState<Composition>(() => {
+    const restored = saved ? importComposition(saved.text) : null;
+    return restored?.ok ? restored.composition : sampleComposition;
+  });
+  const [imagesRestoring, setImagesRestoring] = useState(() => saved?.zipSource != null);
   // Path -> blob: URL, populated by importing a ZIP export. Plain JSON edits
   // (typing, pasting, a .json upload) leave this untouched, so images from a
   // previously imported ZIP survive ordinary tweaks to the same composition.
@@ -104,6 +113,7 @@ export function App() {
           onImport={setComposition}
           onImportZip={handleImportZip}
           onErrorsChange={setJsonHasErrors}
+          onRestoreComplete={() => setImagesRestoring(false)}
         />
       </div>
 
@@ -114,7 +124,7 @@ export function App() {
         hidden={activeTab !== "layout"}
         className={styles.tabPanel}
       >
-        <LayoutPanel composition={composition} assetUrls={assetUrls} />
+        <LayoutPanel composition={composition} assetUrls={assetUrls} imagesRestoring={imagesRestoring} />
       </div>
     </main>
   );

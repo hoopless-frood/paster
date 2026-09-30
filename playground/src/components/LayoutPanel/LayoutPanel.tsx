@@ -22,7 +22,7 @@ function initialViewportWidth(): number {
   return Math.max(window.innerWidth, MIN_VIEWPORT_WIDTH);
 }
 
-export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
+export function LayoutPanel({ composition, assetUrls, imagesRestoring }: LayoutPanelProps) {
   const [viewportWidth, setViewportWidth] = useState(initialViewportWidth);
   // Only raises the slider's range as the window grows; it never moves the slider.
   const [widestWindowWidth, setWidestWindowWidth] = useState(() => window.innerWidth);
@@ -32,7 +32,10 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
   // renderer uses internally, so this info can never drift from what's shown.
   const activeLayout = selectLayout(composition, viewportWidth);
 
-  const resolveContent = useMemo(() => createAssetContentResolver(assetUrls), [assetUrls]);
+  const resolveContent = useMemo(
+    () => createAssetContentResolver(assetUrls, imagesRestoring),
+    [assetUrls, imagesRestoring],
+  );
 
   useEffect(() => {
     const updateWindowWidth = () => setWidestWindowWidth((widest) => Math.max(widest, window.innerWidth));

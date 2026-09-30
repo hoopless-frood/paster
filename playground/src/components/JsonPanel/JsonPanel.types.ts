@@ -14,4 +14,6 @@ export interface JsonPanelProps {
   onImportZip: (composition: Composition, assetUrls: Map<string, string>) => void;
   /** Reports whether the current JSON has validation errors, so the tab itself can show it. */
   onErrorsChange: (hasErrors: boolean) => void;
+  /** Called once a previous page load's ZIP images have been restored, or have failed to. */
+  onRestoreComplete: () => void;
 }
