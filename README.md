@@ -78,9 +78,11 @@ paster
 
 - The parent frame represents the composition.
 - Each layout frame defines its own dimensions and coordinate system.
-- Items (currently images or SVGs) are direct children of their layout.
+- Items (frames, shapes, vectors, text — see [the Figma guide](./docs/figma-guide.md) for the full list) are direct children of their layout; groups aren't supported, so ungroup or flatten first.
 - Matching layer names identify the same content across layouts.
-- Position, size, and stacking order can differ between breakpoints.
+- Position, size, stacking order, and rotation can differ between breakpoints.
+
+[`docs/figma-guide.md`](./docs/figma-guide.md) covers this in full — supported layer types, breakpoints, rotation, clipping, image export formats, and troubleshooting for every warning the plugin can show.
 
 ### Export
 
@@ -112,5 +114,7 @@ paster/
 ├── frontend/react/  # React renderer
 └── playground/      # Interactive playground
 ```
+
+See [`docs/architecture.md`](./docs/architecture.md) for how these fit together, each package's responsibilities, and why assets are kept separate from geometry.
 
 Paster uses pnpm workspaces, TypeScript, React, Vite, and CSS Modules. Its composition format is framework-independent, allowing additional renderers without changing the exporter.

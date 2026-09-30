@@ -9,6 +9,10 @@ The format is defined and validated in [`@paster/core`](../packages/core)
 (`packages/core/src/types.ts` and `validate.ts`), which has no Figma, React, or
 browser dependencies.
 
+For how this fits into the rest of the pipeline, see
+[architecture.md](./architecture.md); for Figma-side layer conventions and
+troubleshooting, see [figma-guide.md](./figma-guide.md).
+
 ## Model: Composition → Layout → Item
 
 - A **Composition** is one exported design: a set of breakpoint **Layouts**
