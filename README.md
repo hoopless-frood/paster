@@ -118,3 +118,6 @@ paster/
 See [`docs/architecture.md`](./docs/architecture.md) for how these fit together, each package's responsibilities, and why assets are kept separate from geometry.
 
 Paster uses pnpm workspaces, TypeScript, React, Vite, and CSS Modules. Its composition format is framework-independent, allowing additional renderers without changing the exporter.
+
+<img width="1055" height="859" alt="image" src="https://github.com/user-attachments/assets/dcd071db-6814-4c7c-a453-30c3b58c2b95" />
+
