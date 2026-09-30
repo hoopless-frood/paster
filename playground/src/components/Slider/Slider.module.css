@@ -1,46 +1,32 @@
+.root {
+  --thumb-size: 16px;
+}
+
 .slider {
   width: 100%;
+  margin: 0;
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
 }
 
-/* Tick marks (breakpoints) are painted as layers in this background, on top
-   of the base color — the only way to render above the track but below the
-   thumb, since the thumb is a pseudo-element of the same input. Each layer
-   is a 2px-wide solid-color "image" positioned by --tick-N (set in
-   Slider.tsx); unused slots default to -100%, off the visible track. */
 .slider::-webkit-slider-runnable-track {
   height: 2px;
-  background:
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-0, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-1, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-2, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-3, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-4, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-5, -100%) 0 / 2px 100%,
-    var(--paster-muted);
+  background: var(--paster-muted);
 }
 
 .slider::-moz-range-track {
   height: 2px;
-  background:
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-0, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-1, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-2, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-3, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-4, -100%) 0 / 2px 100%,
-    linear-gradient(var(--paster-hover), var(--paster-hover)) no-repeat var(--tick-5, -100%) 0 / 2px 100%,
-    var(--paster-muted);
+  background: var(--paster-muted);
 }
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
-  margin-top: -8px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  margin-top: calc(var(--thumb-size) / -2);
   background: var(--paster-accent-text);
   border: none;
   cursor: pointer;
@@ -48,10 +34,66 @@
 }
 
 .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
   background: var(--paster-accent-text);
   border: none;
   cursor: pointer;
   border-radius: 100%;
+}
+
+/* Marks sit where the thumb's center would be at their value. The thumb
+   stays inside the input, so its center only travels from half a thumb in
+   from each end, hence the thumb-size adjustment. */
+.marks {
+  position: relative;
+  height: 2.4em;
+  margin-top: 4px;
+}
+
+/* Shifted left by its own fraction of its width, so the leftmost label is
+   left-aligned, the rightmost right-aligned, and anything between centered,
+   keeping every label inside the slider's width. */
+.mark {
+  position: absolute;
+  top: 0;
+  left: calc(var(--thumb-size) / 2 + var(--mark-fraction) * (100% - var(--thumb-size)));
+  transform: translateX(calc(var(--mark-fraction) * -100%));
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 10px 0 0;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--paster-muted);
+  cursor: pointer;
+  transition: color var(--paster-transition);
+}
+
+/* The tick itself, at the exact point: the same fraction across the button
+   as the button was shifted by. */
+.mark::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--mark-fraction) * 100% - 1px);
+  width: 2px;
+  height: 8px;
+  background: currentColor;
+}
+
+.mark:hover {
+  color: var(--paster-hover);
+}
+
+.activeMark {
+  color: var(--paster-accent-text);
+  font-weight: 700;
+}
+
+.mark:focus-visible {
+  outline: 2px solid var(--paster-accent-text);
+  outline-offset: 2px;
 }

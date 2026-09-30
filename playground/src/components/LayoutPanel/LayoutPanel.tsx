@@ -54,8 +54,14 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
           min={MIN_VIEWPORT_WIDTH}
           max={maxViewportWidthFor(composition)}
           value={viewportWidth}
-          ticks={composition.layouts.map((layout) => layout.minWidth)}
           onChange={(event) => setViewportWidth(Number(event.target.value))}
+          marks={composition.layouts.map((layout) => ({
+            value: layout.minWidth,
+            label: `${layout.name} ${layout.minWidth}px`,
+            active: layout.id === activeLayout.id,
+          }))}
+          marksLabel="Jump to a breakpoint"
+          onMarkSelect={setViewportWidth}
         />
       </div>
 
