@@ -28,6 +28,7 @@ Items have `x`, `y`, `width`, `height`, and `zIndex`. Keep geometry separate fro
 - Comment why, not what. Avoid redundant comments, boilerplate JSDoc, and development-history comments.
 - Remove obsolete comments and temporary TODOs.
 - Document non-obvious public APIs and constraints.
+- Prefer CSS over JavaScript wherever CSS can do the job: layout, responsiveness (media and container queries), visibility, and interaction states. Use JavaScript only for what CSS can't express, and keep any CSS generated at runtime to the minimum that has to be data-driven.
 - Prioritize accessibility, safe file imports, predictable rendering, and reduced-motion support.
 - Never assume Figma metadata provides suitable image alt text.
 
