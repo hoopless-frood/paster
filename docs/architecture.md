@@ -49,6 +49,18 @@ own `resolveContent` (backed by however it actually serves images —
 a CMS, a CDN, static files, whatever). The playground is a demonstration
 of that contract, not a dependency of it.
 
+Because of that, the playground's rendered composition must stay
+production-shaped: its `resolveContent`
+(`playground/src/PreviewPanel/asset-content.tsx`) returns only the markup
+a real consumer would, such as a bare `<img>`. Debug tooling (outlines,
+item inspection) must never wrap or restyle that content. Wrapping it
+changes the DOM and can visibly change rendering: a `<button>` around an
+image, for example, paints its default background through the image's
+transparent pixels. Debug UI belongs in a separate layer beside or on top
+of the composition, in its own folder. For example,
+`playground/src/ItemOutlines/` draws outlines by overlaying a second
+`PasterComposition` rather than touching the preview's content.
+
 ## Package boundaries and responsibilities
 
 | Package | Depends on | Owns | Never touches |
@@ -56,7 +68,7 @@ of that contract, not a dependency of it.
 | `packages/core` (`@paster/core`) | nothing (workspace-internal) | Schema types, `validateComposition`, `selectLayout` (breakpoint selection), the sample composition | Figma's plugin API, the DOM, React |
 | `plugin/` (`@paster/plugin`) | `@paster/core` | Reading Figma's live document (`figma.*`), converting Figma-specific concepts (rotation sign, node types, fills, image export) into the neutral schema, assembling the ZIP | Rendering anything — the plugin never shows a preview, only produces JSON/a ZIP |
 | `frontend/react/` (`@paster/react`) | `@paster/core` | Turning a validated `Composition` into positioned, responsive DOM (`item-style.ts`'s geometry math, `Composition`/`Item` components) | Where content comes from (that's `resolveContent`, supplied by the consumer), any bundler-specific tooling |
-| `playground/` (`@paster/playground`) | `@paster/core`, `@paster/react` | Import UI (paste/upload JSON or ZIP), viewport preview, debug overlays, its own `resolveContent` that resolves ZIP-imported images to blob URLs | Anything reusable by *other* consumers — playground-only concerns (its own CSS, its own ZIP-parsing) stay local to it |
+| `playground/` (`@paster/playground`) | `@paster/core`, `@paster/react` | Import UI (paste/upload JSON or ZIP), viewport preview, its own `resolveContent` that resolves ZIP-imported images to blob URLs | Anything reusable by *other* consumers — playground-only concerns (its own CSS, its own ZIP-parsing) stay local to it |
 | `tokens/` (`@paster/tokens`) | `style-dictionary` | Design token sources (`light.json`, `dark.json`) and `build.mjs`, which generates each consumer's `tokens.css` | Component-specific styles — those live with each consumer |
 
 `tokens/light.json` is the complete default theme; `tokens/dark.json`

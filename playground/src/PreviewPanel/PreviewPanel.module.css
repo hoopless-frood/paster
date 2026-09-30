@@ -24,6 +24,7 @@
 }
 
 .previewWrapper {
+  position: relative;
   box-sizing: border-box;
   background: var(--paster-canvas-bg);
   border: 1px solid var(--paster-border);
@@ -32,9 +33,6 @@
 }
 
 .itemPlaceholder {
-  appearance: none;
-  font: inherit;
-  cursor: pointer;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -45,62 +43,8 @@
   padding: 0.5rem;
   background: color-mix(in srgb, var(--paster-color-blossom) 35%, white);
   border: 1px dashed var(--paster-color-magenta-haze);
-  border-radius: 0;
   color: #333;
   font-size: clamp(11px, 1.5vw, 16px);
-  transition: background-color var(--paster-transition);
-
-  &:hover {
-    background: color-mix(in srgb, var(--paster-color-blossom) 55%, white);
-  }
-}
-
-.itemPlaceholder:focus-visible {
-  outline: 2px solid var(--paster-color-magenta-haze);
-  outline-offset: 2px;
-}
-
-.itemOutline {
-  align-items: flex-start;
-  justify-content: flex-start;
-  background: rgba(255, 255, 255, 0.6);
-  border: 2px solid var(--paster-color-magenta-haze);
-  color: #333;
-  font-weight: 600;
-}
-
-.itemDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  text-align: left;
-}
-
-.itemGeometry {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-weight: 400;
-
-  font-size: 0.85em;
-  opacity: 0.85;
-}
-
-.itemImageButton {
-  appearance: none;
-  font: inherit;
-  cursor: pointer;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 2px solid transparent;
-  position: relative;
-  display: block;
-  overflow: hidden;
-}
-
-.itemImageButton:focus-visible {
-  outline: 2px solid var(--paster-color-magenta-haze);
-  outline-offset: 2px;
 }
 
 .itemImage {
@@ -114,29 +58,4 @@
      that same negligible rounding error, never discarding pixels Figma
      already framed intentionally. */
   object-fit: fill;
-  transition: filter var(--paster-transition);
-}
-
-.itemImageButton:hover .itemImage {
-  filter: brightness(0.92);
-}
-
-.itemImageOutline {
-  border-color: var(--paster-color-magenta-haze);
-}
-
-.itemImageDetails {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 0.15rem;
-  text-align: left;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-size: clamp(11px, 1.5vw, 16px);
-  font-weight: 600;
 }
