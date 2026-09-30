@@ -1,7 +1,8 @@
 import { selectLayout } from "@paster/core";
 import { PasterComposition } from "@paster/react";
 import { useId, useMemo, useState } from "react";
-import { Checkbox } from "../Checkbox/Checkbox";
+// Hidden for now: restore with the outlines checkbox below.
+// import { Checkbox } from "../Checkbox/Checkbox";
 import { ItemOutlines } from "../ItemOutlines/ItemOutlines";
 import { Slider } from "../Slider/Slider";
 import { createAssetContentResolver } from "./asset-content";
@@ -26,7 +27,8 @@ function initialViewportWidth(): number {
 
 export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
   const [viewportWidth, setViewportWidth] = useState(initialViewportWidth);
-  const [showOutlines, setShowOutlines] = useState(false);
+  // Outlines are hidden for now; restore setShowOutlines with the checkbox below.
+  const [showOutlines /* , setShowOutlines */] = useState(false);
   const viewportInputId = useId();
 
   // Independently re-derives the active layout with the same function the
@@ -37,12 +39,14 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
 
   return (
     <section className={styles.panel} aria-label="Layout">
+      {/* Hidden for now.
       <Checkbox
         className={styles.checkbox}
         label="Show item outlines and IDs"
         checked={showOutlines}
         onChange={(event) => setShowOutlines(event.target.checked)}
       />
+      */}
 
       <div className={styles.widthGroup}>
         <label htmlFor={viewportInputId}>
@@ -54,8 +58,14 @@ export function LayoutPanel({ composition, assetUrls }: LayoutPanelProps) {
           min={MIN_VIEWPORT_WIDTH}
           max={maxViewportWidthFor(composition)}
           value={viewportWidth}
-          ticks={composition.layouts.map((layout) => layout.minWidth)}
           onChange={(event) => setViewportWidth(Number(event.target.value))}
+          marks={composition.layouts.map((layout) => ({
+            value: layout.minWidth,
+            label: `${layout.name} ${layout.minWidth}px`,
+            active: layout.id === activeLayout.id,
+          }))}
+          marksLabel="Jump to a breakpoint"
+          onMarkSelect={setViewportWidth}
         />
       </div>
 

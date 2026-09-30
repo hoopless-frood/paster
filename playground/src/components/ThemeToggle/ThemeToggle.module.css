@@ -8,7 +8,6 @@
   color: var(--paster-text);
   cursor: pointer;
   transition: color var(--paster-transition);
-  color: var(--paster-text);
 }
 
 .toggle:hover {

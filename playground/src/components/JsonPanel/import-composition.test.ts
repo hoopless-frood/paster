@@ -1,6 +1,6 @@
 import { sampleComposition } from "@paster/core";
 import { describe, expect, it } from "vitest";
-import { importComposition } from "./import-composition";
+import { importComposition, jsonFileSizeError, MAX_COMPOSITION_BYTES } from "./import-composition";
 
 describe("importComposition", () => {
   it("accepts valid composition JSON", () => {
@@ -47,5 +47,17 @@ describe("importComposition", () => {
     if (result.ok) {
       expect(result.warnings.some((w) => w.includes(sampleComposition.assets[0].path))).toBe(true);
     }
+  });
+});
+
+describe("jsonFileSizeError", () => {
+  it("accepts a file at the limit", () => {
+    expect(jsonFileSizeError({ name: "ok.json", size: MAX_COMPOSITION_BYTES })).toBeNull();
+  });
+
+  it("rejects a larger file, naming it and both sizes", () => {
+    expect(jsonFileSizeError({ name: "huge.json", size: 12 * 1024 * 1024 })).toBe(
+      '"huge.json" is 12.0 MB — larger than the 5.0 MB limit.',
+    );
   });
 });

@@ -1,0 +1,68 @@
+.button {
+  padding: 0.4em 0.9em;
+  border: 1px solid transparent;
+  background: var(--paster-color-blossom);
+  color: var(--paster-color-ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--paster-transition),
+    color var(--paster-transition),
+    opacity var(--paster-transition);
+}
+
+/* Always the dark pink, in both themes, so white text on it stays 7.2:1.
+   (--paster-hover lightens in dark mode for text, which white can't sit on.) */
+.button:hover:not(:disabled) {
+  background: var(--paster-color-magenta-haze);
+  color: #fff;
+}
+
+/* Quieter: outlined, in normal text color, picking up the accent on hover. */
+.secondary {
+  background: transparent;
+  border-color: var(--paster-muted);
+  color: var(--paster-text);
+  transition:
+    border-color var(--paster-transition),
+    color var(--paster-transition),
+    opacity var(--paster-transition);
+}
+
+.secondary:hover:not(:disabled) {
+  background: transparent;
+  border-color: var(--paster-accent-text);
+  color: var(--paster-accent-text);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The busy button stays fully visible, since its label says what's happening. */
+.button[aria-busy="true"] {
+  opacity: 1;
+  cursor: progress;
+}
+
+/* Both labels share one grid cell, and the inactive one is only made
+   invisible, so the button keeps the width of its wider label. */
+.stacked {
+  display: inline-grid;
+}
+
+.label,
+.hiddenLabel {
+  grid-area: 1 / 1;
+}
+
+.hiddenLabel {
+  visibility: hidden;
+}
+
+/* The accent, not ink, so the outline stays visible on the dark background. */
+.button:focus-visible {
+  outline: 2px solid var(--paster-accent-text);
+  outline-offset: 1px;
+}

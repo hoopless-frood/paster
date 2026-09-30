@@ -1,0 +1,40 @@
+.page {
+  font-family: var(--paster-font-body);
+  color: var(--paster-text);
+}
+
+/* A comfortable reading width, left-aligned with the header. */
+.content {
+  max-width: 68ch;
+  padding: 0 var(--edge-space) var(--section-space);
+  line-height: 1.55;
+
+  & h2,
+  & h3 {
+    color: var(--paster-accent-text);
+    line-height: 1.2;
+  }
+
+  & h2 {
+    margin: var(--section-space) 0 0.75rem;
+  }
+
+  & h3 {
+    margin: 1.75rem 0 0.5rem;
+  }
+
+  & p,
+  & ul,
+  & ol {
+    margin: 0 0 1rem;
+  }
+
+  & li + li {
+    margin-top: 0.4rem;
+  }
+
+  & code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
+  }
+}

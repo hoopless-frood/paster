@@ -1,9 +1,9 @@
 import { sampleComposition, type Composition } from "@paster/core";
 import { useEffect, useRef, useState } from "react";
-import { Header } from "../Header/Header";
-import { JsonPanel } from "../JsonPanel/JsonPanel";
-import { LayoutPanel } from "../LayoutPanel/LayoutPanel";
-import { Tabs } from "../Tabs/Tabs";
+import { Header } from "../components/Header/Header";
+import { JsonPanel } from "../components/JsonPanel/JsonPanel";
+import { LayoutPanel } from "../components/LayoutPanel/LayoutPanel";
+import { Tabs } from "../components/Tabs/Tabs";
 import styles from "./App.module.css";
 
 type TabId = "json" | "layout";
@@ -58,7 +58,7 @@ export function App() {
 
   return (
     <main className={styles.app}>
-      <Header />
+      <Header currentPage="playground" />
 
       <Tabs
         label="Paster playground views"

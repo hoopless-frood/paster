@@ -51,14 +51,14 @@ of that contract, not a dependency of it.
 
 Because of that, the playground's rendered composition must stay
 production-shaped: its `resolveContent`
-(`playground/src/LayoutPanel/asset-content.tsx`) returns only the markup
+(`playground/src/components/LayoutPanel/asset-content.tsx`) returns only the markup
 a real consumer would, such as a bare `<img>`. Debug tooling (outlines,
 item inspection) must never wrap or restyle that content. Wrapping it
 changes the DOM and can visibly change rendering: a `<button>` around an
 image, for example, paints its default background through the image's
 transparent pixels. Debug UI belongs in a separate layer beside or on top
 of the composition, in its own folder. For example,
-`playground/src/ItemOutlines/` draws outlines by overlaying a second
+`playground/src/components/ItemOutlines/` draws outlines by overlaying a second
 `PasterComposition` rather than touching the preview's content.
 
 ## Package boundaries and responsibilities
@@ -122,5 +122,5 @@ embedding image data directly. This is deliberate, not incidental:
 | Plugin ↔ UI thread messages | `plugin/src/protocol.ts` |
 | Item positioning/rotation math (the layout-relative % + rotation-pivot correction) | `frontend/react/src/item-style.ts` |
 | Composition-level rendering (background, clipping) | `frontend/react/src/Composition/Composition.tsx` |
-| ZIP import, blob URL lifecycle | `playground/src/JsonPanel/import-zip.ts` |
+| ZIP import, blob URL lifecycle | `playground/src/components/JsonPanel/import-zip.ts` |
 | Shared color/font tokens, light/dark themes | `tokens/light.json`, `tokens/dark.json`, `tokens/build.mjs` |

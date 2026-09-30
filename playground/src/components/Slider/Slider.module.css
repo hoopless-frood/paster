@@ -1,0 +1,99 @@
+.root {
+  --thumb-size: 16px;
+}
+
+.slider {
+  width: 100%;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--paster-muted);
+}
+
+.slider::-moz-range-track {
+  height: 2px;
+  background: var(--paster-muted);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  margin-top: calc(var(--thumb-size) / -2);
+  background: var(--paster-accent-text);
+  border: none;
+  cursor: pointer;
+  border-radius: 100%;
+}
+
+.slider::-moz-range-thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  background: var(--paster-accent-text);
+  border: none;
+  cursor: pointer;
+  border-radius: 100%;
+}
+
+/* Marks sit where the thumb's center would be at their value. The thumb
+   stays inside the input, so its center only travels from half a thumb in
+   from each end, hence the thumb-size adjustment. */
+.marks {
+  position: relative;
+  height: 2.4em;
+  margin-top: 4px;
+}
+
+/* Shifted left by its own fraction of its width, so the leftmost label is
+   left-aligned, the rightmost right-aligned, and anything between centered,
+   keeping every label inside the slider's width. */
+.mark {
+  position: absolute;
+  top: 0;
+  left: calc(var(--thumb-size) / 2 + var(--mark-fraction) * (100% - var(--thumb-size)));
+  transform: translateX(calc(var(--mark-fraction) * -100%));
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 10px 0 0;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--paster-muted);
+  cursor: pointer;
+  transition: color var(--paster-transition);
+}
+
+/* The tick itself, at the exact point: the same fraction across the button
+   as the button was shifted by. */
+.mark::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--mark-fraction) * 100% - 1px);
+  width: 2px;
+  height: 8px;
+  background: currentColor;
+}
+
+.mark:hover {
+  color: var(--paster-hover);
+}
+
+.activeMark {
+  color: var(--paster-accent-text);
+  font-weight: 700;
+}
+
+.mark:focus-visible {
+  outline: 2px solid var(--paster-accent-text);
+  outline-offset: 2px;
+}

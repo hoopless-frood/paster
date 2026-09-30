@@ -9,12 +9,24 @@ export type { FileUploadButtonProps } from "./FileUploadButton.types";
  * chosen" text can't be hidden independently of its button, so this hides
  * the real input and triggers it from a visible Button instead.
  */
-export function FileUploadButton({ children, accept, disabled, onFileSelected }: FileUploadButtonProps) {
+export function FileUploadButton({
+  children,
+  accept,
+  disabled,
+  loading,
+  loadingLabel,
+  onFileSelected,
+}: FileUploadButtonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <>
-      <Button onClick={() => inputRef.current?.click()} disabled={disabled}>
+      <Button
+        onClick={() => inputRef.current?.click()}
+        disabled={disabled}
+        loading={loading}
+        loadingLabel={loadingLabel}
+      >
         {children}
       </Button>
       <input

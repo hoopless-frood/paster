@@ -12,14 +12,10 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: max(10px, calc(var(--edge-space) / 1.33));
   margin: var(--section-space) 0;
   padding: 0 var(--edge-space);
-}
-
-.status {
-  color: var(--paster-muted);
-  margin: 0;
 }
 
 .jsonGroup {
@@ -27,9 +23,4 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-
-  & label {
-    padding: 0 var(--edge-space);
-    margin-bottom: var(--section-space);
-  }
 }
