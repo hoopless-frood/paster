@@ -106,6 +106,8 @@ To run it yourself, run `pnpm run dev` and open the playground in a browser. [`e
 
 An item without a real image (uploaded via JSON alone, without a matching ZIP) renders as a labeled placeholder box instead.
 
+The **?** in the header opens an About page (`/about/`) with a short overview of Paster for people arriving at the playground.
+
 ## Project structure
 
 ```text

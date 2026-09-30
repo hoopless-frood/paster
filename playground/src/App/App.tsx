@@ -58,7 +58,7 @@ export function App() {
 
   return (
     <main className={styles.app}>
-      <Header />
+      <Header currentPage="playground" />
 
       <Tabs
         label="Paster playground views"

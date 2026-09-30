@@ -31,4 +31,14 @@ function tokensPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tokensPlugin()],
+  build: {
+    // Two pages: the playground itself, and /about/ (a folder with its own
+    // index.html, so the URL works on any static host without rewrites).
+    rolldownOptions: {
+      input: {
+        main: fileURLToPath(new URL("index.html", import.meta.url)),
+        about: fileURLToPath(new URL("about/index.html", import.meta.url)),
+      },
+    },
+  },
 });
