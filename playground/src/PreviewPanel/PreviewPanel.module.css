@@ -107,7 +107,13 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* fill, not cover: the exported image is already Figma's own rendered
+     crop/scale of this exact item, sized to match it almost exactly (up to
+     float rounding) — cover would crop a further, unintended sliver off an
+     edge to force an exact aspect-ratio match; fill only ever stretches by
+     that same negligible rounding error, never discarding pixels Figma
+     already framed intentionally. */
+  object-fit: fill;
   transition: filter var(--paster-transition);
 }
 

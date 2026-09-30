@@ -274,6 +274,16 @@ export.zip
 - PNG, JPG, and SVG are all supported; the plugin's naming/collision rules
   (deterministic, slugified `<layout>-<item>` stems, de-duplicated with a
   numeric suffix) keep paths portable and unambiguous.
+- Each exported image is already Figma's own rendered crop/scale of that
+  specific item — not the original source image plus separate crop
+  instructions. A consumer's `resolveContent` should render it with CSS
+  `object-fit: fill` (or an equivalent that never crops), not `cover`:
+  the image is sized to match its item almost exactly already (up to
+  float rounding between Figma's export and the item's own geometry), and
+  `cover` would crop a further, unintended sliver off an edge trying to
+  force an exact match — discarding part of a crop Figma already framed
+  intentionally. `fill` only ever stretches by that same negligible
+  rounding error.
 
 ### Importing a ZIP
 
