@@ -56,3 +56,19 @@
      cropping a sliver off an edge. */
   object-fit: fill;
 }
+
+/* Each item fades in when it first appears (first load, restored images, a
+   new composition). Dragging across breakpoints reuses the same elements,
+   so it doesn't replay then. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .itemImage,
+  .itemPlaceholder {
+    animation: fade-in 400ms ease-out;
+  }
+}
