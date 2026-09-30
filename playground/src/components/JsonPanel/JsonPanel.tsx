@@ -14,6 +14,8 @@ export type { JsonPanelProps } from "./JsonPanel.types";
 
 const VALIDATE_DEBOUNCE_MS = 400;
 
+type Example = "collage" | "geometry";
+
 export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsChange }: JsonPanelProps) {
   const [text, setText] = useState(() => JSON.stringify(sampleComposition, null, 2));
   const [errors, setErrors] = useState<string[]>([]);
@@ -21,6 +23,18 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   // Which button's action is in progress; all are disabled meanwhile.
   const [loadingAction, setLoadingAction] = useState<"upload" | "collage" | null>(null);
   const isBusy = loadingAction !== null;
+  // The example the editor currently shows, unchanged; its load button is
+  // disabled. Starts as geometry, which is what the playground opens with.
+  const [loadedExample, setLoadedExample] = useState<Example | null>("geometry");
+
+  // Every change to the editor's text goes through here (or the editor's own
+  // onChange, which only fires for the user's edits), so loadedExample stays
+  // accurate; a failed import that leaves the text alone leaves it alone too.
+  function showText(nextText: string, example: Example | null = null) {
+    setText(nextText);
+    setLoadedExample(example);
+  }
+
   function runImport(candidateText: string) {
     const result = importComposition(candidateText);
     if (result.ok) {
@@ -49,7 +63,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
 
   function handleLoadGeometryExample() {
     const sampleText = JSON.stringify(sampleComposition, null, 2);
-    setText(sampleText);
+    showText(sampleText, "geometry");
     runImport(sampleText);
   }
 
@@ -67,20 +81,20 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
     }
     try {
       const content = await file.text();
-      setText(content);
+      showText(content);
       runImport(content);
     } catch {
       setErrors(["Couldn't read that file — try again or paste the JSON directly."]);
     }
   }
 
-  async function handleZipFileSelected(file: File) {
+  async function handleZipFileSelected(file: File, example: Example | null = null) {
     try {
       const result = await importZip(file);
       if (result.ok) {
         setErrors([]);
         setWarnings(result.warnings);
-        setText(JSON.stringify(result.composition, null, 2));
+        showText(JSON.stringify(result.composition, null, 2), example);
         onImportZip(result.composition, result.assetUrls);
       } else {
         setErrors(result.errors);
@@ -99,7 +113,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
         throw new Error(`HTTP ${response.status}`);
       }
       const file = new File([await response.blob()], "collage.zip", { type: "application/zip" });
-      await handleZipFileSelected(file);
+      await handleZipFileSelected(file, "collage");
     } catch {
       setErrors(["Couldn't load the collage example — try again, or upload a ZIP instead."]);
     } finally {
@@ -135,14 +149,20 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
         <Button
           variant="secondary"
           onClick={handleLoadCollageExample}
-          disabled={isBusy}
+          disabled={isBusy || loadedExample === "collage"}
           loading={loadingAction === "collage"}
           loadingLabel="Loading example…"
         >
           Load collage example
+          {loadedExample === "collage" && <span className="visually-hidden"> (loaded)</span>}
         </Button>
-        <Button variant="secondary" onClick={handleLoadGeometryExample} disabled={isBusy}>
+        <Button
+          variant="secondary"
+          onClick={handleLoadGeometryExample}
+          disabled={isBusy || loadedExample === "geometry"}
+        >
           Load geometry example
+          {loadedExample === "geometry" && <span className="visually-hidden"> (loaded)</span>}
         </Button>
       </div>
 
@@ -157,7 +177,7 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
 
       <div className={styles.jsonGroup}>
         {/* Named by JsonEditor's own aria-label, so no visible label. */}
-        <JsonEditor value={text} onChange={setText} spellCheck={false} />
+        <JsonEditor value={text} onChange={(edited) => showText(edited)} spellCheck={false} />
       </div>
     </section>
   );
