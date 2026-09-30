@@ -1,11 +1,9 @@
 import JSZip from "jszip";
 import type { Composition } from "@paster/core";
-import { importComposition } from "./import-composition";
+import { formatBytes, importComposition, MAX_COMPOSITION_BYTES } from "./import-composition";
 
 /** Above this, refuse the upload outright rather than let the browser tab hang decompressing it. */
 const MAX_ZIP_BYTES = 50 * 1024 * 1024;
-/** composition.json itself is always fully read into memory to be parsed. */
-const MAX_MANIFEST_BYTES = 5 * 1024 * 1024;
 /** Per referenced asset, after decompression. */
 const MAX_ASSET_BYTES = 20 * 1024 * 1024;
 
@@ -19,12 +17,6 @@ const IMAGE_CONTENT_TYPES: Record<string, string> = {
 export type ZipImportResult =
   | { ok: true; composition: Composition; assetUrls: Map<string, string>; warnings: string[] }
   | { ok: false; errors: string[] };
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 function extensionOf(path: string): string {
   const dot = path.lastIndexOf(".");
@@ -80,10 +72,10 @@ export async function importZip(file: File): Promise<ZipImportResult> {
     };
   }
 
-  if (manifestText.length > MAX_MANIFEST_BYTES) {
+  if (manifestText.length > MAX_COMPOSITION_BYTES) {
     return {
       ok: false,
-      errors: [`composition.json is larger than the ${formatBytes(MAX_MANIFEST_BYTES)} limit.`],
+      errors: [`composition.json is larger than the ${formatBytes(MAX_COMPOSITION_BYTES)} limit.`],
     };
   }
 

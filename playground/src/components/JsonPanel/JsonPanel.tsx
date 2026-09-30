@@ -3,7 +3,7 @@ import { Button } from "../Button/Button";
 import { FileUploadButton } from "../FileUploadButton/FileUploadButton";
 import { JsonEditor } from "../JsonEditor/JsonEditor";
 import { MessageList } from "../MessageList/MessageList";
-import { importComposition } from "./import-composition";
+import { importComposition, jsonFileSizeError } from "./import-composition";
 import { importZip } from "./import-zip";
 // Bundled by Vite, so the example also works on the hosted playground.
 import collageZipUrl from "../../../../examples/collage/collage.zip?url";
@@ -58,6 +58,13 @@ export function JsonPanel({ sampleComposition, onImport, onImportZip, onErrorsCh
   }
 
   async function handleJsonFileSelected(file: File) {
+    // Checked before reading, and leaves the editor's current text alone.
+    const sizeError = jsonFileSizeError(file);
+    if (sizeError) {
+      setErrors([sizeError]);
+      setWarnings([]);
+      return;
+    }
     try {
       const content = await file.text();
       setText(content);

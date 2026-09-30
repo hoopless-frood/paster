@@ -1,5 +1,26 @@
 import { validateComposition, type Composition } from "@paster/core";
 
+/**
+ * Composition JSON is always read fully into memory, parsed, and loaded into
+ * the editor, so above this it's refused outright rather than risk freezing
+ * the tab. Also applies to a ZIP's composition.json (see import-zip.ts).
+ */
+export const MAX_COMPOSITION_BYTES = 5 * 1024 * 1024;
+
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** Checks an uploaded .json file's size before it's read: an error message, or null if it's fine. */
+export function jsonFileSizeError(file: Pick<File, "name" | "size">): string | null {
+  if (file.size <= MAX_COMPOSITION_BYTES) {
+    return null;
+  }
+  return `"${file.name}" is ${formatBytes(file.size)} — larger than the ${formatBytes(MAX_COMPOSITION_BYTES)} limit.`;
+}
+
 export type ImportResult =
   | { ok: true; composition: Composition; warnings: string[] }
   | { ok: false; errors: string[] };
