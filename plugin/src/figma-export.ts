@@ -86,14 +86,21 @@ const VECTOR_ITEM_TYPES = new Set<SupportedItemNode["type"]>([
   "LINE",
 ]);
 
-/** Node types whose `fills` decide raster vs. vector: an image fill means real photographic content (rasterize); anything else (solid, gradient, none) is still flat vector content. */
-type FillCheckableNode = Extract<SupportedItemNode, { fills: unknown }>;
-
-function isFillCheckable(node: SupportedItemNode): node is FillCheckableNode {
-  return "fills" in node;
-}
-
-function hasVisibleImageFill(fills: readonly Paint[]): boolean {
+/**
+ * Content that only a raster image represents faithfully: a photo fill, or
+ * text (which SVG export would turn into heavy vector outlines).
+ */
+function needsRaster(node: SceneNode): boolean {
+  if (node.type === "TEXT") {
+    return true;
+  }
+  if (!("fills" in node)) {
+    return false;
+  }
+  const fills = node.fills;
+  if (fills === figma.mixed || !Array.isArray(fills)) {
+    return true;
+  }
   return fills.some((fill) => fill.visible !== false && fill.type === "IMAGE");
 }
 
@@ -109,15 +116,16 @@ export function formatForNode(node: SupportedItemNode): ImageFormat {
   if (VECTOR_ITEM_TYPES.has(node.type)) {
     return "SVG";
   }
-  if (node.type === "TEXT" || !isFillCheckable(node)) {
+  if (needsRaster(node)) {
     return "PNG";
   }
-
-  const fills = node.fills;
-  if (fills === figma.mixed || !Array.isArray(fills)) {
+  // A frame, component, instance or group exports as one image of
+  // everything inside it, so its contents decide too: a photo inside a
+  // plain-colored frame would otherwise end up base64-embedded in an SVG.
+  if ("findOne" in node && node.findOne((child) => child.visible && needsRaster(child))) {
     return "PNG";
   }
-  return hasVisibleImageFill(fills) ? "PNG" : "SVG";
+  return "SVG";
 }
 
 const ROTATION_EPSILON = 0.01;
@@ -134,6 +142,8 @@ const SUPPORTED_ITEM_TYPES = new Set<SceneNode["type"]>([
   "STAR",
   "POLYGON",
   "BOOLEAN_OPERATION",
+  // A group is exported as one image of everything in it, like a frame.
+  "GROUP",
 ]);
 
 export type SupportedItemNode = Extract<SceneNode, { type: SupportedItemType }>;
@@ -148,7 +158,8 @@ type SupportedItemType =
   | "LINE"
   | "STAR"
   | "POLYGON"
-  | "BOOLEAN_OPERATION";
+  | "BOOLEAN_OPERATION"
+  | "GROUP";
 
 function isSupportedItemNode(node: SceneNode): node is SupportedItemNode {
   return SUPPORTED_ITEM_TYPES.has(node.type);
@@ -159,17 +170,13 @@ function isRotated(rotation: number): boolean {
 }
 
 /**
- * Figma's `node.rotation` is counterclockwise-positive (the plugin API's own
- * documented convention), while the composition schema (and CSS's
- * `rotate()`, which is what ultimately renders it) is clockwise-positive —
- * the same convention Figma's own UI displays to a designer. Converting
- * once here, at the export boundary, means everything downstream (the
- * schema, the renderer) can treat "rotation" as an ordinary clockwise
- * degrees value without re-deriving this each time.
- *
- * NOTE: this specific sign flip hasn't been confirmed against a real
- * rotated Figma layer in this environment (no way to launch Figma here) —
- * verify a rotated export visually matches its source before relying on it.
+ * Figma's `node.rotation` is counterclockwise-positive, and its Rotation
+ * field shows the same value (a layer at 151.43° there reads 151.43 here).
+ * The composition schema, like CSS's `rotate()` that ultimately renders
+ * it, is clockwise-positive, so the exported value is the negation of what
+ * a designer sees in Figma. Converting once here, at the export boundary,
+ * means everything downstream can treat `rotation` as ordinary clockwise
+ * degrees.
  */
 export function figmaRotationToCss(rotation: number): number {
   if (Math.abs(rotation) <= ROTATION_EPSILON) {
@@ -186,7 +193,7 @@ export function figmaRotationToCss(rotation: number): number {
  *
  * Only an invalid/missing selection is a hard failure. Everything else we
  * don't support yet (a rotated *layout* or composition frame, Auto Layout,
- * groups, other unsupported node types, duplicate names) is skipped
+ * unsupported node types, duplicate names) is skipped
  * individually and reported as a warning, so one problem layer doesn't
  * block exporting the rest of an otherwise-valid composition. An item's own
  * rotation is fully supported — see figmaRotationToCss.
@@ -315,10 +322,7 @@ function scanLayoutItems(layoutNode: FrameNode, warnings: string[]): ScannedItem
 
   for (const child of visibleChildren) {
     if (!isSupportedItemNode(child)) {
-      const hint = child.type === "GROUP" ? " (ungroup or flatten it)" : "";
-      warnings.push(
-        `Skipped "${layoutNode.name}/${child.name}": a ${child.type.toLowerCase()} isn't supported yet${hint}.`,
-      );
+      warnings.push(`Skipped "${layoutNode.name}/${child.name}": a ${child.type.toLowerCase()} isn't supported yet.`);
       continue;
     }
 

@@ -6,14 +6,14 @@ Paster exports a Figma **Composition** (one selected parent frame) containing an
 
 ## Decisions and invariants
 
-- Monorepo: pnpm workspaces, TypeScript; CSS Modules for the React renderer and demo. Vite for demo, esbuild for plugin bundle; use a test runner such as Vitest where appropriate.
+- Monorepo: pnpm workspaces, TypeScript; CSS Modules for the React renderer and playground. Vite for the playground, esbuild for plugin bundle; use a test runner such as Vitest where appropriate.
 - Folders: `plugin/`, `packages/core/`, `frontend/react/`, `playground/`.
 - Model: `Composition → Layout → Item`; `Item` is the public positioned-object term. In Figma, a Layout is a Frame node; an Item is not necessarily one. Keep Figma-specific node types at the adapter boundary.
 - A selected parent Figma frame holds named layout frames; do not require exactly two layouts. Layout selection uses explicit, validated viewport minimum widths, including one base layout at 0; design-space width is not implicitly the CSS breakpoint.
 - Coordinates and dimensions are relative to the layout frame. `zIndex` reflects each layout's Figma child stacking order, independently; the MVP accepts only visible, unrotated direct children of ordinary layout frames.
 - Item identity links layouts to shared content; assets and content remain separate from layout geometry. Support per-layout asset overrides for differing rendered crops. A production consumer may supply its own asset mapping.
 - Version exports (`version: 1`). Keep an explicit schema and validate all untrusted JSON before rendering. No automatic uploads, external image hosting, or Figma account authentication in the MVP.
-- Geometry-only JSON export and composition-with-images ZIP export are separate modes. ZIP contains `composition.json` plus relative-path images. The demo resolves imported images locally and releases object URLs during cleanup.
+- Geometry-only JSON (Copy JSON) and composition-with-images ZIP (Export ZIP) are separate exports. ZIP contains `composition.json` plus relative-path images. The playground resolves imported images locally and releases object URLs during cleanup.
 - For MVP image fidelity, export **rendered** images per item (including Figma crop/visual treatment); do not mistake them for original production images. Preserve image aspect ratio, avoid accidental double cropping, and document the flattened-image trade-off.
 - Use a README for people and `CLAUDE.md` for concise working conventions. Keep the public repository free of private assets, credentials, and client information. Choose a license explicitly before publishing.
 
@@ -132,8 +132,18 @@ Since committed, also extended past its original scope (moved out of the backlog
 - [x] Support per-asset export format selection (choosing PNG/JPG/SVG per item rather than one format for the whole export). Landed as part of M6/M7 (see above), not as a separate commit.
 - [x] Investigate automatic vector/raster format detection (e.g., default vector-only items to SVG export). Landed as part of M6/M7 (see above) — went beyond "investigate" into a real implementation: vector node types always export SVG, photos rasterize, and format choice also accounts for alpha (PNG-sourced/unreadable fills never silently downgrade to JPG).
 
+### Production images and alt text
+The plugin's exported PNG/SVG files are a starting point; in production, images and their descriptions are managed in the CMS.
+- [ ] **Hook up production images:** map each `Asset` (by `id`/`path`) to its production URL from the CMS/CDN in a consumer's `resolveContent`, and document a reference implementation. The WordPress Media Library items above are one concrete case.
+- [ ] Responsive image delivery: `srcset`/`sizes` derived from each item's rendered width per layout, plus re-encoding exported PNGs (e.g. WebP/AVIF/JPG) downstream without changing asset ids or geometry.
+- [ ] **Alt text workflow:** authored and edited in the CMS, never derived from Figma layer names. Decorative images are an explicit choice (`alt=""`), not a missing value.
+- [ ] Decide where alt text lives in the schema: `Asset.alt` today, but an item can point at a different asset (crop) per layout while needing one consistent description, which argues for a per-item field.
+- [ ] Surface missing alt text: a validation warning, and a flag in the playground (e.g. via the item inspector).
+
 ### Motion and interaction
 - [ ] **Motion for layers:** entrance/exit transitions, per-item timing/easing, stagger, depth/parallax, and breakpoint transitions. Define declarative data model only after prototyping.
+- [ ] **Animation settings:** a declarative model for per-item settings (effect, duration, delay/stagger, easing) with composition-level defaults, authored in the CMS rather than the Figma plugin. Decide whether it extends the schema (a version bump) or lives alongside it as separate metadata keyed by item id.
+- [ ] Render animation settings in `@paster/react`, respecting `prefers-reduced-motion`.
 - [ ] Honor `prefers-reduced-motion` with meaningful static equivalents.
 - [ ] Interactive layers, pointer/focus behavior, and stacking for interactive controls.
 
@@ -141,7 +151,7 @@ Since committed, also extended past its original scope (moved out of the backlog
 - [ ] **Playground item inspector:** a debug layer kept separate from the production-shaped preview (see `docs/architecture.md`). A second `PasterComposition` overlaid on the preview draws outlines/hit targets with identical geometry; an inspector panel lists the active layout's items front-to-back (reaching tiny or fully covered items) and shows the selected item's name/id, geometry, rotation, and asset details (path, format, alt, intrinsic vs. rendered size). Clicking an outline selects it in the list; selection persists across breakpoints. Builds on the existing `ItemOutlines` overlay, which currently only shows all outlines at once (the earlier click-to-toggle buttons wrapped item content and altered the rendered DOM, so they were removed).
 - [ ] Direct manipulation and coordinate editing in playground; export edits as JSON.
 - [ ] Compare imported composition with current version and preview a diff.
-- [ ] CMS/asset-library adapter, image metadata/alt text workflow, and production URL mapping.
+- [ ] CMS/asset-library adapter (see Production images and alt text above for the image, URL and alt text work it carries).
 - [ ] Container-query mode alongside viewport breakpoint mode.
 - [ ] Alternative renderers under `frontend/` (e.g., vanilla or Vue) when there is actual demand.
 - [ ] GitHub Actions CI, releases, package publication, and optional Figma Community plugin publication.

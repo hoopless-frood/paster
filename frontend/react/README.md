@@ -29,6 +29,9 @@ const resolveContent: ItemContentResolver = (item, { asset }) => {
       alt={altTextByItemId[item.id] ?? ""}
       width={asset.width}
       height={asset.height}
+      // Fill the item's box exactly. Exported images already match it, so
+      // never crop with object-fit: cover (see docs/composition-format.md).
+      style={{ display: "block", width: "100%", height: "100%", objectFit: "fill" }}
     />
   );
 };

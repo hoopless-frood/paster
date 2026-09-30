@@ -78,7 +78,7 @@ paster
 
 - The parent frame represents the composition.
 - Each layout frame defines its own dimensions and coordinate system.
-- Items (frames, shapes, vectors, text — see [the Figma guide](./docs/figma-guide.md) for the full list) are direct children of their layout; groups aren't supported, so ungroup or flatten first.
+- Items (frames, groups, shapes, vectors, text — see [the Figma guide](./docs/figma-guide.md) for the full list) are direct children of their layout. A group or frame item is exported as one image of everything in it.
 - Matching layer names identify the same content across layouts.
 - Position, size, stacking order, and rotation can differ between breakpoints.
 
@@ -91,7 +91,7 @@ paster
 
 Each layout's breakpoint min-width is set automatically from frame widths (see [the Figma guide](./docs/figma-guide.md#breakpoints-and-layout-order)); adjust it afterwards in the JSON or your CMS.
 
-An item's own rotation is preserved. Individual layers the plugin doesn't support yet (Auto Layout, groups, duplicate names, or a rotated *layout* frame) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only a genuinely unusable selection (nothing selected, the wrong node type, or mismatched layer names across layouts that leave the schema invalid) blocks export outright; fix that in Figma and click **Refresh**.
+An item's own rotation is preserved. Individual layers the plugin doesn't support yet (Auto Layout, duplicate names, or a rotated *layout* frame) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only an unusable selection (nothing selected, something other than a frame, or no layout with any supported layers) blocks export outright; fix that in Figma and click **Refresh**. Layer names that don't match across layouts are allowed, with a warning in case it wasn't intentional.
 
 Paste JSON, or drop a ZIP, straight into the playground (`pnpm run dev`) to preview it, or use [`@paster/react`](./frontend/react) directly, given content you supply yourself — see [PLAN.md](./PLAN.md) for what's next. [`docs/composition-format.md`](./docs/composition-format.md) documents what the exported JSON means and how a ZIP export is packaged.
 
@@ -99,9 +99,9 @@ Paste JSON, or drop a ZIP, straight into the playground (`pnpm run dev`) to prev
 
 A hosted copy of the playground is live at [paster.annapearson.dev](https://paster.annapearson.dev/) — no local setup needed to try it.
 
-To run it yourself, run `pnpm run dev` and open the playground in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export** step), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, or a composition that fails schema validation shows every problem found, without losing your last valid preview.
+To run it yourself, run `pnpm run dev` and open the playground in a browser. It starts with a built-in sample composition — paste or upload your own composition JSON, or upload a complete ZIP export (e.g. from the plugin's **Export ZIP** button), to preview it instead. Invalid JSON, a corrupt/incomplete ZIP, or a composition that fails schema validation shows every problem found, without losing your last valid preview.
 
-- **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width, up to desktop widths even on a phone (a preview wider than your screen is scaled down to fit); the exact breakpoint and design-space dimensions are shown alongside the preview.
+- **Viewport width** — drag the slider (or use arrow keys) to see which layout is active at a given width, up to desktop widths even on a phone (a preview wider than your screen is scaled down to fit); the active layout's name is shown next to the width.
 - **Show item outlines and IDs** — overlay each item's bounds and identity, useful for checking geometry against the source Figma file.
 
 An item without a real image (uploaded via JSON alone, without a matching ZIP) renders as a labeled placeholder box instead.
@@ -113,7 +113,8 @@ paster/
 ├── plugin/          # Figma exporter
 ├── packages/core/   # Schema, geometry, validation
 ├── frontend/react/  # React renderer
-└── playground/      # Interactive playground
+├── playground/      # Interactive playground
+└── tokens/          # Shared design tokens (colors, fonts, light/dark)
 ```
 
 See [`docs/architecture.md`](./docs/architecture.md) for how these fit together, each package's responsibilities, and why assets are kept separate from geometry.

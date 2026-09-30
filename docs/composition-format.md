@@ -135,10 +135,11 @@ does this; it's a real gotcha, not a formality — get it wrong and rotated
 items land in a visibly different place from where they were positioned in
 Figma.
 
-Figma's plugin API exposes `node.rotation` as counterclockwise-positive,
-the opposite of this schema (and of CSS) — the exporter converts it once,
-at export time, so `rotation` here always means "clockwise," matching what
-Figma's own UI shows a designer.
+Figma counts rotation counterclockwise as positive, both in its plugin API
+(`node.rotation`) and in its Rotation field, which is the opposite of this
+schema (and of CSS). The exporter converts it once, at export time, so
+`rotation` here always means clockwise: a layer at 151.43° in Figma
+exports as `-151.43`.
 
 A rotated item's visual footprint (its axis-aligned bounding box) is always
 *larger* than its own unrotated `width`/`height` — rotating a box necessarily
@@ -178,6 +179,7 @@ activates.
 fields above:
 
 - `version` must equal `COMPOSITION_SCHEMA_VERSION` (currently `1`).
+- `layouts` must be non-empty, and so must every layout's `items`.
 - Exactly one layout must have `minWidth: 0` (a base layout); every other
   `minWidth` must be a unique, non-negative number.
 - `Layout.width`/`height` and `Item.width`/`height` must be finite numbers
@@ -256,7 +258,7 @@ composition is exported as `sampleComposition` from
 
 ## ZIP packaging
 
-The Figma plugin's **Export ZIP** mode packages a complete, portable export:
+The Figma plugin's **Export ZIP** button packages a complete, portable export:
 
 ```text
 export.zip
@@ -350,9 +352,10 @@ needs a real Figma file and a real plugin export, and isn't automated:
 ## Non-goals (MVP)
 
 This schema does not yet support (see [PLAN.md](../PLAN.md)'s backlog):
-nested groups, non-rotation transforms/masks/constraints, Auto Layout,
-layout-specific visibility or non-identical item sets, or non-image node
-types as item content (native vector shapes, live text, video). An item's
+nested compositions (layers inside a group or frame item positioned
+independently per layout), non-rotation transforms/masks/constraints, Auto Layout,
+or non-image node types as item content (native vector shapes, live text,
+video). An item's
 own rotation *is* supported (see [Rotation](#rotation) above) — a rotated
 *layout* frame, or the composition's own parent frame, is not. Note this is
 distinct from *asset file format*: an `Asset.path` may point at a PNG, JPG,
