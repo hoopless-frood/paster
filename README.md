@@ -6,7 +6,7 @@ It extracts item geometry and stacking order from Figma, eliminating manual coor
 
 ## Status
 
-The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated composition JSON, either alone or packaged as a ZIP with real exported images (PNG, JPG, or SVG); [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the playground lets you paste or upload composition JSON, upload a complete ZIP export, adjust a viewport-width control, and preview it live. Items without a real image (e.g. the built-in sample composition) still render as labeled placeholder boxes. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
+The workspace installs, builds, and typechecks; `@paster/core` validates the composition schema; the Figma plugin can scan a selection and export validated composition JSON, either alone or packaged as a ZIP with real exported images (PNG or SVG); [`@paster/react`](./frontend/react) can render that composition responsively, given content you supply; and the playground lets you paste or upload composition JSON, upload a complete ZIP export, adjust a viewport-width control, and preview it live. Items without a real image (e.g. the built-in sample composition) still render as labeled placeholder boxes. Track real progress in [PLAN.md](./PLAN.md), which lists milestones and their acceptance criteria; only checked items are done.
 
 ## How it works
 
@@ -88,7 +88,7 @@ paster
 
 1. Select the parent composition frame and run **Plugins → Development → Paster**. The plugin scans the selection and lists each layout it found.
 2. Each layout's breakpoint minimum width (px) is pre-filled with a suggestion based on its frame width — the smallest layout suggests 0, and each other layout suggests the midpoint between its width and the next-smaller layout's. Review and edit these before exporting; the exported value is always whatever's in the field, never silently substituted.
-3. Choose **JSON** (geometry only) or **ZIP** (geometry plus every item's rendered image, as PNG, JPG, or SVG) and click **Export**.
+3. Choose **JSON** (geometry only) or **ZIP** (geometry plus every item's rendered image, as PNG or SVG) and click **Export**.
 
 An item's own rotation is preserved. Individual layers the plugin doesn't support yet (Auto Layout, groups, duplicate names, or a rotated *layout* frame) don't block the export — they're skipped and listed as warnings alongside the result, so the rest of the composition still exports. Only a genuinely unusable selection (nothing selected, the wrong node type, or mismatched layer names across layouts that leave the schema invalid) blocks export outright; fix that in Figma and click **Refresh selection** to re-scan.
 

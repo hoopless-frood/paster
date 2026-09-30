@@ -59,7 +59,7 @@ async function handleExport(message: Extract<UiToMainMessage, { type: "export" }
     return;
   }
 
-  const withImages = await attachImages(validation.composition, result, message.rasterFormat);
+  const withImages = await attachImages(validation.composition, result);
 
   if (!withImages.ok) {
     postToUi({ type: "export-result", ok: false, errors: withImages.errors });

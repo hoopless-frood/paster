@@ -19,7 +19,7 @@ conventions, see [figma-guide.md](./figma-guide.md).
 └──────┬───────┘
        │  produces
        ▼
-  composition.json  (+ images/*.png|.jpg|.svg, optionally zipped)
+  composition.json  (+ images/*.png|.svg, optionally zipped)
        │
        ▼
 ┌──────────────┐

@@ -2,36 +2,15 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { assembleComposition, attachImages } from "./assemble";
 import type { ScannedItem, ScanSuccess, SupportedItemNode } from "./figma-export";
 
-const PNG_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-const JPEG_BYTES = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
-
-/**
- * formatForNode reads figma.mixed and figma.getImageByHash directly (there's
- * no dependency injection for it), so this stubs just enough of the global
- * for tests to control what each image-fill hash "contains" without needing
- * a real Figma environment.
- */
-function stubFigma(imagesByHash: Record<string, Uint8Array> = {}) {
+// Just enough of Figma's global for formatForNode and exportItemImage.
+beforeEach(() => {
   (globalThis as unknown as { figma: unknown }).figma = {
     mixed: Symbol("figma-mixed"),
     currentPage: { appendChild: () => {} },
-    getImageByHash: (hash: string) => {
-      const bytes = imagesByHash[hash];
-      if (!bytes) return null;
-      return { getBytesAsync: async () => bytes };
-    },
   };
-}
-
-beforeEach(() => {
-  stubFigma({ "jpeg-hash": JPEG_BYTES, "png-hash": PNG_BYTES });
 });
 
-/**
- * Defaults to a JPEG-sourced photo fill (confirmed opaque) so existing tests
- * that only care about the (layout, item) -> asset wiring, not format
- * detection itself, see the raster format they pass through unchanged.
- */
+/** Defaults to a photo (image-filled) rectangle, which exports as PNG. */
 function fakeNode(
   width: number,
   height: number,
@@ -42,7 +21,7 @@ function fakeNode(
     width,
     height,
     type: overrides.type ?? "RECTANGLE",
-    fills: overrides.fills ?? [{ type: "IMAGE", visible: true, imageHash: "jpeg-hash" }],
+    fills: overrides.fills ?? [{ type: "IMAGE", visible: true, imageHash: "photo" }],
     exportAsync: async () => bytes,
     // exportItemImage exports a temporary copy, never the node itself.
     clone: () => ({ ...node, rotation: 0, remove: () => {} }),
@@ -158,7 +137,7 @@ describe("attachImages", () => {
     const scanResult = scan();
     const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
 
-    const outcome = await attachImages(composition, scanResult, "PNG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) return;
 
@@ -176,20 +155,7 @@ describe("attachImages", () => {
     expect(image?.bytes).toEqual(new Uint8Array([1, 2, 3]));
   });
 
-  it("uses the requested raster format's extension for a confirmed-opaque photo", async () => {
-    const scanResult = scan();
-    const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
-
-    const outcome = await attachImages(composition, scanResult, "JPG");
-    expect(outcome.ok).toBe(true);
-    if (!outcome.ok) return;
-
-    // The default fake node is a JPEG-sourced image fill — confirmed opaque,
-    // so it's safe to honor the requested raster format.
-    expect(outcome.images.every((img) => img.path.endsWith(".jpg"))).toBe(true);
-  });
-
-  it("exports a vector shape as SVG regardless of the raster preference", async () => {
+  it("exports a vector shape as SVG", async () => {
     const scanResult: ScanSuccess = {
       ok: true,
       compositionName: "Mixed Formats",
@@ -213,7 +179,7 @@ describe("attachImages", () => {
     };
     const composition = assembled(scanResult, { Mobile: 0 });
 
-    const outcome = await attachImages(composition, scanResult, "JPG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) return;
 
@@ -247,48 +213,14 @@ describe("attachImages", () => {
     };
     const composition = assembled(scanResult, { Mobile: 0 });
 
-    const outcome = await attachImages(composition, scanResult, "JPG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) return;
 
     expect(outcome.images[0].path).toMatch(/\.svg$/);
   });
 
-  it("always uses PNG for a PNG-sourced image fill, even when JPG is requested", async () => {
-    const scanResult: ScanSuccess = {
-      ok: true,
-      compositionName: "Mixed Formats",
-      warnings: [],
-      layouts: [
-        {
-          name: "Mobile",
-          width: 375,
-          height: 812,
-          clipsContent: true,
-          items: [
-            fakeItem({
-              name: "sticker",
-              width: 100,
-              height: 100,
-              node: fakeNode(100, 100, new Uint8Array([1]), {
-                type: "RECTANGLE",
-                fills: [{ type: "IMAGE", visible: true, imageHash: "png-hash" }],
-              }),
-            }),
-          ],
-        },
-      ],
-    };
-    const composition = assembled(scanResult, { Mobile: 0 });
-
-    const outcome = await attachImages(composition, scanResult, "JPG");
-    expect(outcome.ok).toBe(true);
-    if (!outcome.ok) return;
-
-    expect(outcome.images[0].path).toMatch(/\.png$/);
-  });
-
-  it("always uses PNG for text, even when JPG is requested", async () => {
+  it("exports text as PNG", async () => {
     const scanResult: ScanSuccess = {
       ok: true,
       compositionName: "Mixed Formats",
@@ -312,7 +244,7 @@ describe("attachImages", () => {
     };
     const composition = assembled(scanResult, { Mobile: 0 });
 
-    const outcome = await attachImages(composition, scanResult, "JPG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) return;
 
@@ -339,7 +271,7 @@ describe("attachImages", () => {
     };
     const composition = assembled(scanResult, { Mobile: 0 });
 
-    const outcome = await attachImages(composition, scanResult, "PNG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) return;
 
@@ -355,7 +287,7 @@ describe("attachImages", () => {
       throw new Error("Figma export failed");
     };
 
-    const outcome = await attachImages(composition, scanResult, "PNG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
     expect(outcome.errors.some((e) => e.includes("mobile") || e.includes("Mobile"))).toBe(true);
@@ -366,7 +298,7 @@ describe("attachImages", () => {
     const composition = assembled(scanResult, { Mobile: 0, Desktop: 1024 });
     delete scanResult.layouts[0].items[0].node;
 
-    const outcome = await attachImages(composition, scanResult, "PNG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(false);
   });
 
@@ -382,7 +314,7 @@ describe("attachImages", () => {
     };
     const composition = assembled(scanResult, { Mobile: 0 });
 
-    const outcome = await attachImages(composition, scanResult, "PNG");
+    const outcome = await attachImages(composition, scanResult);
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
     expect(outcome.errors.some((e) => e.includes("300"))).toBe(true);

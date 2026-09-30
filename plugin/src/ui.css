@@ -107,13 +107,3 @@ textarea {
   width: auto;
   accent-color: var(--paster-color-magenta-haze);
 }
-
-#format-row select {
-  font: inherit;
-}
-
-.hint {
-  font-size: 11px;
-  color: var(--paster-muted);
-  margin: 4px 0 0;
-}

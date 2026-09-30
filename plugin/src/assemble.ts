@@ -8,7 +8,6 @@ import {
   exportItemImage,
   formatForNode,
   IMAGE_EXTENSIONS,
-  type RasterFormat,
   type ScanSuccess,
   type SupportedItemNode,
 } from "./figma-export";
@@ -105,11 +104,8 @@ function uniqueStem(layoutName: string, itemName: string, used: Set<string>): st
  * keeps per-layout image overrides simple to reason about, at the cost of
  * some possibly-redundant image bytes in the resulting ZIP.
  *
- * Each item's actual export format is chosen individually by
- * formatForNode — a mix of vector icons and photographic images in the
- * same layout export as a mix of SVG and raster, rather than forcing one
- * format on everything; rasterFormat is only the preference used where an
- * item ends up rasterized at all.
+ * Each item's export format (SVG or PNG) is chosen individually by
+ * formatForNode.
  *
  * Looks up each item's live Figma node from the original scan by
  * (layout id, item id) — assembleComposition sets those to the scanned
@@ -118,7 +114,6 @@ function uniqueStem(layoutName: string, itemName: string, used: Set<string>): st
 export async function attachImages(
   composition: Composition,
   scan: ScanSuccess,
-  rasterFormat: RasterFormat,
 ): Promise<ImageExportOutcome> {
   const totalItems = composition.layouts.reduce((sum, layout) => sum + layout.items.length, 0);
   if (totalItems > MAX_EXPORTABLE_ITEMS) {
@@ -156,7 +151,7 @@ export async function attachImages(
         };
       }
 
-      const format = await formatForNode(node, rasterFormat);
+      const format = formatForNode(node);
 
       let bytes: Uint8Array;
       try {

@@ -112,29 +112,21 @@ guessed at — the layout renders with no background color set in that case
 
 ## Image export formats
 
-When exporting a ZIP, each item's format is chosen automatically — you
-don't pick one format for the whole export:
+When exporting a ZIP, each item's format is chosen automatically:
 
 - A layer that's inherently a vector shape (Vector, Boolean Operation,
-  Star, Polygon, Line) always exports as **SVG**, preserving its
-  scalability.
+  Star, Polygon, Line) exports as **SVG**, preserving its scalability.
 - A layer with a **plain fill** (solid color, gradient, or no fill at all)
-  and no image also exports as **SVG** — it's still flat vector content,
-  regardless of node type (a Rectangle or Frame with just a color fill
-  exports as SVG, not a raster image).
-- A layer with an actual **photo/image fill** rasterizes, using whichever
-  raster format (PNG or JPG) you picked in the export panel — *unless*
-  that image needs transparency (it's PNG-sourced, or its source can't be
-  read), in which case it's exported as PNG regardless of your choice,
-  rather than risk silently flattening a transparent image to an opaque
-  JPG.
-- **Text** always rasterizes to PNG (never JPG, so the area around the
-  glyphs stays transparent), regardless of your raster preference.
+  and no image also exports as **SVG**. It's still flat vector content,
+  whatever its node type: a Rectangle or Frame with just a color fill
+  exports as SVG, not a raster image.
+- Anything else, meaning a layer with a **photo/image fill**, or **text**,
+  rasterizes to **PNG**.
 
-If an exported photo looks like it lost transparency it shouldn't have,
-or a flat-color shape came out as a raster image instead of a crisp SVG,
-that's the one case worth reporting — everything above should make that
-impossible by construction.
+PNG is always used for rasters, never JPG: it's lossless and keeps
+transparency. Exported images are a starting point, not the final
+delivery format; a CMS or asset pipeline is expected to re-optimize them
+(for example, to compressed JPG or WebP) where that matters.
 
 ## Large compositions
 

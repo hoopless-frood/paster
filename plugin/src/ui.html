@@ -21,18 +21,6 @@
         <input type="radio" name="mode" value="zip" />
         ZIP with images
       </label>
-      <label class="row" id="format-row" hidden>
-        Raster image format
-        <select id="format">
-          <option value="PNG">PNG</option>
-          <option value="JPG">JPG</option>
-        </select>
-      </label>
-      <p class="hint" id="format-hint" hidden>
-        Vector shapes always export as SVG, and anything that might need
-        transparency uses PNG regardless of this setting — this only applies
-        to confirmed-opaque photos.
-      </p>
     </fieldset>
     <button id="refresh" type="button">Refresh selection</button>
     <button id="export" type="button" disabled>Export JSON</button>

@@ -275,7 +275,8 @@ export.zip
 - One image is exported per (layout, item) pair, even when the same item id
   is visually identical across layouts, so each layout can point at a
   different rendered crop via its own `assetId`.
-- PNG, JPG, and SVG are all supported; the plugin's naming/collision rules
+- The plugin exports PNG and SVG (the schema itself accepts any image
+  format, e.g. a JPG substituted later by a CMS); the plugin's naming/collision rules
   (deterministic, slugified `<layout>-<item>` stems, de-duplicated with a
   numeric suffix) keep paths portable and unambiguous.
 - Each exported image covers exactly its item's own unrotated `width` ×

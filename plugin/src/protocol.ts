@@ -4,15 +4,6 @@ export interface LayoutSummary {
   suggestedMinWidth: number;
 }
 
-/**
- * Self-contained (not imported from figma-export.ts): protocol.ts is shared
- * with the UI thread, which can't import main-thread-only Figma types.
- * Only a raster preference crosses this boundary — each item's actual
- * format (including SVG, for vector-shaped items) is chosen automatically
- * per item on the main thread; see figma-export.ts's formatForNode.
- */
-export type RasterFormat = "PNG" | "JPG";
-
 export interface ExportedImage {
   path: string;
   bytes: Uint8Array;
@@ -35,5 +26,4 @@ export type MainToUiMessage =
 
 export type UiToMainMessage =
   | { type: "scan" }
-  | { type: "export"; minWidths: Record<string, number>; mode: "json" }
-  | { type: "export"; minWidths: Record<string, number>; mode: "zip"; rasterFormat: RasterFormat };
+  | { type: "export"; minWidths: Record<string, number>; mode: "json" | "zip" };
