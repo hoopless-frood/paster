@@ -269,6 +269,21 @@ importers:
 
   plugin:
     dependencies:
+      '@codemirror/lang-json':
+        specifier: ^6.0.2
+        version: 6.0.2
+      '@codemirror/language':
+        specifier: ^6.12.4
+        version: 6.12.4
+      '@codemirror/state':
+        specifier: ^6.7.5
+        version: 6.7.5
+      '@codemirror/view':
+        specifier: 6.43.13
+        version: 6.43.13
+      '@lezer/highlight':
+        specifier: ^1.2.3
+        version: 1.2.3
       '@paster/core':
         specifier: workspace:*
         version: link:../packages/core
@@ -290,7 +305,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^5.0.1
-        version: 5.0.1(jsdom@30.1.1)(vite@8.3.0)
+        version: 5.0.1(@types/node@22.20.4)(jsdom@30.1.1)(vite@8.3.0(@types/node@22.20.4))
 
   tokens:
     dependencies:

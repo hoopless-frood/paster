@@ -2,6 +2,7 @@ import type { WordmarkProps } from "./Wordmark.types";
 
 export type { WordmarkProps } from "./Wordmark.types";
 
+// The Figma plugin inlines the same paths in plugin/src/ui.html; keep both in sync.
 export function Wordmark({ fill = "currentColor", className }: WordmarkProps) {
   return (
     <svg

@@ -63,16 +63,13 @@ piece of visible content should be a single, direct child of its layout.
 
 Every layout frame you select becomes a breakpoint. There's no limit to
 two — add as many layouts as you have distinct arrangements. The plugin
-suggests a starting min-width for each, based on frame width (the
-narrowest layout suggests 0; every other layout suggests the midpoint
-between its own width and the next-narrower layout's) — always review and
-adjust these, especially if your frames aren't ordered narrow-to-wide by
-width. The suggestion is just a starting point: whatever's in the field
-when you click Export is what ships, never silently substituted.
-
-Exactly one layout must end up at min-width 0 (the base/mobile-first
-layout) — the plugin will tell you if none, or more than one, ends up
-there.
+sets each layout's min-width automatically from frame widths: the
+narrowest layout gets 0 (the base, mobile-first layout), and every other
+layout gets the midpoint between its own width and the next-narrower
+layout's. For example, a 393px mobile frame and a 1512px desktop frame
+give min-widths of 0 and 953. The plugin has no setting for this; to use
+different breakpoints, edit `minWidth` in the exported JSON, or later in
+your CMS.
 
 ## Rotation
 
@@ -112,29 +109,21 @@ guessed at — the layout renders with no background color set in that case
 
 ## Image export formats
 
-When exporting a ZIP, each item's format is chosen automatically — you
-don't pick one format for the whole export:
+When exporting a ZIP, each item's format is chosen automatically:
 
 - A layer that's inherently a vector shape (Vector, Boolean Operation,
-  Star, Polygon, Line) always exports as **SVG**, preserving its
-  scalability.
+  Star, Polygon, Line) exports as **SVG**, preserving its scalability.
 - A layer with a **plain fill** (solid color, gradient, or no fill at all)
-  and no image also exports as **SVG** — it's still flat vector content,
-  regardless of node type (a Rectangle or Frame with just a color fill
-  exports as SVG, not a raster image).
-- A layer with an actual **photo/image fill** rasterizes, using whichever
-  raster format (PNG or JPG) you picked in the export panel — *unless*
-  that image needs transparency (it's PNG-sourced, or its source can't be
-  read), in which case it's exported as PNG regardless of your choice,
-  rather than risk silently flattening a transparent image to an opaque
-  JPG.
-- **Text** always rasterizes to PNG (never JPG, so the area around the
-  glyphs stays transparent), regardless of your raster preference.
+  and no image also exports as **SVG**. It's still flat vector content,
+  whatever its node type: a Rectangle or Frame with just a color fill
+  exports as SVG, not a raster image.
+- Anything else, meaning a layer with a **photo/image fill**, or **text**,
+  rasterizes to **PNG**.
 
-If an exported photo looks like it lost transparency it shouldn't have,
-or a flat-color shape came out as a raster image instead of a crisp SVG,
-that's the one case worth reporting — everything above should make that
-impossible by construction.
+PNG is always used for rasters, never JPG: it's lossless and keeps
+transparency. Exported images are a starting point, not the final
+delivery format; a CMS or asset pipeline is expected to re-optimize them
+(for example, to compressed JPG or WebP) where that matters.
 
 ## Large compositions
 
@@ -146,8 +135,8 @@ export instead, or split into fewer layouts/items.
 ## Troubleshooting: common warnings
 
 Warnings don't block export — the rest of the composition still exports
-around the flagged layer. Fix what you want and click **Refresh
-selection** to re-scan without losing your other settings.
+around the flagged layer. Fix what you want in Figma, then click
+**Refresh** to re-read the selection.
 
 | Warning | What it means |
 | --- | --- |
@@ -179,6 +168,11 @@ Not yet supported, tracked as backlog work (see [PLAN.md](../PLAN.md)):
 - **Layout-specific item visibility** — every visible item in a layout is
   exported; there's no way to include an item in one layout's arrangement
   but omit it from another's while keeping the same identity.
+- **Effects that paint outside a layer's own box**, such as a drop
+  shadow or an outside stroke, are cut off at the layer's edges in its
+  exported image, which covers exactly the layer's own width × height.
+  To keep one, put the layer inside a frame big enough to contain the
+  effect, and use that frame as the item.
 - Recovering **original, full-resolution image bytes** — exported images
   are Figma's own rendered crop/scale of each item, not the source file,
   so very large source photos are re-encoded down to what's actually

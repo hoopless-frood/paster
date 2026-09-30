@@ -16,6 +16,9 @@ async function buildOnce() {
     bundle: true,
     format: "iife",
     target: "es2017",
+    // Readable in watch builds for debugging; minified otherwise, since
+    // the whole bundle (CodeMirror included) is inlined into ui.html.
+    minify: !isWatch,
     write: false,
     logLevel: "silent",
   });

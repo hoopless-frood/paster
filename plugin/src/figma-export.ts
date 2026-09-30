@@ -38,22 +38,43 @@ export interface ScanFailure {
 
 export type ScanOutcome = ScanSuccess | ScanFailure;
 
-/** The user's raster preference — only meaningful for content that ends up rasterized at all; see formatForNode. */
-export type RasterFormat = "PNG" | "JPG";
-export type ImageFormat = RasterFormat | "SVG";
+export type ImageFormat = "PNG" | "SVG";
 
 export const IMAGE_EXTENSIONS: Record<ImageFormat, string> = {
   PNG: "png",
-  JPG: "jpg",
   SVG: "svg",
 };
 
-/** Renders a single item node to image bytes in the given format. Runs on the main thread (only nodes have exportAsync); rejects if Figma's own export fails. */
-export function exportItemImage(node: SupportedItemNode, format: ImageFormat): Promise<Uint8Array> {
-  if (format === "SVG") {
-    return node.exportAsync({ format: "SVG" });
+/**
+ * Renders a single item to image bytes covering exactly its own unrotated
+ * width × height — the box the schema (and so every renderer) places and
+ * rotates the image in. Runs on the main thread (only nodes have
+ * exportAsync); rejects if Figma's own export fails.
+ *
+ * exportAsync renders a node as it appears on the canvas, which breaks that
+ * contract twice: a rotated node comes out already rotated (inside its
+ * larger bounding box), and any part hanging past a clipping layout frame
+ * is cropped off. A renderer then rotates the image a second time and
+ * stretches whatever survived the crop across the full box. So this exports
+ * a temporary copy instead: moved to the page (out of reach of the layout's
+ * clipping), unrotated, and exported at its full bounds rather than its
+ * visible render bounds.
+ *
+ * Trade-off: useAbsoluteBounds also crops effects that paint outside the
+ * layer's own box (e.g. a drop shadow), since the image must match the box.
+ */
+export async function exportItemImage(node: SupportedItemNode, format: ImageFormat): Promise<Uint8Array> {
+  const copy = node.clone();
+  figma.currentPage.appendChild(copy);
+  try {
+    copy.rotation = 0;
+    if (format === "SVG") {
+      return await copy.exportAsync({ format: "SVG", useAbsoluteBounds: true });
+    }
+    return await copy.exportAsync({ format, useAbsoluteBounds: true, constraint: { type: "SCALE", value: 1 } });
+  } finally {
+    copy.remove();
   }
-  return node.exportAsync({ format, constraint: { type: "SCALE", value: 1 } });
 }
 
 /** Node types that are inherently drawn vector shapes — always worth keeping as SVG, since rasterizing them is a pure loss of scalability. */
@@ -72,66 +93,23 @@ function isFillCheckable(node: SupportedItemNode): node is FillCheckableNode {
   return "fills" in node;
 }
 
-/** The topmost (last-painted) visible IMAGE fill, if any — mirrors extractBackgroundColor's bottom-to-top reasoning. */
-function topImageFill(fills: Paint[]): ImagePaint | undefined {
-  const visibleImageFills = fills.filter(
-    (fill): fill is ImagePaint => fill.visible !== false && fill.type === "IMAGE",
-  );
-  return visibleImageFills[visibleImageFills.length - 1];
+function hasVisibleImageFill(fills: readonly Paint[]): boolean {
+  return fills.some((fill) => fill.visible !== false && fill.type === "IMAGE");
 }
 
 /**
- * PNG is the only common source format an image fill can carry that
- * supports alpha, so this is what decides whether a fill's transparency
- * (if any) needs to be preserved through export. Checks the actual source
- * bytes' magic number rather than trusting a file extension, since Figma
- * doesn't expose the original filename. Errors (and anything that isn't
- * clearly a non-alpha format) are treated as "may need alpha" — the safe
- * direction, since the failure mode of guessing wrong is only ever a
- * slightly larger PNG, never a silently flattened image.
+ * Picks each item's export format individually, since a real Figma file
+ * routinely mixes vector icons with photos in the same layout: flat vector
+ * content stays a scalable SVG, and anything else rasterizes to PNG. PNG
+ * (never JPG) because it's lossless and keeps transparency, and because
+ * these images are a starting point that a CMS will re-optimize, not the
+ * final delivery format.
  */
-async function fillMayNeedAlpha(fill: ImagePaint): Promise<boolean> {
-  if (!fill.imageHash) {
-    return false;
-  }
-  const image = figma.getImageByHash(fill.imageHash);
-  if (!image) {
-    return false;
-  }
-  try {
-    const bytes = await image.getBytesAsync();
-    const isPng = bytes.length >= 4 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
-    const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-    return !isJpeg || isPng;
-  } catch {
-    return true;
-  }
-}
-
-/**
- * Picks the export format for a single item automatically, rather than one
- * format for an entire export — a real Figma file routinely mixes vector
- * icons with photographic images in the same layout, so forcing one format
- * on everything either rasterizes vector art needlessly or can't represent
- * a photo as a vector at all.
- *
- * Both SVG and PNG are lossless with alpha support, and nothing here ever
- * asks Figma to flatten a background onto either, so any transparency in
- * a vector shape or a PNG-sourced image fill survives export unchanged.
- * JPG has no alpha channel at all, so it's only ever used where transparency
- * either doesn't apply (text, whose surrounding area needs to *stay*
- * transparent, always uses PNG instead) or the source image is confirmed
- * opaque (a JPEG-sourced fill) — anything else defaults to PNG rather than
- * risk silently flattening a transparent image to JPG.
- */
-export async function formatForNode(node: SupportedItemNode, rasterFormat: RasterFormat): Promise<ImageFormat> {
+export function formatForNode(node: SupportedItemNode): ImageFormat {
   if (VECTOR_ITEM_TYPES.has(node.type)) {
     return "SVG";
   }
-  if (node.type === "TEXT") {
-    return "PNG";
-  }
-  if (!isFillCheckable(node)) {
+  if (node.type === "TEXT" || !isFillCheckable(node)) {
     return "PNG";
   }
 
@@ -139,13 +117,7 @@ export async function formatForNode(node: SupportedItemNode, rasterFormat: Raste
   if (fills === figma.mixed || !Array.isArray(fills)) {
     return "PNG";
   }
-
-  const imageFill = topImageFill(fills);
-  if (!imageFill) {
-    return "SVG";
-  }
-
-  return (await fillMayNeedAlpha(imageFill)) ? "PNG" : rasterFormat;
+  return hasVisibleImageFill(fills) ? "PNG" : "SVG";
 }
 
 const ROTATION_EPSILON = 0.01;

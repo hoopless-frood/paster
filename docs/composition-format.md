@@ -275,19 +275,19 @@ export.zip
 - One image is exported per (layout, item) pair, even when the same item id
   is visually identical across layouts, so each layout can point at a
   different rendered crop via its own `assetId`.
-- PNG, JPG, and SVG are all supported; the plugin's naming/collision rules
+- The plugin exports PNG and SVG (the schema itself accepts any image
+  format, e.g. a JPG substituted later by a CMS); the plugin's naming/collision rules
   (deterministic, slugified `<layout>-<item>` stems, de-duplicated with a
   numeric suffix) keep paths portable and unambiguous.
-- Each exported image is already Figma's own rendered crop/scale of that
-  specific item — not the original source image plus separate crop
-  instructions. A consumer's `resolveContent` should render it with CSS
-  `object-fit: fill` (or an equivalent that never crops), not `cover`:
-  the image is sized to match its item almost exactly already (up to
-  float rounding between Figma's export and the item's own geometry), and
-  `cover` would crop a further, unintended sliver off an edge trying to
-  force an exact match — discarding part of a crop Figma already framed
-  intentionally. `fill` only ever stretches by that same negligible
-  rounding error.
+- Each exported image covers exactly its item's own unrotated `width` ×
+  `height` box — Figma's rendering of that item alone, never pre-rotated
+  and never cropped by its layout's Clip content (a renderer applies both
+  itself, from `rotation` and `clipsContent`). It is not the original
+  source image plus separate crop instructions. A consumer's
+  `resolveContent` should render it with CSS `object-fit: fill` (or an
+  equivalent that never crops), not `cover`: the image already matches
+  its box, up to rounding a fractional size to whole pixels, and `cover`
+  would crop a further sliver off an edge to absorb that rounding.
 
 ### Importing a ZIP
 
