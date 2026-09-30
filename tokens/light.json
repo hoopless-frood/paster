@@ -20,6 +20,7 @@
   "muted": { "value": "#555" },
   "canvasBg": { "value": "#fff" },
   "accentText": { "value": "{color.magentaHaze}" },
+  "wordmark": { "value": "{color.magentaHaze}" },
   "errorText": { "value": "#b00020" },
   "warningText": { "value": "#8a5300" },
   "hover": { "value": "{color.magentaHaze}" },

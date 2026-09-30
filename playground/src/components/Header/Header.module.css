@@ -39,7 +39,7 @@
   width: auto;
   aspect-ratio: 2235 / 626;
   display: block;
-  color: var(--paster-color-blossom);
+  color: var(--paster-wordmark);
   max-height: 42px;
 
   @media (--phone) {
