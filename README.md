@@ -13,6 +13,7 @@ A designer arranges a collage of images in Figma once per breakpoint. Paster exp
 - **Figma plugin:** exports a composition as JSON, or as a ZIP with every item's rendered image (PNG or SVG).
 - **`@paster/core`:** the versioned composition format, with validation and breakpoint selection.
 - **[`@paster/react`](./frontend/react):** renders a composition responsively, with images supplied by your site.
+- **[LÖVE renderer](./frontend/lua) (experimental):** a proof of concept that draws a composition in a native window.
 - **Playground:** load an example, or upload your own JSON or ZIP export, and preview it at any width.
 
 [PLAN.md](./PLAN.md) lists what's next, as milestones with acceptance criteria; only checked items are done.
